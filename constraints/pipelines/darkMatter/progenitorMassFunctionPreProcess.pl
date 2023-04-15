@@ -102,8 +102,8 @@ my @simulations =
     label               => "Symphony",
     description         => "Progenitor halo mass function for non-backsplash z=0 parent halos from the Symphony ZoomIn simulations.",
     simulationReference => "Nadler et al.; 2022;",
-    #simulationURL       => "https://www.caterpillarproject.org/",
-    hubbleConstant      => 0.6711,
+    simulationURL       => "http://web.stanford.edu/group/gfc/symphony",
+    hubbleConstant      => 0.7,
     builder             => \&symphonyZoomInBuilder
  }
 );
@@ -507,13 +507,14 @@ sub symphonyZoomInBuilder {
     ## Parse the base parameters.
     my $parameters = $xml->XMLin($ENV{'GALACTICUS_EXEC_PATH'}."/constraints/pipelines/darkMatter/progenitorMassFunctionIdentifyNonFlyby.xml");
     ## Adjust comsological model.
-    $parameters->{'cosmologyParameters'}->{'HubbleConstant' }->{'value'} = 67.11;
-    $parameters->{'cosmologyParameters'}->{'OmegaMatter'    }->{'value'} =  0.32;
-    $parameters->{'cosmologyParameters'}->{'OmegaDarkEnergy'}->{'value'} =  0.68;
-    $parameters->{'cosmologyParameters'}->{'OmegaBaryon'    }->{'value'} =  0.05;
+    $parameters->{'cosmologyParameters'}->{'HubbleConstant' }->{'value'} = 70.00;
+    $parameters->{'cosmologyParameters'}->{'OmegaMatter'    }->{'value'} =  0.286;
+    $parameters->{'cosmologyParameters'}->{'OmegaDarkEnergy'}->{'value'} =  0.714;
+    $parameters->{'cosmologyParameters'}->{'OmegaBaryon'    }->{'value'} =  0.047;
     # List available simulations
     my @models;
     find( (sub {my @path = split(/\//,$File::Find::dir);push(@models,$_ eq "tree_0_0_0.dat" ? {simulation => $path[-2], realization => $path[-1]}  : ())}), ($options{'simulationDataPath'}."/Symphony_ZoomIns") );
+    #splice(@models,1); ##NOTE-- deletes everything but first entry to test 1
     my $xml         = new XML::Simple();
     my $hostHaloIDs = $xml->XMLin("constraints/pipelines/darkMatter/symphonyZoomInHostHaloIDs.xml");
     foreach my $model ( @models ) {
@@ -559,7 +560,7 @@ sub symphonyZoomInBuilder {
 	{
 	    value       => "rockstar"                                                    ,
 	    fileName    => {value => $simulation->{'path'}.$parentDirectoryName."tree_0_0_0.dat"   },
-	    readColumns => {value => "id scale desc_id pid upid mmp Mvir scale Snap_num"}
+	    readColumns => {value => "id scale desc_id pid upid mmp Mvir Rvir X Y Z scale Snap_num"}
 	};
 	# Write parameter file.
 	my $parameterFileName = $simulation->{'path'}.$parentDirectoryName."identifyNonFlyby_progenitors.xml";
@@ -579,7 +580,7 @@ sub symphonyZoomInBuilder {
 	$job->{'mpi'       } = "yes";
 	push(@{$jobs->[0]},$job);
 
-	last; # NOTE: This is temporary to allow us to test processing a single simulation.
+	#last; # NOTE: This is temporary to allow us to test processing a single simulation.
     }
 
     ## NOTE: We want to group the models such that all realizations of "MilkyWay" simulations for example as in one "group". We'll
@@ -608,27 +609,28 @@ sub symphonyZoomInBuilder {
 
     ## NOTE: Add in here iteration over the "modelGroup" as in line 593 above. We want to generate one job for each model group -
     ##       that job will combine all realizations in that model group.
-    
+    foreach my $modelGroup ( @modelGroups ) {
+
     # Set output file name.
-    my $outputFileName = $simulation->{'path'}."progenitorMassFunctions.hdf5";
+    my $outputFileName = $simulation->{'path'}."progenitorMassFunctions_".$modelGroup.".hdf5";
     next
-        if ( -e $simulation->{'path'}."progenitorMassFunctions:MPI0000.hdf5" );
+        if ( -e $simulation->{'path'}."progenitorMassFunctions_".$modelGroup.":MPI0000.hdf5" );
     # Add an importer for each parent.
     @{$massFunctionParameters->{'nbodyImporter'}->{'nbodyImporter'}} =
         map
-    {
+    {{
     	value      => "IRATE",
-    	fileName   => {value => $simulation->{'path'}.$_->{'ID'}."_".$_->{'levelMax'}."/identifyNonFlyby_progenitors.hdf5"},
+    	fileName   => {value => $simulation->{'path'}.$modelGroup."/".$_."/identifyNonFlyby_progenitors.hdf5"},
     	properties => {value => "massVirial expansionFactor hostedRootID snapshotID"},
     	snapshot   => {value => "1"}
-    }; ## NOTE: This line is currently incomplete - it will need to be given the list of realizations available for this "group" (i.e. "@{$modelRealizations{$modelGroup}}"). And, the "fileName" will need to be changed to use the appropriate filename for the Symphony simulation for this group and realization, so something like: fileName => {value => $simulation->{'path'}.$modelGroup."/".$_."/identifyNonFlyby_progenitors.hdf5"}.
+    }} @{$modelRealizations{$modelGroup}}; ## NOTE: This line is currently incomplete - it will need to be given the list of realizations available for this "group" (i.e. "@{$modelRealizations{$modelGroup}}"). And, the "fileName" will need to be changed to use the appropriate filename for the Symphony simulation for this group and realization, so something like: fileName => {value => $simulation->{'path'}.$modelGroup."/".$_."/identifyNonFlyby_progenitors.hdf5"}.
     
     # Determine minimum and maximum progenitor mass ratios for the mass function.
     my $massParticle;
-    if      ( $model->{'simulation'} =~ m/LMC/ ) { ## NOTE: Instead of using "$model->{'simulation'}" here we can now use "$modelGroup".
+    if      ( $modelGroup =~ m/LMC/ ) { ## NOTE: Instead of using "$model->{'simulation'}" here we can now use "$modelGroup".
         $massParticle = 3.5247625e4;
-    } elsif ( $model->{'simulation'} =~ m/MilkyWay/ ) { ## NOTE: Same here.
-        if ( $model->{'simulation'} =~ m/hires/ ){
+    } elsif ( $modelGroup =~ m/MilkyWay/ ) { ## NOTE: Same here.
+        if ( $modelGroup =~ m/hires/ ){
             $massParticle = 3.5247625e4;
         }
         else {
@@ -641,11 +643,11 @@ sub symphonyZoomInBuilder {
     # Determine minimum and maximum parent halo masses for the mass function.
     my $massParentMinimum;
     my $massParentMaximum;
-    if ($model->{'simulation'} =~ m/MilkyWay/){ ## NOTE: Same here.
+    if ($modelGroup =~ m/MilkyWay/){ ## NOTE: Same here.
     	$massParentMinimum = 1.0e11;
     	$massParentMaximum = 1.0e13;
     }
-    elsif ($model->{'simulation'} =~ m/LMC/) { ## NOTE: Same here.
+    elsif ($modelGroup =~ m/LMC/) { ## NOTE: Same here.
     	$massParentMinimum = 1.0e10;
     	$massParentMaximum = 1.0e12;
     }
@@ -668,7 +670,7 @@ sub symphonyZoomInBuilder {
     $massFunctionParameters  ->{'nbodyOperator'     }->{'nbodyOperator'}->[1]->{'simulationReference'       }->{'value'} = $simulation->{'simulationReference'};
     $massFunctionParameters  ->{'nbodyOperator'     }->{'nbodyOperator'}->[1]->{'simulationURL'             }->{'value'} = $simulation->{'simulationURL'      };
     ## Write the parameter file.
-    my $parameterFileName = $simulation->{'path'}."progenitorMassFunctions.xml";
+    my $parameterFileName = $simulation->{'path'}."progenitorMassFunctions_".$modelGroup.".xml";
     open(my $outputFile,">",$parameterFileName);
     print $outputFile $xml->XMLout($massFunctionParameters, RootName => "parameters");
     close($outputFile);
@@ -676,20 +678,20 @@ sub symphonyZoomInBuilder {
     my $job;
     $job->{'command'   } =
         "./Galacticus.exe ".$parameterFileName;
-    $job->{'launchFile'} = $simulation->{'path'}."progenitorMassFunctions.sh" ;
-    $job->{'logFile'   } = $simulation->{'path'}."progenitorMassFunctions.log";
-    $job->{'label'     } =                       "progenitorMassFunctions"    ;
+    $job->{'launchFile'} = $simulation->{'path'}."progenitorMassFunctions_".$modelGroup.".sh" ;
+    $job->{'logFile'   } = $simulation->{'path'}."progenitorMassFunctions_".$modelGroup.".log";
+    $job->{'label'     } =                       "progenitorMassFunctions_".$modelGroup    ;
     $job->{'ppn'       } = 16;
     $job->{'nodes'     } = 1;
     $job->{'mpi'       } = "no";
     $job->{'onCompletion'} =
     {
         function  => \&copyFile,
-        arguments => [ $simulation->{'path'}."progenitorMassFunctions:MPI0000.hdf5", $ENV{'GALACTICUS_DATA_PATH'}."/static/darkMatter/progenitorMassFunctions_".$simulation->{'label'}.".hdf5" ]
+        arguments => [ $simulation->{'path'}."progenitorMassFunctions_".$modelGroup.":MPI0000.hdf5", $ENV{'GALACTICUS_DATA_PATH'}."/static/darkMatter/progenitorMassFunctions_".$simulation->{'label'}."_".$modelGroup.".hdf5" ]
     };
     push(@{$jobs->[1]},$job);
 }
-
+}
 sub copyFile {
     # Perform a file copy.
     my $from   = shift();
