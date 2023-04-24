@@ -313,10 +313,11 @@ contains
     Constructor for the {\normalfont \ttfamily inputParameters} class from an XML file
     specified as a character variable.
     !!}
-    use :: File_Utilities, only : File_Exists
-    use :: FoX_dom       , only : node
-    use :: Error         , only : Error_Report
-    use :: IO_XML        , only : XML_Get_First_Element_By_Tag_Name, XML_Parse
+    use :: File_Utilities    , only : File_Exists                      , File_Name_Expand
+    use :: FoX_dom           , only : node
+    use :: Error             , only : Error_Report
+    use :: IO_XML            , only : XML_Get_First_Element_By_Tag_Name, XML_Parse
+    use :: ISO_Varying_String, only : char
     implicit none
     type     (inputParameters)                                        :: self
     character(len=*          )              , intent(in   )           :: fileName
@@ -327,10 +328,10 @@ contains
     integer                                                           :: errorStatus
 
     ! Check that the file exists.
-    if (.not.File_Exists(fileName)) call Error_Report("parameter file '"//trim(fileName)//"' does not exist"//{introspection:location})
+    if (.not.File_Exists(File_Name_Expand(fileName))) call Error_Report("parameter file '"//trim(fileName)//"' does not exist"//{introspection:location})
     ! Open and parse the data file.
     !$omp critical (FoX_DOM_Access)
-    doc => XML_Parse(fileName,iostat=errorStatus)
+    doc => XML_Parse(char(File_Name_Expand(fileName)),iostat=errorStatus)
     if (errorStatus /= 0) then
        if (File_Exists(fileName)) then
           call Error_Report('Unable to parse parameter file: "'//trim(fileName)//'"'//{introspection:location})
