@@ -32,13 +32,13 @@
   <mergerTreeOutputter value="analyzer"/>
   <outputTimes value="list">
     <!-- Matched to Symphony snapshots -->
-    <redshifts value="0.505343971097396 1.0 2.14465408805031 4.10204081632653 7.69565217391304"/>
+    <redshifts value="0.503691562786641 0.990485479408428 2.03149725649498 3.98405103668262"/>
   </outputTimes>
   <mergerTreeOperator value="regridTimes">
     <!-- Regrid the trees to massively speed up searching for parents etc. -->
     <outputTimes value="list">
       <!-- Matched to Symphony snapshots -->
-      <redshifts value="0.0 0.505343971097396 1.0 2.02114803625378 3.95049504950495 7.84955752212389 9.0"/>
+      <redshifts value="0.0 0.503691562786641 0.990485479408428 2.03149725649498 3.98405103668262 9.0"/>
     </outputTimes>
   </mergerTreeOperator>
   <outputAnalysis value="multi">
@@ -46,10 +46,10 @@
          mass in the sample. -->
     <virialDensityContrastDefinition value="sphericalCollapseClsnlssMttrCsmlgclCnstnt"/>
     <outputAnalysis value="progenitorMassFunction">
-      <fileName                     value="%DATASTATICPATH%/darkMatter/progenitorMassFunctions_Symphony_BigMDPL.hdf5"/>
-      <indexParent                  value="1"                                                                                        />
+      <fileName                     value="%DATASTATICPATH%/darkMatter/progenitorMassFunctions_Symphony_MilkyWay.hdf5"/>
+      <indexParent                  value="2"                                                                                        />
       <indexRedshift                value="0"                                                                                        />
-      <massRatioLikelihoodMinimum   value="3.30e-01"                                                                                 />
+      <massRatioLikelihoodMinimum   value="4.7e-05"                                                                                 />
       <massRatioLikelihoodMaximum   value="1.00"                                                                                     />
       <covarianceDiagonalize        value="true"                                                                                     />
       <covarianceTargetOnly         value="true"                                                                                     />
@@ -57,15 +57,15 @@
       <rootVarianceTargetFractional value="0.1"                                                                                      />
       <alwaysIsolatedOnly           value="true"                                                                                     />
       <redshiftParent               value="0.0"                                                                                      />
-      <comment                      value="$13.50 &lt; \log_{10}(M_\mathrm{parent}/\mathrm{M}_\odot) \le 14.00$; $z=0.51$; BigMDPL halos"/>
-      <label                        value="BigMDPLM1Z0"                                                                               />
-      <targetLabel                  value="Klypin et al. (2015)"                                                                     />
+      <comment                      value="$13.50 &lt; \log_{10}(M_\mathrm{parent}/\mathrm{M}_\odot) \le 14.00$; $z=0.51$; Symphony halos"/>
+      <label                        value="Symphony_MilkywayM2Z0"                                                                    />
+      <targetLabel                  value="Nadler et al. (2022)"                                                                     />
     </outputAnalysis>    
     <outputAnalysis value="progenitorMassFunction">
-      <fileName                     value="%DATASTATICPATH%/darkMatter/progenitorMassFunctions_BigMDPL.hdf5"/>
-      <indexParent                  value="1"                                                                                        />
+      <fileName                     value="%DATASTATICPATH%/darkMatter/progenitorMassFunctions_Symphony_MilkyWay.hdf5"/>
+      <indexParent                  value="2"                                                                                        />
       <indexRedshift                value="1"                                                                                        />
-      <massRatioLikelihoodMinimum   value="3.30e-01"                                                                                 />
+      <massRatioLikelihoodMinimum   value="4.7e-05"                                                                                 />
       <massRatioLikelihoodMaximum   value="1.00"                                                                                     />
       <covarianceDiagonalize        value="true"                                                                                     />
       <covarianceTargetOnly         value="true"                                                                                     />
@@ -73,15 +73,15 @@
       <rootVarianceTargetFractional value="0.1"                                                                                      />
       <alwaysIsolatedOnly           value="true"                                                                                     />
       <redshiftParent               value="0.0"                                                                                      />
-      <comment                      value="$13.50 &lt; \log_{10}(M_\mathrm{parent}/\mathrm{M}_\odot) \le 14.00$; $z=1.00$; BigMDPL halos"/>
-      <label                        value="BigMDPLM1Z1"                                                                               />
-      <targetLabel                  value="Klypin et al. (2015)"                                                                     />
+      <comment                      value="$13.50 &lt; \log_{10}(M_\mathrm{parent}/\mathrm{M}_\odot) \le 14.00$; $z=1.00$; Symphony halos"/>
+      <label                        value="Symphony_MilkywayM2Z1"                                                                    />
+      <targetLabel                  value="Nadler et al. (2022)"                                                                     />
     </outputAnalysis>    
     <outputAnalysis value="progenitorMassFunction">
-      <fileName                     value="%DATASTATICPATH%/darkMatter/progenitorMassFunctions_BigMDPL.hdf5"/>
-      <indexParent                  value="1"                                                                                        />
+      <fileName                     value="%DATASTATICPATH%/darkMatter/progenitorMassFunctions_Symphony_MilkyWay.hdf5"/>
+      <indexParent                  value="2"                                                                                        />
       <indexRedshift                value="2"                                                                                        />
-      <massRatioLikelihoodMinimum   value="3.30e-01"                                                                                 />
+      <massRatioLikelihoodMinimum   value="4.7e-05"                                                                                 />
       <massRatioLikelihoodMaximum   value="1.00"                                                                                     />
       <covarianceDiagonalize        value="true"                                                                                     />
       <covarianceTargetOnly         value="true"                                                                                     />
@@ -89,15 +89,15 @@
       <rootVarianceTargetFractional value="0.1"                                                                                      />
       <alwaysIsolatedOnly           value="true"                                                                                     />
       <redshiftParent               value="0.0"                                                                                      />
-      <comment                      value="$13.50 &lt; \log_{10}(M_\mathrm{parent}/\mathrm{M}_\odot) \le 14.00$; $z=2.14$; BigMDPL halos"/>
-      <label                        value="BigMDPLM1Z2"                                                                               />
-      <targetLabel                  value="Klypin et al. (2015)"                                                                     />
+      <comment                      value="$13.50 &lt; \log_{10}(M_\mathrm{parent}/\mathrm{M}_\odot) \le 14.00$; $z=2.03$; Symphony halos"/>
+      <label                        value="Symphony_MilkywayM2Z2"                                                                    />
+      <targetLabel                  value="Nadler et al. (2022)"                                                                     />
     </outputAnalysis>    
     <outputAnalysis value="progenitorMassFunction">
-      <fileName                     value="%DATASTATICPATH%/darkMatter/progenitorMassFunctions_BigMDPL.hdf5"/>
-      <indexParent                  value="1"                                                                                        />
+      <fileName                     value="%DATASTATICPATH%/darkMatter/progenitorMassFunctions_Symphony_MilkyWay.hdf5"/>
+      <indexParent                  value="2"                                                                                        />
       <indexRedshift                value="3"                                                                                        />
-      <massRatioLikelihoodMinimum   value="3.30e-01"                                                                                 />
+      <massRatioLikelihoodMinimum   value="4.7e-05"                                                                                 />
       <massRatioLikelihoodMaximum   value="1.00"                                                                                     />
       <covarianceDiagonalize        value="true"                                                                                     />
       <covarianceTargetOnly         value="true"                                                                                     />
@@ -105,12 +105,12 @@
       <rootVarianceTargetFractional value="0.1"                                                                                      />
       <alwaysIsolatedOnly           value="true"                                                                                     />
       <redshiftParent               value="0.0"                                                                                      />
-      <comment                      value="$13.50 &lt; \log_{10}(M_\mathrm{parent}/\mathrm{M}_\odot) \le 14.00$; $z=4.10$; BigMDPL halos"/>
-      <label                        value="BigMDPLM1Z3"                                                                               />
-      <targetLabel                  value="Klypin et al. (2015)"                                                                     />
+      <comment                      value="$13.50 &lt; \log_{10}(M_\mathrm{parent}/\mathrm{M}_\odot) \le 14.00$; $z=3.98$; Symphony halos"/>
+      <label                        value="Symphony_MilkywayM2Z3"                                                                    />
+      <targetLabel                  value="Nadler et al. (2022)"                                                                     />
     </outputAnalysis>    
-    <outputAnalysis value="progenitorMassFunction">
-      <fileName                     value="%DATASTATICPATH%/darkMatter/progenitorMassFunctions_BigMDPL.hdf5"/>
+    <!--- <outputAnalysis value="progenitorMassFunction">
+      <fileName                     value="%DATASTATICPATH%/darkMatter/progenitorMassFunctions_MilkyWay.hdf5"/>
       <indexParent                  value="2"                                                                                        />
       <indexRedshift                value="0"                                                                                        />
       <massRatioLikelihoodMinimum   value="1.04e-01"                                                                                 />
@@ -126,7 +126,7 @@
       <targetLabel                  value="Klypin et al. (2015)"                                                                     />
     </outputAnalysis>    
     <outputAnalysis value="progenitorMassFunction">
-      <fileName                     value="%DATASTATICPATH%/darkMatter/progenitorMassFunctions_BigMDPL.hdf5"/>
+      <fileName                     value="%DATASTATICPATH%/darkMatter/progenitorMassFunctions_MilkyWay.hdf5"/>
       <indexParent                  value="2"                                                                                        />
       <indexRedshift                value="1"                                                                                        />
       <massRatioLikelihoodMinimum   value="1.04e-01"                                                                                 />
@@ -142,7 +142,7 @@
       <targetLabel                  value="Klypin et al. (2015)"                                                                     />
     </outputAnalysis>    
     <outputAnalysis value="progenitorMassFunction">
-      <fileName                     value="%DATASTATICPATH%/darkMatter/progenitorMassFunctions_BigMDPL.hdf5"/>
+      <fileName                     value="%DATASTATICPATH%/darkMatter/progenitorMassFunctions_MilkyWay.hdf5"/>
       <indexParent                  value="2"                                                                                        />
       <indexRedshift                value="2"                                                                                        />
       <massRatioLikelihoodMinimum   value="1.04e-01"                                                                                 />
@@ -158,7 +158,7 @@
       <targetLabel                  value="Klypin et al. (2015)"                                                                     />
     </outputAnalysis>    
     <outputAnalysis value="progenitorMassFunction">
-      <fileName                     value="%DATASTATICPATH%/darkMatter/progenitorMassFunctions_BigMDPL.hdf5"/>
+      <fileName                     value="%DATASTATICPATH%/darkMatter/progenitorMassFunctions_MilkyWay.hdf5"/>
       <indexParent                  value="2"                                                                                        />
       <indexRedshift                value="3"                                                                                        />
       <massRatioLikelihoodMinimum   value="1.04e-01"                                                                                 />
@@ -174,7 +174,7 @@
       <targetLabel                  value="Klypin et al. (2015)"                                                                     />
     </outputAnalysis>    
     <outputAnalysis value="progenitorMassFunction">
-      <fileName                     value="%DATASTATICPATH%/darkMatter/progenitorMassFunctions_BigMDPL.hdf5"/>
+      <fileName                     value="%DATASTATICPATH%/darkMatter/progenitorMassFunctions_MilkyWay.hdf5"/>
       <indexParent                  value="3"                                                                                        />
       <indexRedshift                value="0"                                                                                        />
       <massRatioLikelihoodMinimum   value="3.30e-02"                                                                                 />
@@ -190,7 +190,7 @@
       <targetLabel                  value="Klypin et al. (2015)"                                                                     />
     </outputAnalysis>    
     <outputAnalysis value="progenitorMassFunction">
-      <fileName                     value="%DATASTATICPATH%/darkMatter/progenitorMassFunctions_BigMDPL.hdf5"/>
+      <fileName                     value="%DATASTATICPATH%/darkMatter/progenitorMassFunctions_MilkyWay.hdf5"/>
       <indexParent                  value="3"                                                                                        />
       <indexRedshift                value="1"                                                                                        />
       <massRatioLikelihoodMinimum   value="3.30e-02"                                                                                 />
@@ -206,7 +206,7 @@
       <targetLabel                  value="Klypin et al. (2015)"                                                                     />
     </outputAnalysis>    
     <outputAnalysis value="progenitorMassFunction">
-      <fileName                     value="%DATASTATICPATH%/darkMatter/progenitorMassFunctions_BigMDPL.hdf5"/>
+      <fileName                     value="%DATASTATICPATH%/darkMatter/progenitorMassFunctions_MilkyWay.hdf5"/>
       <indexParent                  value="3"                                                                                        />
       <indexRedshift                value="2"                                                                                        />
       <massRatioLikelihoodMinimum   value="3.30e-02"                                                                                 />
@@ -222,7 +222,7 @@
       <targetLabel                  value="Klypin et al. (2015)"                                                                     />
     </outputAnalysis>    
     <outputAnalysis value="progenitorMassFunction">
-      <fileName                     value="%DATASTATICPATH%/darkMatter/progenitorMassFunctions_BigMDPL.hdf5"/>
+      <fileName                     value="%DATASTATICPATH%/darkMatter/progenitorMassFunctions_MilkyWay.hdf5"/>
       <indexParent                  value="3"                                                                                        />
       <indexRedshift                value="3"                                                                                        />
       <massRatioLikelihoodMinimum   value="3.30e-02"                                                                                 />
@@ -238,7 +238,7 @@
       <targetLabel                  value="Klypin et al. (2015)"                                                                     />
     </outputAnalysis>    
     <outputAnalysis value="progenitorMassFunction">
-      <fileName                     value="%DATASTATICPATH%/darkMatter/progenitorMassFunctions_BigMDPL.hdf5"/>
+      <fileName                     value="%DATASTATICPATH%/darkMatter/progenitorMassFunctions_MilkyWay.hdf5"/>
       <indexParent                  value="4"                                                                                        />
       <indexRedshift                value="0"                                                                                        />
       <massRatioLikelihoodMinimum   value="1.04e-02"                                                                                 />
@@ -254,7 +254,7 @@
       <targetLabel                  value="Klypin et al. (2015)"                                                                     />
     </outputAnalysis>    
     <outputAnalysis value="progenitorMassFunction">
-      <fileName                     value="%DATASTATICPATH%/darkMatter/progenitorMassFunctions_BigMDPL.hdf5"/>
+      <fileName                     value="%DATASTATICPATH%/darkMatter/progenitorMassFunctions_MilkyWay.hdf5"/>
       <indexParent                  value="4"                                                                                        />
       <indexRedshift                value="1"                                                                                        />
       <massRatioLikelihoodMinimum   value="1.04e-02"                                                                                 />
@@ -270,7 +270,7 @@
       <targetLabel                  value="Klypin et al. (2015)"                                                                     />
     </outputAnalysis>    
     <outputAnalysis value="progenitorMassFunction">
-      <fileName                     value="%DATASTATICPATH%/darkMatter/progenitorMassFunctions_BigMDPL.hdf5"/>
+      <fileName                     value="%DATASTATICPATH%/darkMatter/progenitorMassFunctions_MilkyWay.hdf5"/>
       <indexParent                  value="4"                                                                                        />
       <indexRedshift                value="2"                                                                                        />
       <massRatioLikelihoodMinimum   value="1.04e-02"                                                                                 />
@@ -286,7 +286,7 @@
       <targetLabel                  value="Klypin et al. (2015)"                                                                     />
     </outputAnalysis>    
     <outputAnalysis value="progenitorMassFunction">
-      <fileName                     value="%DATASTATICPATH%/darkMatter/progenitorMassFunctions_BigMDPL.hdf5"/>
+      <fileName                     value="%DATASTATICPATH%/darkMatter/progenitorMassFunctions_MilkyWay.hdf5"/>
       <indexParent                  value="4"                                                                                        />
       <indexRedshift                value="3"                                                                                        />
       <massRatioLikelihoodMinimum   value="1.04e-02"                                                                                 />
@@ -302,7 +302,7 @@
       <targetLabel                  value="Klypin et al. (2015)"                                                                     />
     </outputAnalysis>    
     <outputAnalysis value="progenitorMassFunction">
-      <fileName                     value="%DATASTATICPATH%/darkMatter/progenitorMassFunctions_BigMDPL.hdf5"/>
+      <fileName                     value="%DATASTATICPATH%/darkMatter/progenitorMassFunctions_MilkyWay.hdf5"/>
       <indexParent                  value="5"                                                                                        />
       <indexRedshift                value="0"                                                                                        />
       <massRatioLikelihoodMinimum   value="3.30e-03"                                                                                 />
@@ -318,7 +318,7 @@
       <targetLabel                  value="Klypin et al. (2015)"                                                                     />
     </outputAnalysis>    
     <outputAnalysis value="progenitorMassFunction">
-      <fileName                     value="%DATASTATICPATH%/darkMatter/progenitorMassFunctions_BigMDPL.hdf5"/>
+      <fileName                     value="%DATASTATICPATH%/darkMatter/progenitorMassFunctions_MilkyWay.hdf5"/>
       <indexParent                  value="5"                                                                                        />
       <indexRedshift                value="1"                                                                                        />
       <massRatioLikelihoodMinimum   value="3.30e-03"                                                                                 />
@@ -334,7 +334,7 @@
       <targetLabel                  value="Klypin et al. (2015)"                                                                     />
     </outputAnalysis>    
     <outputAnalysis value="progenitorMassFunction">
-      <fileName                     value="%DATASTATICPATH%/darkMatter/progenitorMassFunctions_BigMDPL.hdf5"/>
+      <fileName                     value="%DATASTATICPATH%/darkMatter/progenitorMassFunctions_MilkyWay.hdf5"/>
       <indexParent                  value="5"                                                                                        />
       <indexRedshift                value="2"                                                                                        />
       <massRatioLikelihoodMinimum   value="3.30e-03"                                                                                 />
@@ -350,7 +350,7 @@
       <targetLabel                  value="Klypin et al. (2015)"                                                                     />
     </outputAnalysis>    
     <outputAnalysis value="progenitorMassFunction">
-      <fileName                     value="%DATASTATICPATH%/darkMatter/progenitorMassFunctions_BigMDPL.hdf5"/>
+      <fileName                     value="%DATASTATICPATH%/darkMatter/progenitorMassFunctions_MilkyWay.hdf5"/>
       <indexParent                  value="5"                                                                                        />
       <indexRedshift                value="3"                                                                                        />
       <massRatioLikelihoodMinimum   value="3.30e-03"                                                                                 />
@@ -364,7 +364,7 @@
       <comment                      value="$15.50 &lt; \log_{10}(M_\mathrm{parent}/\mathrm{M}_\odot) \le 16.00$; $z=4.10$; BigMDPL halos"/>
       <label                        value="BigMDPLM5Z3"                                                                               />
       <targetLabel                  value="Klypin et al. (2015)"                                                                     />
-    </outputAnalysis>    
+    </outputAnalysis> -->    
   </outputAnalysis>
   <nbodyHaloMassError value="trenti2010">
     <massParticle                value="3.48e10"/> <!-- Particle mass in BigMDPL -->

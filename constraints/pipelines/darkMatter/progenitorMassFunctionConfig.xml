@@ -12,7 +12,7 @@
     <initializeNodeClassHierarchy value="false"/>
   </task>
 
-  <outputFileName value="galacticus.hdf5"/>
+  <outputFileName value="chains/galacticus.hdf5"/>
   
   <posteriorSampleLikelihood value="independentLikelihoods">
 
@@ -66,15 +66,15 @@
     <!--   <evolveForestsVerbosity value="silent"                                                                         /> -->
     <!-- </posteriorSampleLikelihood> -->
 
-    <!-- <!-\- Symphony Milky Way -\-> -->
-    <!-- <parameterMap         value="mergerTreeBranchingProbability::G0 mergerTreeBranchingProbability::gamma1 mergerTreeBranchingProbability::gamma2 mergerTreeBranchingProbability::gamma3"/> -->
-    <!-- <parameterInactiveMap value=""                                                                                                                                                       /> -->
-    <!-- <posteriorSampleLikelihood value="galaxyPopulation"> -->
-    <!--   <baseParametersFileName value="%EXECPATH%/constraints/pipelines/darkMatter/progenitorMassFunctionBaseSymphonyMilkyWay.xml"/> -->
-    <!--   <randomize              value="false"                                                                                    /> -->
-    <!--   <cpuLimit               value="7200"                                                                                     /> -->
-    <!--   <evolveForestsVerbosity value="silent"                                                                                   /> -->
-    <!-- </posteriorSampleLikelihood> -->
+    <!-- Symphony Milky Way -->
+    <parameterMap         value="mergerTreeBranchingProbability::G0 mergerTreeBranchingProbability::gamma1 mergerTreeBranchingProbability::gamma2 mergerTreeBranchingProbability::gamma3"/>
+    <parameterInactiveMap value=""/>                                                                                                                                                       
+    <posteriorSampleLikelihood value="galaxyPopulation">
+    <baseParametersFileName value="%EXECPATH%/constraints/pipelines/darkMatter/progenitorMassFunctionBaseSymphonyMilkyWay.xml"/>
+    <randomize              value="false"                                                                                    />
+    <cpuLimit               value="7200"                                                                                     />
+    <evolveForestsVerbosity value="silent"                                                                                   />
+    </posteriorSampleLikelihood>
 
   </posteriorSampleLikelihood>
 
@@ -83,7 +83,7 @@
     <stepsMaximum           value="  4000"/>
     <acceptanceAverageCount value="    10"/>
     <stateSwapCount         value="    10"/>
-    <logFileRoot            value="chains"/>
+    <logFileRoot            value="chains/chains"/>
     <reportCount            value="    10"/>
     <sampleOutliers         value="false" />
     <logFlushCount          value="     1"/>
@@ -104,7 +104,7 @@
       <outlierSignificance        value=" 0.95"/>
       <outlierLogLikelihoodOffset value="60"   />
       <reportCount                value=" 1"   />
-      <logFileName                value="convergence.log"/>
+      <logFileName                value="chains/convergence.log"/>
     </posteriorSampleConvergence>
     
     <posteriorSampleStoppingCriterion value="correlationLength">
