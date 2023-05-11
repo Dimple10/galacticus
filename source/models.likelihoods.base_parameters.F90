@@ -73,7 +73,7 @@ contains
     integer                                                                           :: i                     , j                       , &
          &                                                                               instance              , indexElement            , &
          &                                                                               parameterCount
-    type     (inputParameters                        )                                :: parameters_           , subParameters_
+    type     (inputParameters                        ), pointer                       :: parameters_           , subParameters_
     character(len=10                                 )                                :: labelIndex
 
     ! On first call we must build pointers to all parameter nodes which will be modified as a function of chain state.
@@ -91,6 +91,7 @@ contains
           parameterCount=String_Count_Words(char(modelParametersActive_(i)%modelParameter_%name()),"::")
           allocate(parameterNames(parameterCount))
           call String_Split_Words(parameterNames,char(modelParametersActive_(i)%modelParameter_%name()),"::")
+          allocate(parameters_)
           parameters_=inputParameters(self%parametersModel)
           do j=1,parameterCount
              instance    =1
@@ -110,12 +111,18 @@ contains
                 ! This is the final parameter - so get and store a pointer to its node.
                 self%modelParametersActive_(i)%parameter_   => parameters_%node         (char(parameterNames(j)),requireValue=.true. ,copyInstance=instance)
                 self%modelParametersActive_(i)%indexElement =  indexElement
+                self%modelParametersActive_(i)%definition   =  modelParametersActive_(i)%modelParameter_%name()
              else
                 ! This is an intermediate parameter, get the appropriate sub-parameters.
+                allocate  (subParameters_)
                 subParameters_                              =  parameters_%subParameters(char(parameterNames(j)),requireValue=.false.,copyInstance=instance)
+                deallocate(   parameters_)
+                allocate  (   parameters_)
                 parameters_                                 =  inputParameters(subParameters_)
+                deallocate(subParameters_)
              end if
           end do
+          deallocate(parameters_   )
           deallocate(parameterNames)
        end do
     end if
@@ -133,6 +140,7 @@ contains
           parameterCount=String_Count_Words(char(modelParametersInactive_(i)%modelParameter_%name()),"::")
           allocate(parameterNames(parameterCount))
           call String_Split_Words(parameterNames,char(modelParametersInactive_(i)%modelParameter_%name()),"::")
+          allocate(parameters_)
           parameters_=inputParameters(self%parametersModel)
           do j=1,parameterCount
              instance    =1
@@ -154,10 +162,15 @@ contains
                 self%modelParametersInactive_(i)%indexElement =  indexElement
              else
                 ! This is an intermediate parameter, get the appropriate sub-parameters.
+                allocate  (subParameters_)
                 subParameters_                                =  parameters_   %subParameters(char(parameterNames(j)),requireValue=.false.,copyInstance=instance)
+                deallocate(   parameters_)
+                allocate  (   parameters_)
                 parameters_                                   =  inputParameters(subParameters_)
+                deallocate(subParameters_)
              end if
           end do
+          deallocate(parameters_   )
           deallocate(parameterNames)
        end do
     end if
@@ -223,7 +236,7 @@ contains
     if (size(modelParametersInactive_) > 0) then
        do i=1,size(modelParametersInactive_)
           select type (modelParameter_ => modelParametersInactive_(i)%modelParameter_)
-             class is (modelParameterDerived)
+          class is (modelParameterDerived)
              self%modelParametersInactive_(i)%definition=modelParameter_%definition()
              self%modelParametersInactive_(i)%resolved  =.false.
           end select

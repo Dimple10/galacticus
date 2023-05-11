@@ -9,6 +9,7 @@ use PDL;
 use PDL::IO::HDF5;
 use Galacticus::Options;
 use List::Util;
+use Data::Dumper;
 
 # Script to generate content for halo mass function pipeline.
 # Andrew Benson 8-April-2022
@@ -41,6 +42,33 @@ my @types =
 	 suite        => "Symphony",
 	 transfer     => "WDM3",
 	 name         => "Milky Way 3 keV WDM",
+	 redshifts    => [ 0.000, 0.504, 0.990, 2.031, 3.984 ],
+	 massParticle => 4.02830e05
+     },
+     {
+	 label        => "MilkyWay_WDM4",
+	 simulation   => "MilkyWay",
+	 suite        => "Symphony",
+	 transfer     => "WDM4",
+	 name         => "Milky Way 4 keV WDM",
+	 redshifts    => [ 0.000, 0.504, 0.990, 2.031, 3.984 ],
+	 massParticle => 4.02830e05
+     },
+     {
+	 label        => "MilkyWay_WDM5",
+	 simulation   => "MilkyWay",
+	 suite        => "Symphony",
+	 transfer     => "WDM5",
+	 name         => "Milky Way 5 keV WDM",
+	 redshifts    => [ 0.000, 0.504, 0.990, 2.031, 3.984 ],
+	 massParticle => 4.02830e05
+     },
+     {
+	 label        => "MilkyWay_WDM6",
+	 simulation   => "MilkyWay",
+	 suite        => "Symphony",
+	 transfer     => "WDM6",
+	 name         => "Milky Way 6 keV WDM",
 	 redshifts    => [ 0.000, 0.504, 0.990, 2.031, 3.984 ],
 	 massParticle => 4.02830e05
      },
@@ -126,6 +154,33 @@ my @types =
 	 massParticle => 4.02830e05
      },
      {
+	 label        => "MilkyWay_fdm_69.4e-22eV",
+	 simulation   => "MilkyWay",
+	 suite        => "Symphony",
+	 transfer     => "fdm_69.4e-22eV",
+	 name         => "Milky Way FDM 69.4*10^{-22} eV",
+	 redshifts    => [ 0.000, 0.504, 0.990, 2.031, 3.984  ],
+	 massParticle => 4.02830e05
+     },
+     {
+	 label        => "MilkyWay_fdm_113e-22eV",
+	 simulation   => "MilkyWay",
+	 suite        => "Symphony",
+	 transfer     => "fdm_113e-22eV",
+	 name         => "Milky Way FDM 113*10^{-22} eV",
+	 redshifts    => [ 0.000, 0.504, 0.990, 2.031, 3.984  ],
+	 massParticle => 4.02830e05
+     },
+     {
+	 label        => "MilkyWay_fdm_151e-22eV",
+	 simulation   => "MilkyWay",
+	 suite        => "Symphony",
+	 transfer     => "fdm_151e-22eV",
+	 name         => "Milky Way FDM 151*10^{-22} eV",
+	 redshifts    => [ 0.000, 0.504, 0.990, 2.031, 3.984  ],
+	 massParticle => 4.02830e05
+     },
+     {
 	 label        => "MilkyWay_fdm_185e-22eV",
 	 simulation   => "MilkyWay",
 	 suite        => "Symphony",
@@ -158,6 +213,33 @@ my @types =
 	 suite        => "Symphony",
 	 transfer     => "WDM3",
 	 name         => "Milky Way 3 keV WDM",
+	 redshifts    => [ 0.000, 0.504, 0.990, 2.031, 3.984 ],
+	 massParticle => 5.03538e04
+     },
+     {
+	 label        => "MilkyWay_WDM4_hires",
+	 simulation   => "MilkyWay",
+	 suite        => "Symphony",
+	 transfer     => "WDM4",
+	 name         => "Milky Way 4 keV WDM",
+	 redshifts    => [ 0.000, 0.504, 0.990, 2.031, 3.984 ],
+	 massParticle => 5.03538e04
+     },
+     {
+	 label        => "MilkyWay_WDM5_hires",
+	 simulation   => "MilkyWay",
+	 suite        => "Symphony",
+	 transfer     => "WDM5",
+	 name         => "Milky Way 5 keV WDM",
+	 redshifts    => [ 0.000, 0.504, 0.990, 2.031, 3.984 ],
+	 massParticle => 5.03538e04
+     },
+     {
+	 label        => "MilkyWay_WDM6_hires",
+	 simulation   => "MilkyWay",
+	 suite        => "Symphony",
+	 transfer     => "WDM6",
+	 name         => "Milky Way 6 keV WDM",
 	 redshifts    => [ 0.000, 0.504, 0.990, 2.031, 3.984 ],
 	 massParticle => 5.03538e04
      },
@@ -243,6 +325,33 @@ my @types =
 	 massParticle => 5.03538e04
      },
      {
+	 label        => "MilkyWay_fdm_69.4e-22eV_hires",
+	 simulation   => "MilkyWay",
+	 suite        => "Symphony",
+	 transfer     => "fdm_69.4e-22eV",
+	 name         => "Milky Way FDM 69.4*10^{-22} eV",
+	 redshifts    => [ 0.000, 0.504, 0.990, 2.031, 3.984  ],
+	 massParticle => 5.03538e04
+     },
+     {
+	 label        => "MilkyWay_fdm_113e-22eV_hires",
+	 simulation   => "MilkyWay",
+	 suite        => "Symphony",
+	 transfer     => "fdm_113e-22eV",
+	 name         => "Milky Way FDM 113*10^{-22} eV",
+	 redshifts    => [ 0.000, 0.504, 0.990, 2.031, 3.984  ],
+	 massParticle => 5.03538e04
+     },
+     {
+	 label        => "MilkyWay_fdm_151e-22eV_hires",
+	 simulation   => "MilkyWay",
+	 suite        => "Symphony",
+	 transfer     => "fdm_151e-22eV",
+	 name         => "Milky Way FDM 151*10^{-22} eV",
+	 redshifts    => [ 0.000, 0.504, 0.990, 2.031, 3.984  ],
+	 massParticle => 5.03538e04
+     },
+     {
 	 label        => "MilkyWay_fdm_185e-22eV_hires",
 	 simulation   => "MilkyWay",
 	 suite        => "Symphony",
@@ -262,7 +371,7 @@ my @types =
      },
      {
 	 label        => "LMC",
-	 simulation   => "MilkyWay",
+	 simulation   => "LMC",
 	 suite        => "Symphony",
 	 transfer     => "CDM",
 	 name         => "LMC",
@@ -275,18 +384,36 @@ my $labelLengthMaximum = &List::Util::max(@lengths);
 open(my $configFile  ,">haloMassFunctionConfig.xml");
 my $pipelineBase   = "";
 my $pipelineSuffix = "";
+
+my %countsByTransferFunction;
+my %temperatureByTransferFunction;
 foreach my $type ( @types ) {
     die("Directory '".$options{'simulationDataPath'}."/ZoomIns/".$type->{'label'}."' does not exist")
 	unless ( -e $options{'simulationDataPath'}."/ZoomIns/".$type->{'label'} );
     opendir(my $dir,$options{'simulationDataPath'}."/ZoomIns/".$type->{'label'});
     my @halos = sort map {$_ =~ m/^Halo\d+/ ? $_ : ()} readdir($dir);
     closedir($dir);    
+    $countsByTransferFunction{$type->{'transfer'}} += scalar(@halos);
+}
+my $countsMinimum = &List::Util::min(map {$countsByTransferFunction{$_}} keys(%countsByTransferFunction));
+foreach ( keys(%countsByTransferFunction) ) {
+    $temperatureByTransferFunction{$_} = $countsByTransferFunction{$_}/$countsMinimum;
+}
+
+foreach my $type ( @types ) {
+    $code::temperature = $temperatureByTransferFunction{$type->{'transfer'}};
+    die("Directory '".$options{'simulationDataPath'}."/ZoomIns/".$type->{'label'}."' does not exist")
+	unless ( -e $options{'simulationDataPath'}."/ZoomIns/".$type->{'label'} );
+    opendir(my $dir,$options{'simulationDataPath'}."/ZoomIns/".$type->{'label'});
+    my @halos = sort map {$_ =~ m/^Halo\d+/ ? $_ : ()} readdir($dir);
+    closedir($dir);    
     foreach my $halo ( @halos ) {
-	$code::label       = $type->{'label'};
-	$code::name        = $type->{'name'};
-	$code::suite       = $type->{'suite'};
-	$code::simulation  = $type->{'simulation'};
-	$code::transfer    = $type->{'transfer'};
+	$code::label       = $type->{'label'     }                              ;
+	$code::name        = $type->{'name'      }                              ;
+	$code::suite       = $type->{'suite'     }                              ;
+	$code::simulation  = $type->{'simulation'}                              ;
+	$code::hires       = $type->{'label'     } =~ m/_hires$/ ? "_hires" : "";
+	$code::transfer    = $type->{'transfer'  }                              ;
 	$code::halo        = $halo;
 	$code::massMinimum = sprintf("%11.5e",3000.0*$type->{'massParticle'});
 	foreach my $redshift ( @{$type->{'redshifts'}} ) {
@@ -322,20 +449,25 @@ foreach my $type ( @types ) {
     <!-- Zoom-in: {$name} {$halo} -->
     <parameterMap value="haloMassFunctionParameters::a             haloMassFunctionParameters::p
                          haloMassFunctionParameters::normalization haloMassFunctionParameters::q
+                         haloMassFunctionParameters::b
                          haloMassFunctionParameters::cW            haloMassFunctionParameters::beta
-                         haloMassFunctionParameters::alpha"/>
-     <parameterInactiveMap value="" ignoreWarnings="true"/>
-    <posteriorSampleLikelihood value="haloMassFunction">
-      <!-- Options matched to those of Benson (2017; https://ui.adsabs.harvard.edu/abs/2017MNRAS.467.3454B) -->
-      <baseParametersFileName value="constraints/pipelines/darkMatter/haloMassFunctionBase_{$label}_{$halo}_z{$redshiftShort}.xml"/>
-      <fileName               value="%DATASTATICPATH%/darkMatter/haloMassFunction_{$label}_{$halo}_z{$redshiftShort}.hdf5"/>
-      <redshift               value="{$redshift}"       />
-      <massRangeMinimum       value="{$massMinimum}"    /> <!-- 3000 times zoom-in {$name} particle mass -->
-      <massRangeMaximum       value="{$massMaximum}"    /> <!-- 1/10 of the target halo mass             -->
-      <binCountMinimum        value="0"                 />    
-      <likelihoodPoisson      value="true"              />
-      <likelihoodModel        value="environment"       />
-      <massEnvironment        value="{$massEnvironment}"/>
+                         haloMassFunctionParameters::alpha         varianceFractionalModelDiscrepancy"/>
+    <parameterInactiveMap value="" ignoreWarnings="true"/>
+    <posteriorSampleLikelihood value="heated">
+      <temperature value="{$temperature}"/>
+      <posteriorSampleLikelihood value="haloMassFunction">
+        <!-- Options matched to those of Benson (2017; https://ui.adsabs.harvard.edu/abs/2017MNRAS.467.3454B) -->
+        <baseParametersFileName value="constraints/pipelines/darkMatter/haloMassFunctionBase_{$label}_{$halo}_z{$redshiftShort}.xml"/>
+        <fileName               value="%DATASTATICPATH%/darkMatter/haloMassFunction_{$label}_{$halo}_z{$redshiftShort}.hdf5"/>
+        <redshift               value="{$redshift}"       />
+        <massRangeMinimum       value="{$massMinimum}"    /> <!-- 3000 times zoom-in {$name} particle mass -->
+        <massRangeMaximum       value="{$massMaximum}"    /> <!-- 1/10 of the target halo mass             -->
+        <binCountMinimum        value="0"                 />    
+        <likelihoodPoisson      value="true"              />
+        <likelihoodModel        value="simulationSphere"  />
+        <massSphere             value="{$massEnvironment}"/>
+        <truncatePower          value="true"              />
+      </posteriorSampleLikelihood>
     </posteriorSampleLikelihood>
 CODE
 		    print $configFile $config;
@@ -359,12 +491,11 @@ CODE
   </haloEnvironment>
 
   <!-- Include Milky Way cosmology and mass function parameters -->
-  <xi:include href="haloMassFunctionParameters.xml"            xpointer="xpointer(parameters/*)" xmlns:xi="http://www.w3.org/2001/XInclude"/>
-  <xi:include href="simulation_{$suite}.xml"                   xpointer="xpointer(parameters/*)" xmlns:xi="http://www.w3.org/2001/XInclude"/>
-  <xi:include href="cosmology_{$suite}.xml"                    xpointer="xpointer(parameters/*)" xmlns:xi="http://www.w3.org/2001/XInclude"/>
-  <xi:include href="powerSpectrumEffective_{$suite}.xml"       xpointer="xpointer(parameters/*)" xmlns:xi="http://www.w3.org/2001/XInclude"/>
-  <xi:include href="haloMassFunction_{$suite}.xml"             xpointer="xpointer(parameters/*)" xmlns:xi="http://www.w3.org/2001/XInclude"/>
-  <xi:include href="transferFunction_{$suite}_{$transfer}.xml" xpointer="xpointer(parameters/*)" xmlns:xi="http://www.w3.org/2001/XInclude"/>
+  <xi:include href="haloMassFunctionParameters.xml"                xpointer="xpointer(parameters/*)" xmlns:xi="http://www.w3.org/2001/XInclude"/>
+  <xi:include href="simulation_{$suite}_{$simulation}{$hires}.xml" xpointer="xpointer(parameters/*)" xmlns:xi="http://www.w3.org/2001/XInclude"/>
+  <xi:include href="cosmology_{$suite}.xml"                        xpointer="xpointer(parameters/*)" xmlns:xi="http://www.w3.org/2001/XInclude"/>
+  <xi:include href="haloMassFunction_{$suite}.xml"                 xpointer="xpointer(parameters/*)" xmlns:xi="http://www.w3.org/2001/XInclude"/>
+  <xi:include href="transferFunction_{$suite}_{$transfer}.xml"     xpointer="xpointer(parameters/*)" xmlns:xi="http://www.w3.org/2001/XInclude"/>
 
 </parameters>
 CODE
