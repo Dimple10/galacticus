@@ -58,6 +58,7 @@
      procedure :: rootVarianceLogarithmicGradient    => variancePeakBackgroundSplitRootVarianceLogarithmicGradient
      procedure :: rootVarianceAndLogarithmicGradient => variancePeakBackgroundSplitRootVarianceAndLogarithmicGradient
      procedure :: mass                               => variancePeakBackgroundSplitMass
+     procedure :: growthIsMassDependent              => variancePeakBackgroundSplitGrowthIsMassDependent
      procedure :: varianceBackground                 => variancePeakBackgroundSplitVarianceBackground
   end type cosmologicalMassVariancePeakBackgroundSplit
 
@@ -297,3 +298,14 @@ contains
     end if
     return
   end function variancePeakBackgroundSplitVarianceBackground
+
+  logical function variancePeakBackgroundSplitGrowthIsMassDependent(self)
+    !!{
+    Return true if the growth rate of the variance is mass-dependent.
+    !!}
+    implicit none
+    class(cosmologicalMassVariancePeakBackgroundSplit), intent(inout) :: self
+
+    variancePeakBackgroundSplitGrowthIsMassDependent=self%cosmologicalMassVariance_%growthIsMassDependent()
+    return
+  end function variancePeakBackgroundSplitGrowthIsMassDependent
