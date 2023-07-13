@@ -12,7 +12,7 @@
     <initializeNodeClassHierarchy value="false"/>
   </task>
 
-  <outputFileName value="chains/galacticus.hdf5"/>
+  <outputFileName value="chains_mdpl2/galacticus.hdf5"/>
   
   <posteriorSampleLikelihood value="independentLikelihoods">
 
@@ -34,8 +34,8 @@
       <randomize              value="false"                                                                           />
       <evolveForestsVerbosity value="silent"                                                                          />
     </posteriorSampleLikelihood>
-
-    <! MDPL2 >
+-->
+    <!-- MDPL2 -->
     <parameterMap         value="mergerTreeBranchingProbability::G0 mergerTreeBranchingProbability::gamma1 mergerTreeBranchingProbability::gamma2 mergerTreeBranchingProbability::gamma3"/>
     <parameterInactiveMap value=""                                                                                                                                                       /> 
     <posteriorSampleLikelihood value="galaxyPopulation">
@@ -43,7 +43,7 @@
       <randomize              value="false"                                                                         /> 
       <evolveForestsVerbosity value="silent"                                                                          /> 
     </posteriorSampleLikelihood> 
-
+<!--
     <! SMDPL >
     <parameterMap         value="mergerTreeBranchingProbability::G0 mergerTreeBranchingProbability::gamma1 mergerTreeBranchingProbability::gamma2 mergerTreeBranchingProbability::gamma3"/> 
     <parameterInactiveMap value=""                                                                                                                                                       /> 
@@ -61,9 +61,8 @@
       <randomize              value="false"                                                                          /> 
       <evolveForestsVerbosity value="silent"                                                                         /> 
     </posteriorSampleLikelihood>
-	-->
 
-    <!-- Symphony Milky Way -->
+    <! Symphony Milky Way >
     <parameterMap         value="mergerTreeBranchingProbability::G0 mergerTreeBranchingProbability::gamma1 mergerTreeBranchingProbability::gamma2 mergerTreeBranchingProbability::gamma3"/>
     <parameterInactiveMap value="" ignoreWarnings="true"/>                                                                                                                                                       
     <posteriorSampleLikelihood value="galaxyPopulation">
@@ -72,7 +71,7 @@
       <evolveForestsVerbosity value="silent"                                                                                   />
     </posteriorSampleLikelihood>
 
-    <!-- Symphony WDM3 -->
+    <! Symphony WDM3  >
     <parameterMap         value="mergerTreeBranchingProbability::G0 mergerTreeBranchingProbability::gamma1 mergerTreeBranchingProbability::gamma2 mergerTreeBranchingProbability::gamma3"/>
     <parameterInactiveMap value="" ignoreWarnings="true"/>
     <posteriorSampleLikelihood value="galaxyPopulation">
@@ -82,7 +81,7 @@
     </posteriorSampleLikelihood>
 
 
-  <!-- Symphony IDM1e-4GeV_halfmode -->
+  <! Symphony IDM1e-4GeV_halfmode >
     <parameterMap         value="mergerTreeBranchingProbability::G0 mergerTreeBranchingProbability::gamma1 mergerTreeBranchingProbability::gamma2 mergerTreeBranchingProbability::gamma3"/>
     <parameterInactiveMap value="" ignoreWarnings="true"/>
     <posteriorSampleLikelihood value="galaxyPopulation">
@@ -91,7 +90,7 @@
       <evolveForestsVerbosity value="silent"/>
     </posteriorSampleLikelihood>
 
-  <!-- Symphony IDM1e-2GeV_halfmode -->
+  <! Symphony IDM1e-2GeV_halfmode >
     <parameterMap         value="mergerTreeBranchingProbability::G0 mergerTreeBranchingProbability::gamma1 mergerTreeBranchingProbability::gamma2 mergerTreeBranchingProbability::gamma3"/>
     <parameterInactiveMap value="" ignoreWarnings="true"/>
     <posteriorSampleLikelihood value="galaxyPopulation">
@@ -100,7 +99,7 @@
       <evolveForestsVerbosity value="silent"/>
     </posteriorSampleLikelihood>
 
-  <!-- Symphony IDM1GeV_halfmode -->
+  <! Symphony IDM1GeV_halfmode >
     <parameterMap         value="mergerTreeBranchingProbability::G0 mergerTreeBranchingProbability::gamma1 mergerTreeBranchingProbability::gamma2 mergerTreeBranchingProbability::gamma3"/>
     <parameterInactiveMap value="" ignoreWarnings="true"/>
     <posteriorSampleLikelihood value="galaxyPopulation">
@@ -109,7 +108,7 @@
       <evolveForestsVerbosity value="silent"/>
     </posteriorSampleLikelihood>
 
-  <!-- Symphony IDM1e-4GeV_envelope -->
+  <! Symphony IDM1e-4GeV_envelope >
     <parameterMap         value="mergerTreeBranchingProbability::G0 mergerTreeBranchingProbability::gamma1 mergerTreeBranchingProbability::gamma2 mergerTreeBranchingProbability::gamma3"/>
     <parameterInactiveMap value="" ignoreWarnings="true"/>
     <posteriorSampleLikelihood value="galaxyPopulation">
@@ -118,7 +117,7 @@
       <evolveForestsVerbosity value="silent"/>
     </posteriorSampleLikelihood>
 
-  <!-- Symphony IDM1e-2GeV_envelope -->
+  <! Symphony IDM1e-2GeV_envelope >
     <parameterMap         value="mergerTreeBranchingProbability::G0 mergerTreeBranchingProbability::gamma1 mergerTreeBranchingProbability::gamma2 mergerTreeBranchingProbability::gamma3"/>
     <parameterInactiveMap value="" ignoreWarnings="true"/>
     <posteriorSampleLikelihood value="galaxyPopulation">
@@ -127,7 +126,7 @@
       <evolveForestsVerbosity value="silent"/>
     </posteriorSampleLikelihood>
 
-  <!-- Symphony IDM1GeV_envelope -->
+  <! Symphony IDM1GeV_envelope >
     <parameterMap         value="mergerTreeBranchingProbability::G0 mergerTreeBranchingProbability::gamma1 mergerTreeBranchingProbability::gamma2 mergerTreeBranchingProbability::gamma3"/>
     <parameterInactiveMap value="" ignoreWarnings="true"/>
     <posteriorSampleLikelihood value="galaxyPopulation">
@@ -136,7 +135,7 @@
       <evolveForestsVerbosity value="silent"/>
     </posteriorSampleLikelihood>
 
-  <!-- Symphony fdm_490e-22eV -->
+  <! Symphony fdm_490e-22eV >
     <parameterMap         value="mergerTreeBranchingProbability::G0 mergerTreeBranchingProbability::gamma1 mergerTreeBranchingProbability::gamma2 mergerTreeBranchingProbability::gamma3"/>
     <parameterInactiveMap value="" ignoreWarnings="true"/>
     <posteriorSampleLikelihood value="galaxyPopulation">
@@ -145,7 +144,7 @@
       <evolveForestsVerbosity value="silent"/>
     </posteriorSampleLikelihood>
 
-  <!-- Symphony fdm_25.9e-22eV -->
+  <! Symphony fdm_25.9e-22eV >
     <parameterMap         value="mergerTreeBranchingProbability::G0 mergerTreeBranchingProbability::gamma1 mergerTreeBranchingProbability::gamma2 mergerTreeBranchingProbability::gamma3"/>
     <parameterInactiveMap value="" ignoreWarnings="true"/>
     <posteriorSampleLikelihood value="galaxyPopulation">
@@ -154,7 +153,7 @@
       <evolveForestsVerbosity value="silent"/>
     </posteriorSampleLikelihood>
 
-  <!-- Symphony fdm_185e-22eV -->
+  <! Symphony fdm_185e-22eV >
     <parameterMap         value="mergerTreeBranchingProbability::G0 mergerTreeBranchingProbability::gamma1 mergerTreeBranchingProbability::gamma2 mergerTreeBranchingProbability::gamma3"/>
     <parameterInactiveMap value="" ignoreWarnings="true"/>
     <posteriorSampleLikelihood value="galaxyPopulation">
@@ -163,7 +162,7 @@
       <evolveForestsVerbosity value="silent"/>
     </posteriorSampleLikelihood>
 
-  <!-- Symphony fdm_69.4e-22eV -->
+  <! Symphony fdm_69.4e-22eV >
     <parameterMap         value="mergerTreeBranchingProbability::G0 mergerTreeBranchingProbability::gamma1 mergerTreeBranchingProbability::gamma2 mergerTreeBranchingProbability::gamma3"/>
     <parameterInactiveMap value="" ignoreWarnings="true"/>
     <posteriorSampleLikelihood value="galaxyPopulation">
@@ -172,7 +171,7 @@
       <evolveForestsVerbosity value="silent"/>
     </posteriorSampleLikelihood>
 
-  <!-- Symphony fdm_151e-22eV -->
+  <! Symphony fdm_151e-22eV >
     <parameterMap         value="mergerTreeBranchingProbability::G0 mergerTreeBranchingProbability::gamma1 mergerTreeBranchingProbability::gamma2 mergerTreeBranchingProbability::gamma3"/>
     <parameterInactiveMap value="" ignoreWarnings="true"/>
     <posteriorSampleLikelihood value="galaxyPopulation">
@@ -181,7 +180,7 @@
       <evolveForestsVerbosity value="silent"/>
     </posteriorSampleLikelihood>
 
-  <!-- Symphony fdm_113e-22eV -->
+  <! Symphony fdm_113e-22eV >
     <parameterMap         value="mergerTreeBranchingProbability::G0 mergerTreeBranchingProbability::gamma1 mergerTreeBranchingProbability::gamma2 mergerTreeBranchingProbability::gamma3"/>
     <parameterInactiveMap value="" ignoreWarnings="true"/>
     <posteriorSampleLikelihood value="galaxyPopulation">
@@ -190,7 +189,7 @@
       <evolveForestsVerbosity value="silent"/>
     </posteriorSampleLikelihood>
 
-  <!-- Symphony WDM10 -->
+  <! Symphony WDM10 >
     <parameterMap         value="mergerTreeBranchingProbability::G0 mergerTreeBranchingProbability::gamma1 mergerTreeBranchingProbability::gamma2 mergerTreeBranchingProbability::gamma3"/>
     <parameterInactiveMap value="" ignoreWarnings="true"/>
     <posteriorSampleLikelihood value="galaxyPopulation">
@@ -199,7 +198,7 @@
       <evolveForestsVerbosity value="silent"/>
     </posteriorSampleLikelihood>
 
-  <!-- Symphony WDM6.5 -->
+  <! Symphony WDM6.5 >
     <parameterMap         value="mergerTreeBranchingProbability::G0 mergerTreeBranchingProbability::gamma1 mergerTreeBranchingProbability::gamma2 mergerTreeBranchingProbability::gamma3"/>
     <parameterInactiveMap value="" ignoreWarnings="true"/>
     <posteriorSampleLikelihood value="galaxyPopulation">
@@ -208,7 +207,7 @@
       <evolveForestsVerbosity value="silent"/>
     </posteriorSampleLikelihood>
 
-  <!-- Symphony WDM6 -->
+  <! Symphony WDM6 >
     <parameterMap         value="mergerTreeBranchingProbability::G0 mergerTreeBranchingProbability::gamma1 mergerTreeBranchingProbability::gamma2 mergerTreeBranchingProbability::gamma3"/>
     <parameterInactiveMap value="" ignoreWarnings="true"/>
     <posteriorSampleLikelihood value="galaxyPopulation">
@@ -217,7 +216,7 @@
       <evolveForestsVerbosity value="silent"/>
     </posteriorSampleLikelihood>
 
-  <!-- Symphony WDM5 -->
+  <! Symphony WDM5 >
     <parameterMap         value="mergerTreeBranchingProbability::G0 mergerTreeBranchingProbability::gamma1 mergerTreeBranchingProbability::gamma2 mergerTreeBranchingProbability::gamma3"/>
     <parameterInactiveMap value="" ignoreWarnings="true"/>
     <posteriorSampleLikelihood value="galaxyPopulation">
@@ -226,7 +225,7 @@
       <evolveForestsVerbosity value="silent"/>
     </posteriorSampleLikelihood>
 
-  <!-- Symphony WDM4 -->
+  <!  Symphony WDM4 >
     <parameterMap         value="mergerTreeBranchingProbability::G0 mergerTreeBranchingProbability::gamma1 mergerTreeBranchingProbability::gamma2 mergerTreeBranchingProbability::gamma3"/>
     <parameterInactiveMap value="" ignoreWarnings="true"/>
     <posteriorSampleLikelihood value="galaxyPopulation">
@@ -234,7 +233,7 @@
       <randomize              value="false"/>
       <evolveForestsVerbosity value="silent"/>
     </posteriorSampleLikelihood>
-
+ -->
 
   </posteriorSampleLikelihood>
 
@@ -243,7 +242,7 @@
     <stepsMaximum           value="  4000"/>
     <acceptanceAverageCount value="    10"/>
     <stateSwapCount         value="    10"/>
-    <logFileRoot            value="chains_sub/chains"/>
+    <logFileRoot            value="chains_mdpl2/chains"/>
     <reportCount            value="    10"/>
     <sampleOutliers         value="false" />
     <logFlushCount          value="     1"/>
@@ -264,7 +263,7 @@
       <outlierSignificance        value=" 0.95"/>
       <outlierLogLikelihoodOffset value="60"   />
       <reportCount                value=" 1"   />
-      <logFileName                value="chains_sub/convergence.log"/>
+      <logFileName                value="chains_mdpl2/convergence.log"/>
     </posteriorSampleConvergence>
     
     <posteriorSampleStoppingCriterion value="correlationLength">
