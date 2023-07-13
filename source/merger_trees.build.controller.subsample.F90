@@ -44,7 +44,9 @@ Contains a module which implements a merger tree build controller class which pe
      private
      class           (mergerTreeBranchingProbabilityClass), pointer :: mergerTreeBranchingProbability_ => null()
      double precision                                               :: massThreshold                            , subsamplingRateAtThreshold , &
-          &                                                            exponent                                 , factorMassGrowthConsolidate
+          &                                                            exponent                                 , factorMassGrowthConsolidate, &
+          &                                                            fractionMassThreshold
+     logical                                                        :: useFractionalThreshold
   contains
      final     ::                               subsampleDestructor
      procedure :: control                    => subsampleControl
@@ -66,20 +68,38 @@ contains
     !!{
     Constructor for the ``subsample'' merger tree build controller class which takes a parameter set as input.
     !!}
+    use :: Error           , only : Error_Report
     use :: Input_Parameters, only : inputParameter, inputParameters
     implicit none
     type            (mergerTreeBuildControllerSubsample )                :: self
     type            (inputParameters                    ), intent(inout) :: parameters
     class           (mergerTreeBranchingProbabilityClass), pointer       :: mergerTreeBranchingProbability_
     double precision                                                     :: massThreshold                  , subsamplingRateAtThreshold , &
-         &                                                                  exponent                       , factorMassGrowthConsolidate
-    
+         &                                                                  exponent                       , factorMassGrowthConsolidate, &
+         &                                                                  fractionMassThreshold
+
+    if (parameters%isPresent('massThreshold')) then
+       if (parameters%isPresent('fractionMassThreshold')) call Error_Report('only one of [massThreshold] and [fractionMassThreshold] may be present'//{introspection:location})
+       !![
+       <inputParameter>
+	 <name>massThreshold</name>
+	 <source>parameters</source>
+	 <description>The mass threshold, $M_0$, below which subsampling is applied.</description>
+       </inputParameter>
+       !!]
+    else if (parameters%isPresent('fractionMassThreshold')) then
+       if (parameters%isPresent('massThreshold')) call Error_Report('only one of [massThreshold] and [fractionMassThreshold] may be present'//{introspection:location})
+       !![
+       <inputParameter>
+	 <name>fractionMassThreshold</name>
+	 <source>parameters</source>
+	 <description>The fractional (relative to the tree mass) mass threshold, $f_0$, below which subsampling is applied.</description>
+       </inputParameter>
+       !!]
+    else
+       call Error_Report('either [massThreshold] or [fractionMassThreshold] must be present')
+    end if
     !![
-    <inputParameter>
-      <name>massThreshold</name>
-      <source>parameters</source>
-      <description>The mass threshold, $M_0$, below which subsampling is applied.</description>
-    </inputParameter>
     <inputParameter>
       <name>subsamplingRateAtThreshold</name>
       <source>parameters</source>
@@ -97,28 +117,35 @@ contains
       <defaultValue>0.0d0</defaultValue>
     </inputParameter>
     <objectBuilder class="mergerTreeBranchingProbability" name="mergerTreeBranchingProbability_" source="parameters"/>
-    !!]
-    self=mergerTreeBuildControllerSubsample(massThreshold,subsamplingRateAtThreshold,exponent,factorMassGrowthConsolidate,mergerTreeBranchingProbability_)
-    !![
+    <conditionalCall>
+      <call>self=mergerTreeBuildControllerSubsample(mergerTreeBranchingProbability_,subsamplingRateAtThreshold,exponent,factorMassGrowthConsolidate{conditions})</call>
+      <argument name="massThreshold"         value="massThreshold"         parameterPresent="parameters"/>
+      <argument name="fractionMassThreshold" value="fractionMassThreshold" parameterPresent="parameters"/>
+    </conditionalCall>
     <inputParametersValidate source="parameters"/>
     <objectDestructor name="mergerTreeBranchingProbability_"/>
     !!]
     return
   end function subsampleConstructorParameters
 
-  function subsampleConstructorInternal(massThreshold,subsamplingRateAtThreshold,exponent,factorMassGrowthConsolidate,mergerTreeBranchingProbability_) result(self)
+  function subsampleConstructorInternal(mergerTreeBranchingProbability_,subsamplingRateAtThreshold,exponent,factorMassGrowthConsolidate,massThreshold,fractionMassThreshold) result(self)
     !!{
     Internal constructor for the ``subsample'' merger tree build controller class.
     !!}
+    use :: Error, only : Error_Report
     implicit none
-    type            (mergerTreeBuildControllerSubsample )                        :: self
-    class           (mergerTreeBranchingProbabilityClass), intent(in   ), target :: mergerTreeBranchingProbability_
-    double precision                                     , intent(in   )         :: massThreshold                  , subsamplingRateAtThreshold , &
-         &                                                                          exponent                       , factorMassGrowthConsolidate
+    type            (mergerTreeBuildControllerSubsample )                          :: self
+    class           (mergerTreeBranchingProbabilityClass), intent(in   ), target   :: mergerTreeBranchingProbability_
+    double precision                                     , intent(in   )           :: factorMassGrowthConsolidate    , subsamplingRateAtThreshold , &
+         &                                                                            exponent
+    double precision                                     , intent(in   ), optional :: massThreshold                  , fractionMassThreshold
     !![
-    <constructorAssign variables="massThreshold, subsamplingRateAtThreshold, exponent, factorMassGrowthConsolidate, *mergerTreeBranchingProbability_"/>
+    <constructorAssign variables="massThreshold, fractionMassThreshold, subsamplingRateAtThreshold, exponent, factorMassGrowthConsolidate, *mergerTreeBranchingProbability_"/>
     !!]
-    
+
+    if (     present(massThreshold).and.     present(fractionMassThreshold)) call Error_Report('only one of `massThreshold` or `fractionMassThreshold` can be supplied'//{introspection:location})
+    if (.not.present(massThreshold).and..not.present(fractionMassThreshold)) call Error_Report('either `massThreshold` or `fractionMassThreshold` must be supplied'    //{introspection:location})
+    self%useFractionalThreshold=present(fractionMassThreshold)
     return
   end function subsampleConstructorInternal
 
@@ -144,13 +171,21 @@ contains
     class           (mergerTreeBuildControllerSubsample), intent(inout)          :: self    
     type            (treeNode                          ), intent(inout), pointer :: node
     class           (mergerTreeWalkerClass             ), intent(inout)          :: treeWalker_
-    type            (treeNode                          )               , pointer :: nodeNext       , nodeChild  , &
+    type            (treeNode                          )               , pointer :: nodeNext       , nodeChild    , &
          &                                                                          nodeParent
     class           (nodeComponentBasic                )               , pointer :: basic          , basicParent
-    double precision                                                             :: rateSubsampling
+    double precision                                                             :: rateSubsampling, massThreshold
     integer         (c_size_t                          )                         :: countNodes
     logical                                                                      :: finished
 
+    ! Determine the mass threshold to use.
+    if (self%useFractionalThreshold) then
+       basic         =>  node %hostTree%nodeBase%basic()
+       massThreshold =  +basic%mass                   () &
+            &           *self %fractionMassThreshold
+   else
+       massThreshold=self%massThreshold
+    end if
     ! The node which we return to the tree builder must be one that we have determined will not be pruned, since this node will be
     ! fully-processed by the tree builder. Therefore, if we prune a node we must check for pruning of the next node, and so on
     ! until we reach a node that is not pruned.
@@ -166,12 +201,12 @@ contains
        if (node%isPrimaryProgenitor()) return
        ! Nodes above the mass threshold are not eligible for pruning.
        basic => node%basic()
-       if (basic%mass() >= self%massThreshold) return
+       if (basic%mass() >= massThreshold) return
        ! Compute subsampling rate, perform sampling.
        rateSubsampling=+self%subsamplingRateAtThreshold &
             &          *(                               &
             &            +basic%mass         ()         &
-            &            /self %massThreshold           &
+            &            /      massThreshold           &
             &           )**self%exponent
        if (node%hostTree%randomNumberGenerator_%uniformSample() < rateSubsampling) then
           ! Node is to be kept - increase its weight to account for corresponding branches which will have been lost.
