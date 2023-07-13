@@ -18,7 +18,7 @@
 
  
     <!--     <! HugeMDPL  >
-    <parameterMap         value="mergerTreeBranchingProbability::G0 mergerTreeBranchingProbability::gamma1 mergerTreeBranchingProbability::gamma2 mergerTreeBranchingProbability::gamma3"/>
+    <parameterMap         value="mergerTreeBranchingProbability::G0 mergerTreeBranchingProbability::gamma1 mergerTreeBranchingProbability::gamma2 mergerTreeBranchingProbability::gamma3 progenitorMassFunctionParameters::rootVarianceTargetFractional"/>
     <parameterInactiveMap value=""                                                                                                                                                       />
     <posteriorSampleLikelihood value="galaxyPopulation">
     <baseParametersFileName value="%EXECPATH%/constraints/pipelines/darkMatter/progenitorMassFunctionBaseHugeMDPL.xml"/>
@@ -27,7 +27,7 @@
     </posteriorSampleLikelihood> 
 
     <! BigMDPL >
-    <parameterMap         value="mergerTreeBranchingProbability::G0 mergerTreeBranchingProbability::gamma1 mergerTreeBranchingProbability::gamma2 mergerTreeBranchingProbability::gamma3"/>
+    <parameterMap         value="mergerTreeBranchingProbability::G0 mergerTreeBranchingProbability::gamma1 mergerTreeBranchingProbability::gamma2 mergerTreeBranchingProbability::gamma3 progenitorMassFunctionParameters::rootVarianceTargetFractional"/>
     <parameterInactiveMap value=""                                                                                                                                                       />
     <posteriorSampleLikelihood value="galaxyPopulation">
       <baseParametersFileName value="%EXECPATH%/constraints/pipelines/darkMatter/progenitorMassFunctionBaseBigMDPL.xml"/>
@@ -36,7 +36,7 @@
     </posteriorSampleLikelihood>
 -->
     <!-- MDPL2 -->
-    <parameterMap         value="mergerTreeBranchingProbability::G0 mergerTreeBranchingProbability::gamma1 mergerTreeBranchingProbability::gamma2 mergerTreeBranchingProbability::gamma3"/>
+    <parameterMap         value="mergerTreeBranchingProbability::G0 mergerTreeBranchingProbability::gamma1 mergerTreeBranchingProbability::gamma2 mergerTreeBranchingProbability::gamma3 progenitorMassFunctionParameters::rootVarianceTargetFractional"/>
     <parameterInactiveMap value=""                                                                                                                                                       /> 
     <posteriorSampleLikelihood value="galaxyPopulation">
       <baseParametersFileName value="%EXECPATH%/constraints/pipelines/darkMatter/progenitorMassFunctionBaseMDPL2.xml"/>
@@ -45,7 +45,7 @@
     </posteriorSampleLikelihood> 
 <!--
     <! SMDPL >
-    <parameterMap         value="mergerTreeBranchingProbability::G0 mergerTreeBranchingProbability::gamma1 mergerTreeBranchingProbability::gamma2 mergerTreeBranchingProbability::gamma3"/> 
+    <parameterMap         value="mergerTreeBranchingProbability::G0 mergerTreeBranchingProbability::gamma1 mergerTreeBranchingProbability::gamma2 mergerTreeBranchingProbability::gamma3 progenitorMassFunctionParameters::rootVarianceTargetFractional"/> 
     <parameterInactiveMap value=""                                                                                                                                                       /> 
     <posteriorSampleLikelihood value="galaxyPopulation">
       <baseParametersFileName value="%EXECPATH%/constraints/pipelines/darkMatter/progenitorMassFunctionBaseSMDPL.xml"/>
@@ -54,7 +54,7 @@
     </posteriorSampleLikelihood>
 
     <! VSMDPL >
-    <parameterMap         value="mergerTreeBranchingProbability::G0 mergerTreeBranchingProbability::gamma1 mergerTreeBranchingProbability::gamma2 mergerTreeBranchingProbability::gamma3"/> 
+    <parameterMap         value="mergerTreeBranchingProbability::G0 mergerTreeBranchingProbability::gamma1 mergerTreeBranchingProbability::gamma2 mergerTreeBranchingProbability::gamma3 progenitorMassFunctionParameters::rootVarianceTargetFractional"/> 
     <parameterInactiveMap value=""                                                                                                                                                       /> 
     <posteriorSampleLikelihood value="galaxyPopulation"> 
       <baseParametersFileName value="%EXECPATH%/constraints/pipelines/darkMatter/progenitorMassFunctionBaseVSMDPL.xml"/>
@@ -63,7 +63,7 @@
     </posteriorSampleLikelihood>
 
     <! Symphony Milky Way >
-    <parameterMap         value="mergerTreeBranchingProbability::G0 mergerTreeBranchingProbability::gamma1 mergerTreeBranchingProbability::gamma2 mergerTreeBranchingProbability::gamma3"/>
+    <parameterMap         value="mergerTreeBranchingProbability::G0 mergerTreeBranchingProbability::gamma1 mergerTreeBranchingProbability::gamma2 mergerTreeBranchingProbability::gamma3 progenitorMassFunctionParameters::rootVarianceTargetFractional"/>
     <parameterInactiveMap value="" ignoreWarnings="true"/>                                                                                                                                                       
     <posteriorSampleLikelihood value="galaxyPopulation">
       <baseParametersFileName value="%EXECPATH%/constraints/pipelines/darkMatter/progenitorMassFunctionBaseSymphonyMilkyWay.xml"/>
@@ -72,7 +72,7 @@
     </posteriorSampleLikelihood>
 
     <! Symphony WDM3  >
-    <parameterMap         value="mergerTreeBranchingProbability::G0 mergerTreeBranchingProbability::gamma1 mergerTreeBranchingProbability::gamma2 mergerTreeBranchingProbability::gamma3"/>
+    <parameterMap         value="mergerTreeBranchingProbability::G0 mergerTreeBranchingProbability::gamma1 mergerTreeBranchingProbability::gamma2 mergerTreeBranchingProbability::gamma3 progenitorMassFunctionParameters::rootVarianceTargetFractional"/>
     <parameterInactiveMap value="" ignoreWarnings="true"/>
     <posteriorSampleLikelihood value="galaxyPopulation">
       <baseParametersFileName value="%EXECPATH%/constraints/pipelines/darkMatter/progenitorMassFunctionBaseSymphonyWDM3.xml"/>
@@ -82,7 +82,7 @@
 
 
   <! Symphony IDM1e-4GeV_halfmode >
-    <parameterMap         value="mergerTreeBranchingProbability::G0 mergerTreeBranchingProbability::gamma1 mergerTreeBranchingProbability::gamma2 mergerTreeBranchingProbability::gamma3"/>
+    <parameterMap         value="mergerTreeBranchingProbability::G0 mergerTreeBranchingProbability::gamma1 mergerTreeBranchingProbability::gamma2 mergerTreeBranchingProbability::gamma3 progenitorMassFunctionParameters::rootVarianceTargetFractional"/>
     <parameterInactiveMap value="" ignoreWarnings="true"/>
     <posteriorSampleLikelihood value="galaxyPopulation">
       <baseParametersFileName value="%EXECPATH%/constraints/pipelines/darkMatter/progenitorMassFunctionBaseSymphonyIDM1e-4GeV_halfmode.xml"/>
@@ -91,7 +91,7 @@
     </posteriorSampleLikelihood>
 
   <! Symphony IDM1e-2GeV_halfmode >
-    <parameterMap         value="mergerTreeBranchingProbability::G0 mergerTreeBranchingProbability::gamma1 mergerTreeBranchingProbability::gamma2 mergerTreeBranchingProbability::gamma3"/>
+    <parameterMap         value="mergerTreeBranchingProbability::G0 mergerTreeBranchingProbability::gamma1 mergerTreeBranchingProbability::gamma2 mergerTreeBranchingProbability::gamma3 progenitorMassFunctionParameters::rootVarianceTargetFractional"/>
     <parameterInactiveMap value="" ignoreWarnings="true"/>
     <posteriorSampleLikelihood value="galaxyPopulation">
       <baseParametersFileName value="%EXECPATH%/constraints/pipelines/darkMatter/progenitorMassFunctionBaseSymphonyIDM1e-2GeV_halfmode.xml"/>
@@ -100,7 +100,7 @@
     </posteriorSampleLikelihood>
 
   <! Symphony IDM1GeV_halfmode >
-    <parameterMap         value="mergerTreeBranchingProbability::G0 mergerTreeBranchingProbability::gamma1 mergerTreeBranchingProbability::gamma2 mergerTreeBranchingProbability::gamma3"/>
+    <parameterMap         value="mergerTreeBranchingProbability::G0 mergerTreeBranchingProbability::gamma1 mergerTreeBranchingProbability::gamma2 mergerTreeBranchingProbability::gamma3 progenitorMassFunctionParameters::rootVarianceTargetFractional"/>
     <parameterInactiveMap value="" ignoreWarnings="true"/>
     <posteriorSampleLikelihood value="galaxyPopulation">
       <baseParametersFileName value="%EXECPATH%/constraints/pipelines/darkMatter/progenitorMassFunctionBaseSymphonyIDM1GeV_halfmode.xml"/>
@@ -109,7 +109,7 @@
     </posteriorSampleLikelihood>
 
   <! Symphony IDM1e-4GeV_envelope >
-    <parameterMap         value="mergerTreeBranchingProbability::G0 mergerTreeBranchingProbability::gamma1 mergerTreeBranchingProbability::gamma2 mergerTreeBranchingProbability::gamma3"/>
+    <parameterMap         value="mergerTreeBranchingProbability::G0 mergerTreeBranchingProbability::gamma1 mergerTreeBranchingProbability::gamma2 mergerTreeBranchingProbability::gamma3 progenitorMassFunctionParameters::rootVarianceTargetFractional"/>
     <parameterInactiveMap value="" ignoreWarnings="true"/>
     <posteriorSampleLikelihood value="galaxyPopulation">
       <baseParametersFileName value="%EXECPATH%/constraints/pipelines/darkMatter/progenitorMassFunctionBaseSymphonyIDM1e-4GeV_envelope.xml"/>
@@ -118,7 +118,7 @@
     </posteriorSampleLikelihood>
 
   <! Symphony IDM1e-2GeV_envelope >
-    <parameterMap         value="mergerTreeBranchingProbability::G0 mergerTreeBranchingProbability::gamma1 mergerTreeBranchingProbability::gamma2 mergerTreeBranchingProbability::gamma3"/>
+    <parameterMap         value="mergerTreeBranchingProbability::G0 mergerTreeBranchingProbability::gamma1 mergerTreeBranchingProbability::gamma2 mergerTreeBranchingProbability::gamma3 progenitorMassFunctionParameters::rootVarianceTargetFractional"/>
     <parameterInactiveMap value="" ignoreWarnings="true"/>
     <posteriorSampleLikelihood value="galaxyPopulation">
       <baseParametersFileName value="%EXECPATH%/constraints/pipelines/darkMatter/progenitorMassFunctionBaseSymphonyIDM1e-2GeV_envelope.xml"/>
@@ -127,7 +127,7 @@
     </posteriorSampleLikelihood>
 
   <! Symphony IDM1GeV_envelope >
-    <parameterMap         value="mergerTreeBranchingProbability::G0 mergerTreeBranchingProbability::gamma1 mergerTreeBranchingProbability::gamma2 mergerTreeBranchingProbability::gamma3"/>
+    <parameterMap         value="mergerTreeBranchingProbability::G0 mergerTreeBranchingProbability::gamma1 mergerTreeBranchingProbability::gamma2 mergerTreeBranchingProbability::gamma3 progenitorMassFunctionParameters::rootVarianceTargetFractional"/>
     <parameterInactiveMap value="" ignoreWarnings="true"/>
     <posteriorSampleLikelihood value="galaxyPopulation">
       <baseParametersFileName value="%EXECPATH%/constraints/pipelines/darkMatter/progenitorMassFunctionBaseSymphonyIDM1GeV_envelope.xml"/>
@@ -136,7 +136,7 @@
     </posteriorSampleLikelihood>
 
   <! Symphony fdm_490e-22eV >
-    <parameterMap         value="mergerTreeBranchingProbability::G0 mergerTreeBranchingProbability::gamma1 mergerTreeBranchingProbability::gamma2 mergerTreeBranchingProbability::gamma3"/>
+    <parameterMap         value="mergerTreeBranchingProbability::G0 mergerTreeBranchingProbability::gamma1 mergerTreeBranchingProbability::gamma2 mergerTreeBranchingProbability::gamma3 progenitorMassFunctionParameters::rootVarianceTargetFractional"/>
     <parameterInactiveMap value="" ignoreWarnings="true"/>
     <posteriorSampleLikelihood value="galaxyPopulation">
       <baseParametersFileName value="%EXECPATH%/constraints/pipelines/darkMatter/progenitorMassFunctionBaseSymphonyfdm_490e-22eV.xml"/>
@@ -145,7 +145,7 @@
     </posteriorSampleLikelihood>
 
   <! Symphony fdm_25.9e-22eV >
-    <parameterMap         value="mergerTreeBranchingProbability::G0 mergerTreeBranchingProbability::gamma1 mergerTreeBranchingProbability::gamma2 mergerTreeBranchingProbability::gamma3"/>
+    <parameterMap         value="mergerTreeBranchingProbability::G0 mergerTreeBranchingProbability::gamma1 mergerTreeBranchingProbability::gamma2 mergerTreeBranchingProbability::gamma3 progenitorMassFunctionParameters::rootVarianceTargetFractional"/>
     <parameterInactiveMap value="" ignoreWarnings="true"/>
     <posteriorSampleLikelihood value="galaxyPopulation">
       <baseParametersFileName value="%EXECPATH%/constraints/pipelines/darkMatter/progenitorMassFunctionBaseSymphonyfdm_25.9e-22eV.xml"/>
@@ -154,7 +154,7 @@
     </posteriorSampleLikelihood>
 
   <! Symphony fdm_185e-22eV >
-    <parameterMap         value="mergerTreeBranchingProbability::G0 mergerTreeBranchingProbability::gamma1 mergerTreeBranchingProbability::gamma2 mergerTreeBranchingProbability::gamma3"/>
+    <parameterMap         value="mergerTreeBranchingProbability::G0 mergerTreeBranchingProbability::gamma1 mergerTreeBranchingProbability::gamma2 mergerTreeBranchingProbability::gamma3 progenitorMassFunctionParameters::rootVarianceTargetFractional"/>
     <parameterInactiveMap value="" ignoreWarnings="true"/>
     <posteriorSampleLikelihood value="galaxyPopulation">
       <baseParametersFileName value="%EXECPATH%/constraints/pipelines/darkMatter/progenitorMassFunctionBaseSymphonyfdm_185e-22eV.xml"/>
@@ -163,7 +163,7 @@
     </posteriorSampleLikelihood>
 
   <! Symphony fdm_69.4e-22eV >
-    <parameterMap         value="mergerTreeBranchingProbability::G0 mergerTreeBranchingProbability::gamma1 mergerTreeBranchingProbability::gamma2 mergerTreeBranchingProbability::gamma3"/>
+    <parameterMap         value="mergerTreeBranchingProbability::G0 mergerTreeBranchingProbability::gamma1 mergerTreeBranchingProbability::gamma2 mergerTreeBranchingProbability::gamma3 progenitorMassFunctionParameters::rootVarianceTargetFractional"/>
     <parameterInactiveMap value="" ignoreWarnings="true"/>
     <posteriorSampleLikelihood value="galaxyPopulation">
       <baseParametersFileName value="%EXECPATH%/constraints/pipelines/darkMatter/progenitorMassFunctionBaseSymphonyfdm_69.4e-22eV.xml"/>
@@ -172,7 +172,7 @@
     </posteriorSampleLikelihood>
 
   <! Symphony fdm_151e-22eV >
-    <parameterMap         value="mergerTreeBranchingProbability::G0 mergerTreeBranchingProbability::gamma1 mergerTreeBranchingProbability::gamma2 mergerTreeBranchingProbability::gamma3"/>
+    <parameterMap         value="mergerTreeBranchingProbability::G0 mergerTreeBranchingProbability::gamma1 mergerTreeBranchingProbability::gamma2 mergerTreeBranchingProbability::gamma3 progenitorMassFunctionParameters::rootVarianceTargetFractional"/>
     <parameterInactiveMap value="" ignoreWarnings="true"/>
     <posteriorSampleLikelihood value="galaxyPopulation">
       <baseParametersFileName value="%EXECPATH%/constraints/pipelines/darkMatter/progenitorMassFunctionBaseSymphonyfdm_151e-22eV.xml"/>
@@ -181,7 +181,7 @@
     </posteriorSampleLikelihood>
 
   <! Symphony fdm_113e-22eV >
-    <parameterMap         value="mergerTreeBranchingProbability::G0 mergerTreeBranchingProbability::gamma1 mergerTreeBranchingProbability::gamma2 mergerTreeBranchingProbability::gamma3"/>
+    <parameterMap         value="mergerTreeBranchingProbability::G0 mergerTreeBranchingProbability::gamma1 mergerTreeBranchingProbability::gamma2 mergerTreeBranchingProbability::gamma3 progenitorMassFunctionParameters::rootVarianceTargetFractional"/>
     <parameterInactiveMap value="" ignoreWarnings="true"/>
     <posteriorSampleLikelihood value="galaxyPopulation">
       <baseParametersFileName value="%EXECPATH%/constraints/pipelines/darkMatter/progenitorMassFunctionBaseSymphonyfdm_113e-22eV.xml"/>
@@ -190,7 +190,7 @@
     </posteriorSampleLikelihood>
 
   <! Symphony WDM10 >
-    <parameterMap         value="mergerTreeBranchingProbability::G0 mergerTreeBranchingProbability::gamma1 mergerTreeBranchingProbability::gamma2 mergerTreeBranchingProbability::gamma3"/>
+    <parameterMap         value="mergerTreeBranchingProbability::G0 mergerTreeBranchingProbability::gamma1 mergerTreeBranchingProbability::gamma2 mergerTreeBranchingProbability::gamma3 progenitorMassFunctionParameters::rootVarianceTargetFractional"/>
     <parameterInactiveMap value="" ignoreWarnings="true"/>
     <posteriorSampleLikelihood value="galaxyPopulation">
       <baseParametersFileName value="%EXECPATH%/constraints/pipelines/darkMatter/progenitorMassFunctionBaseSymphonyWDM10.xml"/>
@@ -199,7 +199,7 @@
     </posteriorSampleLikelihood>
 
   <! Symphony WDM6.5 >
-    <parameterMap         value="mergerTreeBranchingProbability::G0 mergerTreeBranchingProbability::gamma1 mergerTreeBranchingProbability::gamma2 mergerTreeBranchingProbability::gamma3"/>
+    <parameterMap         value="mergerTreeBranchingProbability::G0 mergerTreeBranchingProbability::gamma1 mergerTreeBranchingProbability::gamma2 mergerTreeBranchingProbability::gamma3 progenitorMassFunctionParameters::rootVarianceTargetFractional"/>
     <parameterInactiveMap value="" ignoreWarnings="true"/>
     <posteriorSampleLikelihood value="galaxyPopulation">
       <baseParametersFileName value="%EXECPATH%/constraints/pipelines/darkMatter/progenitorMassFunctionBaseSymphonyWDM6.5.xml"/>
@@ -208,7 +208,7 @@
     </posteriorSampleLikelihood>
 
   <! Symphony WDM6 >
-    <parameterMap         value="mergerTreeBranchingProbability::G0 mergerTreeBranchingProbability::gamma1 mergerTreeBranchingProbability::gamma2 mergerTreeBranchingProbability::gamma3"/>
+    <parameterMap         value="mergerTreeBranchingProbability::G0 mergerTreeBranchingProbability::gamma1 mergerTreeBranchingProbability::gamma2 mergerTreeBranchingProbability::gamma3 progenitorMassFunctionParameters::rootVarianceTargetFractional"/>
     <parameterInactiveMap value="" ignoreWarnings="true"/>
     <posteriorSampleLikelihood value="galaxyPopulation">
       <baseParametersFileName value="%EXECPATH%/constraints/pipelines/darkMatter/progenitorMassFunctionBaseSymphonyWDM6.xml"/>
@@ -217,7 +217,7 @@
     </posteriorSampleLikelihood>
 
   <! Symphony WDM5 >
-    <parameterMap         value="mergerTreeBranchingProbability::G0 mergerTreeBranchingProbability::gamma1 mergerTreeBranchingProbability::gamma2 mergerTreeBranchingProbability::gamma3"/>
+    <parameterMap         value="mergerTreeBranchingProbability::G0 mergerTreeBranchingProbability::gamma1 mergerTreeBranchingProbability::gamma2 mergerTreeBranchingProbability::gamma3 progenitorMassFunctionParameters::rootVarianceTargetFractional"/>
     <parameterInactiveMap value="" ignoreWarnings="true"/>
     <posteriorSampleLikelihood value="galaxyPopulation">
       <baseParametersFileName value="%EXECPATH%/constraints/pipelines/darkMatter/progenitorMassFunctionBaseSymphonyWDM5.xml"/>
@@ -226,7 +226,7 @@
     </posteriorSampleLikelihood>
 
   <!  Symphony WDM4 >
-    <parameterMap         value="mergerTreeBranchingProbability::G0 mergerTreeBranchingProbability::gamma1 mergerTreeBranchingProbability::gamma2 mergerTreeBranchingProbability::gamma3"/>
+    <parameterMap         value="mergerTreeBranchingProbability::G0 mergerTreeBranchingProbability::gamma1 mergerTreeBranchingProbability::gamma2 mergerTreeBranchingProbability::gamma3 progenitorMassFunctionParameters::rootVarianceTargetFractional"/>
     <parameterInactiveMap value="" ignoreWarnings="true"/>
     <posteriorSampleLikelihood value="galaxyPopulation">
       <baseParametersFileName value="%EXECPATH%/constraints/pipelines/darkMatter/progenitorMassFunctionBaseSymphonyWDM4.xml"/>
@@ -329,6 +329,19 @@
 	<limitUpper value="+1.00"/>
       </distributionFunction1DPrior>
       <operatorUnaryMapper value="identity"/>
+      <distributionFunction1DPerturber value="cauchy">
+	<median value="0.0e+0"/>
+	<scale  value="1.0e-9"/>
+      </distributionFunction1DPerturber>
+    </modelParameter>
+    
+    <modelParameter value="active">
+      <name value="progenitorMassFunctionParameters::rootVarianceTargetFractional"/>
+      <distributionFunction1DPrior value="logUniform">
+	<limitLower value="+1.00e-4"/>
+	<limitUpper value="+1.00e+0"/>
+      </distributionFunction1DPrior>
+      <operatorUnaryMapper value="logarithm"/>
       <distributionFunction1DPerturber value="cauchy">
 	<median value="0.0e+0"/>
 	<scale  value="1.0e-9"/>
