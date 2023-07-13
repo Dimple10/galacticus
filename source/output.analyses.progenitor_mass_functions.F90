@@ -432,6 +432,7 @@ contains
     use :: Cosmology_Functions                     , only : cosmologyFunctionsMatterLambda
     use :: Cosmology_Parameters                    , only : cosmologyParametersSimple
     use :: Dark_Matter_Profiles_DMO                , only : darkMatterProfileDMOClass
+    use :: Error                                   , only : Error_Report
     use :: Output_Analysis_Distribution_Normalizers, only : normalizerList                                  , outputAnalysisDistributionNormalizerBinWidth, outputAnalysisDistributionNormalizerLog10ToLog, outputAnalysisDistributionNormalizerSequence
     use :: Output_Analysis_Weight_Operators        , only : outputAnalysisWeightOperatorProperty            , outputAnalysisWeightOperatorSequence        , outputAnalysisWeightOperatorSubsampling       , weightOperatorList
     use :: Output_Analysis_Distribution_Operators  , only : outputAnalysisDistributionOperatorMassRatioNBody
@@ -490,6 +491,8 @@ contains
     type            (outputAnalysisPropertyOperatorAntiLog10         ), pointer                                 :: outputAnalysisPropertyUnoperator_
     type            (outputAnalysisPropertyOperatorIdentity          ), pointer                                 :: outputAnalysisPropertyIdentity_
     integer         (c_size_t                                        )                                          :: iOutput                                                , bufferCount
+    type            (varying_string                                  )                                          :: message
+    character       (len=10                                          )                                          :: timeLabel
     !![
     <constructorAssign variables="massRatioMinimum, massRatioMaximum, countMassRatio, massParentMinimum, massParentMaximum, timeProgenitor, timeParent, alwaysIsolatedOnly, massRatioLikelihoodMinimum, massRatioLikelihoodMaximum, covarianceDiagonalize, covarianceTargetOnly, rootVarianceTargetFractional, likelihoodInLog, *cosmologyParameters_, *cosmologyFunctions_, *darkMatterProfileDMO_, *virialDensityContrast_, *virialDensityContrastDefinition_, *nbodyHaloMassError_, *outputTimes_"/>
     !!]
@@ -505,12 +508,25 @@ contains
     ! Compute weights that apply to each output redshift.
     allocate(outputWeight(countMassRatio,outputTimes_%count()))
     outputWeight=0.0d0
-    do iOutput=1,outputTimes_%count()
+    self%indexOutput=-1_c_size_t
+    do iOutput=1_c_size_t,outputTimes_%count()
        if (Values_Agree(outputTimes_%time(iOutput),timeProgenitor,absTol=timeTolerance)) then
           outputWeight(:,iOutput)=1.0d0
           self%indexOutput=iOutput
        end if
     end do
+    if (self%indexOutput < 0_c_size_t) then
+       message='no matching output time found - seeking '
+       write (timeLabel,'(f9.3)') timeProgenitor
+       message=message//trim(adjustl(timeLabel))//' in ['
+       do iOutput=1_c_size_t,outputTimes_%count()
+          write (timeLabel,'(f9.3)') outputTimes_%time(iOutput)
+          message=message//' '//trim(adjustl(timeLabel))
+          if (iOutput < outputTimes_%count()) message=message//','
+       end do
+       message=message//' ]'
+       call Error_Report(message//{introspection:location})
+    end if
     ! Initialize accumulated weight of parent nodes.
     self%weightParents=0.0d0
     ! Build a filter which selects isolated halos, above a suitable lower mass, and with parents in the correct mass range.
