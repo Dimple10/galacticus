@@ -113,7 +113,7 @@
     </outputAnalysis>    
    </outputAnalysis>
   <nbodyHaloMassError value="trenti2010">
-    <massParticle                value="=[simulation::massParticle]"/> <!-- Particle mass in BigMDPL -->
+    <massParticle                value="=[simulation::massParticle]"/> <!-- Particle mass in Symphony -->
     <correlationNormalization    value="1.0"   />
     <correlationMassExponent     value="1.0"   />
     <correlationRedshiftExponent value="0.0"   />
