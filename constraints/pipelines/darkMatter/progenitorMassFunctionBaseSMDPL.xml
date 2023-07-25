@@ -57,7 +57,7 @@
       <covarianceDiagonalize        value="true"                                                                                     />
       <covarianceTargetOnly         value="true"                                                                                     />
       <likelihoodInLog              value="true"                                                                                     />
-      <rootVarianceTargetFractional value="0.1"                                                                                      />
+      <rootVarianceTargetFractional value="=[progenitorMassFunctionParameters::rootVarianceTargetFractional]" 			     />
       <alwaysIsolatedOnly           value="true"                                                                                     />
       <redshiftParent               value="0.0"                                                                                      />
       <comment                      value="$11.00 &lt; \log_{10}(M_\mathrm{parent}/\mathrm{M}_\odot) \le 11.50$; $z=0.51$; SMDPL halos"/>
@@ -73,7 +73,7 @@
       <covarianceDiagonalize        value="true"                                                                                     />
       <covarianceTargetOnly         value="true"                                                                                     />
       <likelihoodInLog              value="true"                                                                                     />
-      <rootVarianceTargetFractional value="0.1"                                                                                      />
+      <rootVarianceTargetFractional value="=[progenitorMassFunctionParameters::rootVarianceTargetFractional]" 			     />
       <alwaysIsolatedOnly           value="true"                                                                                     />
       <redshiftParent               value="0.0"                                                                                      />
       <comment                      value="$11.00 &lt; \log_{10}(M_\mathrm{parent}/\mathrm{M}_\odot) \le 11.50$; $z=1.00$; SMDPL halos"/>
@@ -89,7 +89,7 @@
       <covarianceDiagonalize        value="true"                                                                                     />
       <covarianceTargetOnly         value="true"                                                                                     />
       <likelihoodInLog              value="true"                                                                                     />
-      <rootVarianceTargetFractional value="0.1"                                                                                      />
+      <rootVarianceTargetFractional value="=[progenitorMassFunctionParameters::rootVarianceTargetFractional]" 			     />
       <alwaysIsolatedOnly           value="true"                                                                                     />
       <redshiftParent               value="0.0"                                                                                      />
       <comment                      value="$11.00 &lt; \log_{10}(M_\mathrm{parent}/\mathrm{M}_\odot) \le 11.50$; $z=2.02$; SMDPL halos"/>
@@ -105,7 +105,7 @@
       <covarianceDiagonalize        value="true"                                                                                     />
       <covarianceTargetOnly         value="true"                                                                                     />
       <likelihoodInLog              value="true"                                                                                     />
-      <rootVarianceTargetFractional value="0.1"                                                                                      />
+      <rootVarianceTargetFractional value="=[progenitorMassFunctionParameters::rootVarianceTargetFractional]" 			     />
       <alwaysIsolatedOnly           value="true"                                                                                     />
       <redshiftParent               value="0.0"                                                                                      />
       <comment                      value="$11.00 &lt; \log_{10}(M_\mathrm{parent}/\mathrm{M}_\odot) \le 11.50$; $z=3.95$; SMDPL halos"/>
@@ -121,7 +121,7 @@
       <covarianceDiagonalize        value="true"                                                                                     />
       <covarianceTargetOnly         value="true"                                                                                     />
       <likelihoodInLog              value="true"                                                                                     />
-      <rootVarianceTargetFractional value="0.1"                                                                                      />
+      <rootVarianceTargetFractional value="=[progenitorMassFunctionParameters::rootVarianceTargetFractional]" 			     />
       <alwaysIsolatedOnly           value="true"                                                                                     />
       <redshiftParent               value="0.0"                                                                                      />
       <comment                      value="$11.50 &lt; \log_{10}(M_\mathrm{parent}/\mathrm{M}_\odot) \le 12.00$; $z=0.51$; SMDPL halos"/>
@@ -137,7 +137,7 @@
       <covarianceDiagonalize        value="true"                                                                                     />
       <covarianceTargetOnly         value="true"                                                                                     />
       <likelihoodInLog              value="true"                                                                                     />
-      <rootVarianceTargetFractional value="0.1"                                                                                      />
+      <rootVarianceTargetFractional value="=[progenitorMassFunctionParameters::rootVarianceTargetFractional]" 			     />
       <alwaysIsolatedOnly           value="true"                                                                                     />
       <redshiftParent               value="0.0"                                                                                      />
       <comment                      value="$11.50 &lt; \log_{10}(M_\mathrm{parent}/\mathrm{M}_\odot) \le 12.00$; $z=1.00$; SMDPL halos"/>
@@ -153,7 +153,7 @@
       <covarianceDiagonalize        value="true"                                                                                     />
       <covarianceTargetOnly         value="true"                                                                                     />
       <likelihoodInLog              value="true"                                                                                     />
-      <rootVarianceTargetFractional value="0.1"                                                                                      />
+      <rootVarianceTargetFractional value="=[progenitorMassFunctionParameters::rootVarianceTargetFractional]" 			     />
       <alwaysIsolatedOnly           value="true"                                                                                     />
       <redshiftParent               value="0.0"                                                                                      />
       <comment                      value="$11.50 &lt; \log_{10}(M_\mathrm{parent}/\mathrm{M}_\odot) \le 12.00$; $z=2.02$; SMDPL halos"/>
@@ -169,7 +169,7 @@
       <covarianceDiagonalize        value="true"                                                                                     />
       <covarianceTargetOnly         value="true"                                                                                     />
       <likelihoodInLog              value="true"                                                                                     />
-      <rootVarianceTargetFractional value="0.1"                                                                                      />
+      <rootVarianceTargetFractional value="=[progenitorMassFunctionParameters::rootVarianceTargetFractional]" 			     />
       <alwaysIsolatedOnly           value="true"                                                                                     />
       <redshiftParent               value="0.0"                                                                                      />
       <comment                      value="$11.50 &lt; \log_{10}(M_\mathrm{parent}/\mathrm{M}_\odot) \le 12.00$; $z=3.95$; SMDPL halos"/>
@@ -185,7 +185,7 @@
       <covarianceDiagonalize        value="true"                                                                                     />
       <covarianceTargetOnly         value="true"                                                                                     />
       <likelihoodInLog              value="true"                                                                                     />
-      <rootVarianceTargetFractional value="0.1"                                                                                      />
+      <rootVarianceTargetFractional value="=[progenitorMassFunctionParameters::rootVarianceTargetFractional]" 			     />
       <alwaysIsolatedOnly           value="true"                                                                                     />
       <redshiftParent               value="0.0"                                                                                      />
       <comment                      value="$11.50 &lt; \log_{10}(M_\mathrm{parent}/\mathrm{M}_\odot) \le 12.00$; $z=7.85$; SMDPL halos"/>
@@ -201,7 +201,7 @@
       <covarianceDiagonalize        value="true"                                                                                     />
       <covarianceTargetOnly         value="true"                                                                                     />
       <likelihoodInLog              value="true"                                                                                     />
-      <rootVarianceTargetFractional value="0.1"                                                                                      />
+      <rootVarianceTargetFractional value="=[progenitorMassFunctionParameters::rootVarianceTargetFractional]" 			     />
       <alwaysIsolatedOnly           value="true"                                                                                     />
       <redshiftParent               value="0.0"                                                                                      />
       <comment                      value="$12.00 &lt; \log_{10}(M_\mathrm{parent}/\mathrm{M}_\odot) \le 12.50$; $z=0.51$; SMDPL halos"/>
@@ -217,7 +217,7 @@
       <covarianceDiagonalize        value="true"                                                                                     />
       <covarianceTargetOnly         value="true"                                                                                     />
       <likelihoodInLog              value="true"                                                                                     />
-      <rootVarianceTargetFractional value="0.1"                                                                                      />
+      <rootVarianceTargetFractional value="=[progenitorMassFunctionParameters::rootVarianceTargetFractional]" 			     />
       <alwaysIsolatedOnly           value="true"                                                                                     />
       <redshiftParent               value="0.0"                                                                                      />
       <comment                      value="$12.00 &lt; \log_{10}(M_\mathrm{parent}/\mathrm{M}_\odot) \le 12.50$; $z=1.00$; SMDPL halos"/>
@@ -233,7 +233,7 @@
       <covarianceDiagonalize        value="true"                                                                                     />
       <covarianceTargetOnly         value="true"                                                                                     />
       <likelihoodInLog              value="true"                                                                                     />
-      <rootVarianceTargetFractional value="0.1"                                                                                      />
+      <rootVarianceTargetFractional value="=[progenitorMassFunctionParameters::rootVarianceTargetFractional]" 			     />
       <alwaysIsolatedOnly           value="true"                                                                                     />
       <redshiftParent               value="0.0"                                                                                      />
       <comment                      value="$12.00 &lt; \log_{10}(M_\mathrm{parent}/\mathrm{M}_\odot) \le 12.50$; $z=2.02$; SMDPL halos"/>
@@ -249,7 +249,7 @@
       <covarianceDiagonalize        value="true"                                                                                     />
       <covarianceTargetOnly         value="true"                                                                                     />
       <likelihoodInLog              value="true"                                                                                     />
-      <rootVarianceTargetFractional value="0.1"                                                                                      />
+      <rootVarianceTargetFractional value="=[progenitorMassFunctionParameters::rootVarianceTargetFractional]" 			     />
       <alwaysIsolatedOnly           value="true"                                                                                     />
       <redshiftParent               value="0.0"                                                                                      />
       <comment                      value="$12.00 &lt; \log_{10}(M_\mathrm{parent}/\mathrm{M}_\odot) \le 12.50$; $z=3.95$; SMDPL halos"/>
@@ -265,7 +265,7 @@
       <covarianceDiagonalize        value="true"                                                                                     />
       <covarianceTargetOnly         value="true"                                                                                     />
       <likelihoodInLog              value="true"                                                                                     />
-      <rootVarianceTargetFractional value="0.1"                                                                                      />
+      <rootVarianceTargetFractional value="=[progenitorMassFunctionParameters::rootVarianceTargetFractional]" 			     />
       <alwaysIsolatedOnly           value="true"                                                                                     />
       <redshiftParent               value="0.0"                                                                                      />
       <comment                      value="$12.00 &lt; \log_{10}(M_\mathrm{parent}/\mathrm{M}_\odot) \le 12.50$; $z=7.85$; SMDPL halos"/>
@@ -281,7 +281,7 @@
       <covarianceDiagonalize        value="true"                                                                                     />
       <covarianceTargetOnly         value="true"                                                                                     />
       <likelihoodInLog              value="true"                                                                                     />
-      <rootVarianceTargetFractional value="0.1"                                                                                      />
+      <rootVarianceTargetFractional value="=[progenitorMassFunctionParameters::rootVarianceTargetFractional]" 			     />
       <alwaysIsolatedOnly           value="true"                                                                                     />
       <redshiftParent               value="0.0"                                                                                      />
       <comment                      value="$12.50 &lt; \log_{10}(M_\mathrm{parent}/\mathrm{M}_\odot) \le 13.00$; $z=0.51$; SMDPL halos"/>
@@ -297,7 +297,7 @@
       <covarianceDiagonalize        value="true"                                                                                     />
       <covarianceTargetOnly         value="true"                                                                                     />
       <likelihoodInLog              value="true"                                                                                     />
-      <rootVarianceTargetFractional value="0.1"                                                                                      />
+      <rootVarianceTargetFractional value="=[progenitorMassFunctionParameters::rootVarianceTargetFractional]" 			     />
       <alwaysIsolatedOnly           value="true"                                                                                     />
       <redshiftParent               value="0.0"                                                                                      />
       <comment                      value="$12.50 &lt; \log_{10}(M_\mathrm{parent}/\mathrm{M}_\odot) \le 13.00$; $z=1.00$; SMDPL halos"/>
@@ -313,7 +313,7 @@
       <covarianceDiagonalize        value="true"                                                                                     />
       <covarianceTargetOnly         value="true"                                                                                     />
       <likelihoodInLog              value="true"                                                                                     />
-      <rootVarianceTargetFractional value="0.1"                                                                                      />
+      <rootVarianceTargetFractional value="=[progenitorMassFunctionParameters::rootVarianceTargetFractional]" 			     />
       <alwaysIsolatedOnly           value="true"                                                                                     />
       <redshiftParent               value="0.0"                                                                                      />
       <comment                      value="$12.50 &lt; \log_{10}(M_\mathrm{parent}/\mathrm{M}_\odot) \le 13.00$; $z=2.02$; SMDPL halos"/>
@@ -329,7 +329,7 @@
       <covarianceDiagonalize        value="true"                                                                                     />
       <covarianceTargetOnly         value="true"                                                                                     />
       <likelihoodInLog              value="true"                                                                                     />
-      <rootVarianceTargetFractional value="0.1"                                                                                      />
+      <rootVarianceTargetFractional value="=[progenitorMassFunctionParameters::rootVarianceTargetFractional]" 			     />
       <alwaysIsolatedOnly           value="true"                                                                                     />
       <redshiftParent               value="0.0"                                                                                      />
       <comment                      value="$12.50 &lt; \log_{10}(M_\mathrm{parent}/\mathrm{M}_\odot) \le 13.00$; $z=3.95$; SMDPL halos"/>
@@ -345,7 +345,7 @@
       <covarianceDiagonalize        value="true"                                                                                     />
       <covarianceTargetOnly         value="true"                                                                                     />
       <likelihoodInLog              value="true"                                                                                     />
-      <rootVarianceTargetFractional value="0.1"                                                                                      />
+      <rootVarianceTargetFractional value="=[progenitorMassFunctionParameters::rootVarianceTargetFractional]" 			     />
       <alwaysIsolatedOnly           value="true"                                                                                     />
       <redshiftParent               value="0.0"                                                                                      />
       <comment                      value="$12.50 &lt; \log_{10}(M_\mathrm{parent}/\mathrm{M}_\odot) \le 13.00$; $z=7.85$; SMDPL halos"/>
@@ -361,7 +361,7 @@
       <covarianceDiagonalize        value="true"                                                                                     />
       <covarianceTargetOnly         value="true"                                                                                     />
       <likelihoodInLog              value="true"                                                                                     />
-      <rootVarianceTargetFractional value="0.1"                                                                                      />
+      <rootVarianceTargetFractional value="=[progenitorMassFunctionParameters::rootVarianceTargetFractional]" 			     />
       <alwaysIsolatedOnly           value="true"                                                                                     />
       <redshiftParent               value="0.0"                                                                                      />
       <comment                      value="$13.00 &lt; \log_{10}(M_\mathrm{parent}/\mathrm{M}_\odot) \le 13.50$; $z=0.51$; SMDPL halos"/>
@@ -377,7 +377,7 @@
       <covarianceDiagonalize        value="true"                                                                                     />
       <covarianceTargetOnly         value="true"                                                                                     />
       <likelihoodInLog              value="true"                                                                                     />
-      <rootVarianceTargetFractional value="0.1"                                                                                      />
+      <rootVarianceTargetFractional value="=[progenitorMassFunctionParameters::rootVarianceTargetFractional]" 			     />
       <alwaysIsolatedOnly           value="true"                                                                                     />
       <redshiftParent               value="0.0"                                                                                      />
       <comment                      value="$13.00 &lt; \log_{10}(M_\mathrm{parent}/\mathrm{M}_\odot) \le 13.50$; $z=1.00$; SMDPL halos"/>
@@ -393,7 +393,7 @@
       <covarianceDiagonalize        value="true"                                                                                     />
       <covarianceTargetOnly         value="true"                                                                                     />
       <likelihoodInLog              value="true"                                                                                     />
-      <rootVarianceTargetFractional value="0.1"                                                                                      />
+      <rootVarianceTargetFractional value="=[progenitorMassFunctionParameters::rootVarianceTargetFractional]" 			     />
       <alwaysIsolatedOnly           value="true"                                                                                     />
       <redshiftParent               value="0.0"                                                                                      />
       <comment                      value="$13.00 &lt; \log_{10}(M_\mathrm{parent}/\mathrm{M}_\odot) \le 13.50$; $z=2.02$; SMDPL halos"/>
@@ -409,7 +409,7 @@
       <covarianceDiagonalize        value="true"                                                                                     />
       <covarianceTargetOnly         value="true"                                                                                     />
       <likelihoodInLog              value="true"                                                                                     />
-      <rootVarianceTargetFractional value="0.1"                                                                                      />
+      <rootVarianceTargetFractional value="=[progenitorMassFunctionParameters::rootVarianceTargetFractional]" 			     />
       <alwaysIsolatedOnly           value="true"                                                                                     />
       <redshiftParent               value="0.0"                                                                                      />
       <comment                      value="$13.00 &lt; \log_{10}(M_\mathrm{parent}/\mathrm{M}_\odot) \le 13.50$; $z=3.95$; SMDPL halos"/>
@@ -425,7 +425,7 @@
       <covarianceDiagonalize        value="true"                                                                                     />
       <covarianceTargetOnly         value="true"                                                                                     />
       <likelihoodInLog              value="true"                                                                                     />
-      <rootVarianceTargetFractional value="0.1"                                                                                      />
+      <rootVarianceTargetFractional value="=[progenitorMassFunctionParameters::rootVarianceTargetFractional]" 			     />
       <alwaysIsolatedOnly           value="true"                                                                                     />
       <redshiftParent               value="0.0"                                                                                      />
       <comment                      value="$13.00 &lt; \log_{10}(M_\mathrm{parent}/\mathrm{M}_\odot) \le 13.50$; $z=7.85$; SMDPL halos"/>
@@ -441,7 +441,7 @@
       <covarianceDiagonalize        value="true"                                                                                     />
       <covarianceTargetOnly         value="true"                                                                                     />
       <likelihoodInLog              value="true"                                                                                     />
-      <rootVarianceTargetFractional value="0.1"                                                                                      />
+      <rootVarianceTargetFractional value="=[progenitorMassFunctionParameters::rootVarianceTargetFractional]" 			     />
       <alwaysIsolatedOnly           value="true"                                                                                     />
       <redshiftParent               value="0.0"                                                                                      />
       <comment                      value="$13.50 &lt; \log_{10}(M_\mathrm{parent}/\mathrm{M}_\odot) \le 14.00$; $z=0.51$; SMDPL halos"/>
@@ -457,7 +457,7 @@
       <covarianceDiagonalize        value="true"                                                                                     />
       <covarianceTargetOnly         value="true"                                                                                     />
       <likelihoodInLog              value="true"                                                                                     />
-      <rootVarianceTargetFractional value="0.1"                                                                                      />
+      <rootVarianceTargetFractional value="=[progenitorMassFunctionParameters::rootVarianceTargetFractional]" 			     />
       <alwaysIsolatedOnly           value="true"                                                                                     />
       <redshiftParent               value="0.0"                                                                                      />
       <comment                      value="$13.50 &lt; \log_{10}(M_\mathrm{parent}/\mathrm{M}_\odot) \le 14.00$; $z=1.00$; SMDPL halos"/>
@@ -473,7 +473,7 @@
       <covarianceDiagonalize        value="true"                                                                                     />
       <covarianceTargetOnly         value="true"                                                                                     />
       <likelihoodInLog              value="true"                                                                                     />
-      <rootVarianceTargetFractional value="0.1"                                                                                      />
+      <rootVarianceTargetFractional value="=[progenitorMassFunctionParameters::rootVarianceTargetFractional]" 			     />
       <alwaysIsolatedOnly           value="true"                                                                                     />
       <redshiftParent               value="0.0"                                                                                      />
       <comment                      value="$13.50 &lt; \log_{10}(M_\mathrm{parent}/\mathrm{M}_\odot) \le 14.00$; $z=2.02$; SMDPL halos"/>
@@ -489,7 +489,7 @@
       <covarianceDiagonalize        value="true"                                                                                     />
       <covarianceTargetOnly         value="true"                                                                                     />
       <likelihoodInLog              value="true"                                                                                     />
-      <rootVarianceTargetFractional value="0.1"                                                                                      />
+      <rootVarianceTargetFractional value="=[progenitorMassFunctionParameters::rootVarianceTargetFractional]" 			     />
       <alwaysIsolatedOnly           value="true"                                                                                     />
       <redshiftParent               value="0.0"                                                                                      />
       <comment                      value="$13.50 &lt; \log_{10}(M_\mathrm{parent}/\mathrm{M}_\odot) \le 14.00$; $z=3.95$; SMDPL halos"/>
@@ -505,7 +505,7 @@
       <covarianceDiagonalize        value="true"                                                                                     />
       <covarianceTargetOnly         value="true"                                                                                     />
       <likelihoodInLog              value="true"                                                                                     />
-      <rootVarianceTargetFractional value="0.1"                                                                                      />
+      <rootVarianceTargetFractional value="=[progenitorMassFunctionParameters::rootVarianceTargetFractional]" 			     />
       <alwaysIsolatedOnly           value="true"                                                                                     />
       <redshiftParent               value="0.0"                                                                                      />
       <comment                      value="$13.50 &lt; \log_{10}(M_\mathrm{parent}/\mathrm{M}_\odot) \le 14.00$; $z=7.85$; SMDPL halos"/>
@@ -521,7 +521,7 @@
       <covarianceDiagonalize        value="true"                                                                                     />
       <covarianceTargetOnly         value="true"                                                                                     />
       <likelihoodInLog              value="true"                                                                                     />
-      <rootVarianceTargetFractional value="0.1"                                                                                      />
+      <rootVarianceTargetFractional value="=[progenitorMassFunctionParameters::rootVarianceTargetFractional]" 			     />
       <alwaysIsolatedOnly           value="true"                                                                                     />
       <redshiftParent               value="0.0"                                                                                      />
       <comment                      value="$14.00 &lt; \log_{10}(M_\mathrm{parent}/\mathrm{M}_\odot) \le 14.50$; $z=0.51$; SMDPL halos"/>
@@ -537,7 +537,7 @@
       <covarianceDiagonalize        value="true"                                                                                     />
       <covarianceTargetOnly         value="true"                                                                                     />
       <likelihoodInLog              value="true"                                                                                     />
-      <rootVarianceTargetFractional value="0.1"                                                                                      />
+      <rootVarianceTargetFractional value="=[progenitorMassFunctionParameters::rootVarianceTargetFractional]" 			     />
       <alwaysIsolatedOnly           value="true"                                                                                     />
       <redshiftParent               value="0.0"                                                                                      />
       <comment                      value="$14.00 &lt; \log_{10}(M_\mathrm{parent}/\mathrm{M}_\odot) \le 14.50$; $z=1.00$; SMDPL halos"/>
@@ -553,7 +553,7 @@
       <covarianceDiagonalize        value="true"                                                                                     />
       <covarianceTargetOnly         value="true"                                                                                     />
       <likelihoodInLog              value="true"                                                                                     />
-      <rootVarianceTargetFractional value="0.1"                                                                                      />
+      <rootVarianceTargetFractional value="=[progenitorMassFunctionParameters::rootVarianceTargetFractional]" 			     />
       <alwaysIsolatedOnly           value="true"                                                                                     />
       <redshiftParent               value="0.0"                                                                                      />
       <comment                      value="$14.00 &lt; \log_{10}(M_\mathrm{parent}/\mathrm{M}_\odot) \le 14.50$; $z=2.02$; SMDPL halos"/>
@@ -569,7 +569,7 @@
       <covarianceDiagonalize        value="true"                                                                                     />
       <covarianceTargetOnly         value="true"                                                                                     />
       <likelihoodInLog              value="true"                                                                                     />
-      <rootVarianceTargetFractional value="0.1"                                                                                      />
+      <rootVarianceTargetFractional value="=[progenitorMassFunctionParameters::rootVarianceTargetFractional]" 			     />
       <alwaysIsolatedOnly           value="true"                                                                                     />
       <redshiftParent               value="0.0"                                                                                      />
       <comment                      value="$14.00 &lt; \log_{10}(M_\mathrm{parent}/\mathrm{M}_\odot) \le 14.50$; $z=3.95$; SMDPL halos"/>
@@ -585,7 +585,7 @@
       <covarianceDiagonalize        value="true"                                                                                     />
       <covarianceTargetOnly         value="true"                                                                                     />
       <likelihoodInLog              value="true"                                                                                     />
-      <rootVarianceTargetFractional value="0.1"                                                                                      />
+      <rootVarianceTargetFractional value="=[progenitorMassFunctionParameters::rootVarianceTargetFractional]" 			     />
       <alwaysIsolatedOnly           value="true"                                                                                     />
       <redshiftParent               value="0.0"                                                                                      />
       <comment                      value="$14.00 &lt; \log_{10}(M_\mathrm{parent}/\mathrm{M}_\odot) \le 14.50$; $z=7.85$; SMDPL halos"/>
@@ -601,7 +601,7 @@
       <covarianceDiagonalize        value="true"                                                                                     />
       <covarianceTargetOnly         value="true"                                                                                     />
       <likelihoodInLog              value="true"                                                                                     />
-      <rootVarianceTargetFractional value="0.1"                                                                                      />
+      <rootVarianceTargetFractional value="=[progenitorMassFunctionParameters::rootVarianceTargetFractional]" 			     />
       <alwaysIsolatedOnly           value="true"                                                                                     />
       <redshiftParent               value="0.0"                                                                                      />
       <comment                      value="$14.50 &lt; \log_{10}(M_\mathrm{parent}/\mathrm{M}_\odot) \le 15.00$; $z=0.51$; SMDPL halos"/>
@@ -617,7 +617,7 @@
       <covarianceDiagonalize        value="true"                                                                                     />
       <covarianceTargetOnly         value="true"                                                                                     />
       <likelihoodInLog              value="true"                                                                                     />
-      <rootVarianceTargetFractional value="0.1"                                                                                      />
+      <rootVarianceTargetFractional value="=[progenitorMassFunctionParameters::rootVarianceTargetFractional]" 			     />
       <alwaysIsolatedOnly           value="true"                                                                                     />
       <redshiftParent               value="0.0"                                                                                      />
       <comment                      value="$14.50 &lt; \log_{10}(M_\mathrm{parent}/\mathrm{M}_\odot) \le 15.00$; $z=1.00$; SMDPL halos"/>
@@ -633,7 +633,7 @@
       <covarianceDiagonalize        value="true"                                                                                     />
       <covarianceTargetOnly         value="true"                                                                                     />
       <likelihoodInLog              value="true"                                                                                     />
-      <rootVarianceTargetFractional value="0.1"                                                                                      />
+      <rootVarianceTargetFractional value="=[progenitorMassFunctionParameters::rootVarianceTargetFractional]" 			     />
       <alwaysIsolatedOnly           value="true"                                                                                     />
       <redshiftParent               value="0.0"                                                                                      />
       <comment                      value="$14.50 &lt; \log_{10}(M_\mathrm{parent}/\mathrm{M}_\odot) \le 15.00$; $z=2.02$; SMDPL halos"/>
@@ -649,7 +649,7 @@
       <covarianceDiagonalize        value="true"                                                                                     />
       <covarianceTargetOnly         value="true"                                                                                     />
       <likelihoodInLog              value="true"                                                                                     />
-      <rootVarianceTargetFractional value="0.1"                                                                                      />
+      <rootVarianceTargetFractional value="=[progenitorMassFunctionParameters::rootVarianceTargetFractional]" 			     />
       <alwaysIsolatedOnly           value="true"                                                                                     />
       <redshiftParent               value="0.0"                                                                                      />
       <comment                      value="$14.50 &lt; \log_{10}(M_\mathrm{parent}/\mathrm{M}_\odot) \le 15.00$; $z=3.95$; SMDPL halos"/>
@@ -665,7 +665,7 @@
       <covarianceDiagonalize        value="true"                                                                                     />
       <covarianceTargetOnly         value="true"                                                                                     />
       <likelihoodInLog              value="true"                                                                                     />
-      <rootVarianceTargetFractional value="0.1"                                                                                      />
+      <rootVarianceTargetFractional value="=[progenitorMassFunctionParameters::rootVarianceTargetFractional]" 			     />
       <alwaysIsolatedOnly           value="true"                                                                                     />
       <redshiftParent               value="0.0"                                                                                      />
       <comment                      value="$14.50 &lt; \log_{10}(M_\mathrm{parent}/\mathrm{M}_\odot) \le 15.00$; $z=7.85$; SMDPL halos"/>
@@ -681,7 +681,7 @@
       <covarianceDiagonalize        value="true"                                                                                     />
       <covarianceTargetOnly         value="true"                                                                                     />
       <likelihoodInLog              value="true"                                                                                     />
-      <rootVarianceTargetFractional value="0.1"                                                                                      />
+      <rootVarianceTargetFractional value="=[progenitorMassFunctionParameters::rootVarianceTargetFractional]" 			     />
       <alwaysIsolatedOnly           value="true"                                                                                     />
       <redshiftParent               value="0.0"                                                                                      />
       <comment                      value="$15.00 &lt; \log_{10}(M_\mathrm{parent}/\mathrm{M}_\odot) \le 15.50$; $z=0.51$; SMDPL halos"/>
@@ -697,7 +697,7 @@
       <covarianceDiagonalize        value="true"                                                                                     />
       <covarianceTargetOnly         value="true"                                                                                     />
       <likelihoodInLog              value="true"                                                                                     />
-      <rootVarianceTargetFractional value="0.1"                                                                                      />
+      <rootVarianceTargetFractional value="=[progenitorMassFunctionParameters::rootVarianceTargetFractional]" 			     />
       <alwaysIsolatedOnly           value="true"                                                                                     />
       <redshiftParent               value="0.0"                                                                                      />
       <comment                      value="$15.00 &lt; \log_{10}(M_\mathrm{parent}/\mathrm{M}_\odot) \le 15.50$; $z=1.00$; SMDPL halos"/>
@@ -713,7 +713,7 @@
       <covarianceDiagonalize        value="true"                                                                                     />
       <covarianceTargetOnly         value="true"                                                                                     />
       <likelihoodInLog              value="true"                                                                                     />
-      <rootVarianceTargetFractional value="0.1"                                                                                      />
+      <rootVarianceTargetFractional value="=[progenitorMassFunctionParameters::rootVarianceTargetFractional]" 			     />
       <alwaysIsolatedOnly           value="true"                                                                                     />
       <redshiftParent               value="0.0"                                                                                      />
       <comment                      value="$15.00 &lt; \log_{10}(M_\mathrm{parent}/\mathrm{M}_\odot) \le 15.50$; $z=2.02$; SMDPL halos"/>
@@ -729,7 +729,7 @@
       <covarianceDiagonalize        value="true"                                                                                     />
       <covarianceTargetOnly         value="true"                                                                                     />
       <likelihoodInLog              value="true"                                                                                     />
-      <rootVarianceTargetFractional value="0.1"                                                                                      />
+      <rootVarianceTargetFractional value="=[progenitorMassFunctionParameters::rootVarianceTargetFractional]" 			     />
       <alwaysIsolatedOnly           value="true"                                                                                     />
       <redshiftParent               value="0.0"                                                                                      />
       <comment                      value="$15.00 &lt; \log_{10}(M_\mathrm{parent}/\mathrm{M}_\odot) \le 15.50$; $z=3.95$; SMDPL halos"/>
@@ -745,7 +745,7 @@
       <covarianceDiagonalize        value="true"                                                                                     />
       <covarianceTargetOnly         value="true"                                                                                     />
       <likelihoodInLog              value="true"                                                                                     />
-      <rootVarianceTargetFractional value="0.1"                                                                                      />
+      <rootVarianceTargetFractional value="=[progenitorMassFunctionParameters::rootVarianceTargetFractional]" 			     />
       <alwaysIsolatedOnly           value="true"                                                                                     />
       <redshiftParent               value="0.0"                                                                                      />
       <comment                      value="$15.00 &lt; \log_{10}(M_\mathrm{parent}/\mathrm{M}_\odot) \le 15.50$; $z=7.85$; SMDPL halos"/>
