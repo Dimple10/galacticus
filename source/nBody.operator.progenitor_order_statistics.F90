@@ -342,7 +342,7 @@ contains
           ! Skip parent halos that are out of range.
           k=int(log10(mass(indexParents(i))/self%massParentMinimum)*binParentWidthInverse)+1
           if (k < 1 .or. k > massParentCount) cycle
-          ! Initialize the list of most massive progentors to impossible values.
+          ! Initialize the list of most massive progenitors to impossible values.
           massOrder=-huge(0.0d0)          
           ! Iterate over progenitor halos.
           j=searchIndexed(treeID,indexTreeID,treeIDParents(i))
