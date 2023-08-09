@@ -1,8 +1,8 @@
 #!/bin/bash
-#PBS -N mcmc_mdpl2
+#PBS -N mcmc_all
 #PBS -l nodes=4:ppn=16
 #PBS -j oe
-#PBS -o mcmc_mdpl2.log
+#PBS -o mcmc_all.log
 #PBS -V
 if [ ! -z ${PBS_O_WORKDIR+x} ]; then
  cd $PBS_O_WORKDIR

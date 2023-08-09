@@ -233,7 +233,6 @@
       <randomize              value="false"/>
       <evolveForestsVerbosity value="silent"/>
     </posteriorSampleLikelihood>
- -->
 
   </posteriorSampleLikelihood>
 
@@ -273,7 +272,7 @@
     <posteriorSampleDffrntlEvltnRandomJump   value="adaptive"/>
 
     <posteriorSampleDffrntlEvltnProposalSize value="adaptive" >
-      <gammaInitial          value="0.50e+0"/>
+      <gammaInitial          value="0.10e+0"/>
       <gammaAdjustFactor     value="1.10e+0"/>
       <gammaMinimum          value="1.00e-2"/>
       <gammaMaximum          value="3.00e+0"/>

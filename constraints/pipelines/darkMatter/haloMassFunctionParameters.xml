@@ -11,8 +11,8 @@
     <p             value="-0.0088"/>
     <q             value="+0.9700"/>
     <normalization value="+0.3334"/>
-    <!--alpha         value="+1.0000"/-->
-    <!-- ETHOS window function -->
+    <alpha 	   value="+1.0000"/>
+     <!-- ETHOS window function -->
     <cW            value="+3.5206"/>
     <beta          value="+4.8813"/>
   </haloMassFunctionParameters>
