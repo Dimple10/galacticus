@@ -435,8 +435,20 @@ sub SubmitJobs {
 		print $scriptFile "fi\n";
 		print $scriptFile "export ".$_."\n"
 		    foreach ( &List::ExtraUtils::as_array($pbsConfig->{'environment'}) );
-		print $scriptFile "ulimit -t unlimited\n";
 		print $scriptFile "ulimit -c unlimited\n";
+		my $coreDump = "no";
+		$coreDump = $arguments{'coreDump'}
+		    if ( exists($arguments{'coreDump'}) );
+		$coreDump = $newJob->{'coreDump'}
+		    if ( exists($newJob->{'coreDump'}) );
+		if ( $coreDump eq "yes" ) {
+		    print $scriptFile "ulimit -c unlimited\n";
+		    print $scriptFile "export GFORTRAN_ERROR_DUMPCORE=YES\n";
+		} else {
+		    print $scriptFile "ulimit -c 0\n";
+		    print $scriptFile "export GFORTRAN_ERROR_DUMPCORE=NO\n";
+		}
+		print $scriptFile "ulimit -t unlimited\n";
 		my $mpi = (exists($arguments{'mpi'}) && $arguments{'mpi'} eq "yes") || (exists($newJob->{'mpi'}) && $newJob->{'mpi'} eq "yes");
 		print $scriptFile "export OMP_NUM_THREADS=".($mpi ? 1 : $ppn)."\n";
 		print $scriptFile ($mpi ? "mpirun --map-by node -np ".$mpiProcs." " : "").$newJob->{'command'}."\n";
