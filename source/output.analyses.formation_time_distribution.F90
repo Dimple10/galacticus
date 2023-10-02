@@ -48,7 +48,8 @@
      type            (galacticFilterAll                    ), pointer                   :: galacticFilterParentMass_              => null()
      type            (nodePropertyExtractorMassHalo        ), pointer                   :: nodePropertyExtractorMassParent_       => null()
      double precision                                       , allocatable, dimension(:) :: rootVarianceTargetFractional
-     double precision                                                                   :: massParentMinimum                               , massParentMaximum                   , &                                  &                                                                                timeProgenitor                                  , timeParent                          , &
+     double precision                                                                   :: massParentMinimum                               , massParentMaximum                   , &
+          &                                                                                timeProgenitor                                  , timeParent                          , &
           &                                                                                redshiftProgenitor                              , redshiftParent                      , &
           &                                                                                weightParents                                   , redshiftMinimum                     , &
           &                                                                                redshiftMaximum
