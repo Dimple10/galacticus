@@ -97,7 +97,8 @@ contains
     double precision                                      , dimension(:  ), allocatable :: functionValueTarget             , functionCovarianceTarget1D, &
          &                                                                                 rootVarianceTargetFractional
     double precision                                      , dimension(:,:), allocatable :: functionCovarianceTarget
-    double precision                                                                    :: massParentMinimum               , massParentMaximum         , &                                                           &                                                                                 redshiftProgenitor              , redshiftParent            , &
+    double precision                                                                    :: massParentMinimum               , massParentMaximum         , &                                                 
+         &                                                                                 redshiftProgenitor              , redshiftParent            , &
          &                                                                                 redshiftMinimum                 , redshiftMaximum
     integer         (c_size_t                            )                              :: countRedshiftProgenitor
     integer                                                                             :: indexParent                     , indexRedshift
@@ -448,7 +449,7 @@ contains
     double precision                                                  , intent(in   )          , dimension(:  ) :: rootVarianceTargetFractional
     integer         (c_size_t                                        ), intent(in   )                           :: countRedshiftProgenitor
     logical                                                           , intent(in   )                           :: alwaysIsolatedOnly                                     , covarianceDiagonalize                   , &
-         &                                                                                                         covarianceTargetOnly                                   
+         &                                                                                                         covarianceTargetOnly
     double precision                                                  , intent(in   )                           :: redshiftMinimum                                        , redshiftMaximum
     class           (cosmologyParametersClass                        ), intent(inout), target                   :: cosmologyParameters_
     class           (cosmologyFunctionsClass                         ), intent(inout), target                   :: cosmologyFunctions_

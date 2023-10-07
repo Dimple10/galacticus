@@ -60,16 +60,16 @@ my @simulations =
  #     snapshots           => "116 70 48 38 26 12",
  #     builder             => \&cosmoSimBuilder
  # },
-  {
-      label               => "MDPL2",
-      description         => "Progenitor halo mass function for non-backsplash z=0 parent halos from the MDPL2 simulation.",
-      simulationReference => "Klypin, Yepes, Gottlober, Hess; 2016; MNRAS; 457; 4340",
-      simulationURL       => "https://www.cosmosim.org/cms/simulations/mdpl2/",
-      hubbleConstant      => 0.6777,
-      massParticle        => 1.51e9,
-      snapshots           => "125 124 120 107 94 75 52 26",
-      builder             => \&cosmoSimBuilder
-  }
+ # {
+ #     label               => "MDPL2",
+ #     description         => "Progenitor halo mass function for non-backsplash z=0 parent halos from the MDPL2 simulation.",
+ #     simulationReference => "Klypin, Yepes, Gottlober, Hess; 2016; MNRAS; 457; 4340",
+ #     simulationURL       => "https://www.cosmosim.org/cms/simulations/mdpl2/",
+ #     hubbleConstant      => 0.6777,
+ #     massParticle        => 1.51e9,
+ #     snapshots           => "125 124 120 107 94 75 52 26",
+ #     builder             => \&cosmoSimBuilder
+ # }
  # {
  #     label               => "BigMDPL",
  #     description         => "Progenitor halo mass function for non-backsplash z=0 parent halos from the BigMDPL simulation.",
@@ -98,14 +98,14 @@ my @simulations =
 #     hubbleConstant      => 0.6711,
 #     builder             => \&caterpillarBuilder
 # }
-# {
-#    label               => "Symphony",
-#    description         => "Progenitor halo mass function for non-backsplash z=0 parent halos from the Symphony ZoomIn simulations.",
-#    simulationReference => "Nadler et al.; 2022;",
-#    simulationURL       => "http://web.stanford.edu/group/gfc/symphony",
-#    hubbleConstant      => 0.7,
-#    builder             => \&symphonyZoomInBuilder
-# }
+ {
+    label               => "Symphony",
+    description         => "Progenitor halo mass function for non-backsplash z=0 parent halos from the Symphony ZoomIn simulations.",
+    simulationReference => "Nadler et al.; 2022;",
+    simulationURL       => "http://web.stanford.edu/group/gfc/symphony",
+    hubbleConstant      => 0.7,
+    builder             => \&symphonyZoomInBuilder
+ }
 );
 
 # Parse config options.
@@ -521,7 +521,7 @@ sub symphonyZoomInBuilder {
 
     # Set snapshots to process for each resolution, corresponding to z ~ 0.0, 0.02, 0.1, 0.5, 1.0, 2.0, 4.0, 8.0.
     # expansion factors:  1.0000,   0.66503,   0.50239,   0.32987,   0.20064 (grabs from snapshot #)
-    my $snapshots = "235  203  181 148 109";
+    # my $snapshots = "235  203  181 148 109";
     
     # Initialize lists of parent halo masses.
     my $massParent;
@@ -577,7 +577,7 @@ sub symphonyZoomInBuilder {
 	# Set output file.
 	$parameters_->{'nbodyOperator'}->{'nbodyOperator'}->[6]->{'fileName'}->{'value'} = $outputFileName;
 	# Set the snapshots to select.
-	$parameters_->{'nbodyOperator'}->{'nbodyOperator'}->[3]->{'selectedValues'}->{'value'} = $snapshots;
+	#$parameters_->{'nbodyOperator'}->{'nbodyOperator'}->[3]->{'selectedValues'}->{'value'} = $snapshots;
 	# Set the hostedRootID to select.
 	$parameters_->{'nbodyOperator'}->{'nbodyOperator'}->[4]->{'selectedValues'}->{'value'} = $model->{'hostHaloID'};
 	# Add an operator to shift snapshot numbers. All Symphony simulations should have 235 snapshots. There are fewer
@@ -691,22 +691,45 @@ sub symphonyZoomInBuilder {
     }
     $massFunctionParameters  ->{'nbodyOperator'     }->{'nbodyOperator'}->[1]->{'massParentMinimum'         }->{'value'} = $massParentMinimum;
     $massFunctionParameters  ->{'nbodyOperator'     }->{'nbodyOperator'}->[1]->{'massParentMaximum'         }->{'value'} = $massParentMaximum;
+    $massFunctionParameters  ->{'nbodyOperator'     }->{'nbodyOperator'}->[2]->{'massParentMinimum'         }->{'value'} = $massParentMinimum;
+    $massFunctionParameters  ->{'nbodyOperator'     }->{'nbodyOperator'}->[2]->{'massParentMaximum'         }->{'value'} = $massParentMaximum;
+    $massFunctionParameters  ->{'nbodyOperator'     }->{'nbodyOperator'}->[3]->{'massParentMinimum'         }->{'value'} = $massParentMinimum;
+    $massFunctionParameters  ->{'nbodyOperator'     }->{'nbodyOperator'}->[3]->{'massParentMaximum'         }->{'value'} = $massParentMaximum;
+    $massFunctionParameters  ->{'nbodyOperator'     }->{'nbodyOperator'}->[4]->{'massParentMinimum'         }->{'value'} = $massParentMinimum;
+    $massFunctionParameters  ->{'nbodyOperator'     }->{'nbodyOperator'}->[4]->{'massParentMaximum'         }->{'value'} = $massParentMaximum;
     # Define minimum and maximum mass ratios
     my $massRatioProgenitorMinimum = 10.0**(int(log($massParticle)/log(10.0))+2-log10($massParentMaximum));
     my $massRatioProgenitorMaximum = 10.0;
     $massFunctionParameters  ->{'nbodyOperator'     }->{'nbodyOperator'}->[1]->{'massRatioProgenitorMinimum'}->{'value'} = $massRatioProgenitorMinimum;
     $massFunctionParameters  ->{'nbodyOperator'     }->{'nbodyOperator'}->[1]->{'massRatioProgenitorMaximum'}->{'value'} = $massRatioProgenitorMaximum;
+    $massFunctionParameters  ->{'nbodyOperator'     }->{'nbodyOperator'}->[2]->{'massRatioProgenitorMinimum'}->{'value'} = $massRatioProgenitorMinimum;
+    $massFunctionParameters  ->{'nbodyOperator'     }->{'nbodyOperator'}->[2]->{'massRatioProgenitorMaximum'}->{'value'} = $massRatioProgenitorMaximum;
     # Set snapshots.
     my @snapshotList         = split(" ",$snapshots);
     my $snapshotParents      = &List::Util::max (                                           @snapshotList);
     my $snapshotsProgenitors =              join(" ",map {$_ == $snapshotParents ? () : $_} @snapshotList);
     $massFunctionParameters  ->{'nbodyOperator'     }->{'nbodyOperator'}->[1]->{'snapshotParents'           }->{'value'} = $snapshotParents;
     $massFunctionParameters  ->{'nbodyOperator'     }->{'nbodyOperator'}->[1]->{'snapshotsProgenitors'      }->{'value'} = $snapshotsProgenitors;
+    $massFunctionParameters  ->{'nbodyOperator'     }->{'nbodyOperator'}->[2]->{'snapshotParents'           }->{'value'} = $snapshotParents;
+    $massFunctionParameters  ->{'nbodyOperator'     }->{'nbodyOperator'}->[2]->{'snapshotsProgenitors'      }->{'value'} = $snapshotsProgenitors;
+    $massFunctionParameters  ->{'nbodyOperator'     }->{'nbodyOperator'}->[3]->{'snapshotParents'           }->{'value'} = $snapshotParents;
+    $massFunctionParameters  ->{'nbodyOperator'     }->{'nbodyOperator'}->[3]->{'snapshotsProgenitors'      }->{'value'} = $snapshotsProgenitors;
+    $massFunctionParameters  ->{'nbodyOperator'     }->{'nbodyOperator'}->[4]->{'snapshotParents'           }->{'value'} = $snapshotParents;
+    $massFunctionParameters  ->{'nbodyOperator'     }->{'nbodyOperator'}->[4]->{'snapshotsProgenitors'      }->{'value'} = $snapshotsProgenitors;
     # Set other task properties.
     $massFunctionParameters  ->{'outputFileName'}                                                              ->{'value'} = $outputFileName;
     $massFunctionParameters  ->{'nbodyOperator'     }->{'nbodyOperator'}->[1]->{'description'               }->{'value'} = $simulation->{'description'        };
     $massFunctionParameters  ->{'nbodyOperator'     }->{'nbodyOperator'}->[1]->{'simulationReference'       }->{'value'} = $simulation->{'simulationReference'};
     $massFunctionParameters  ->{'nbodyOperator'     }->{'nbodyOperator'}->[1]->{'simulationURL'             }->{'value'} = $simulation->{'simulationURL'      };
+    $massFunctionParameters  ->{'nbodyOperator'     }->{'nbodyOperator'}->[2]->{'description'               }->{'value'} = $simulation->{'description'        };
+    $massFunctionParameters  ->{'nbodyOperator'     }->{'nbodyOperator'}->[2]->{'simulationReference'       }->{'value'} = $simulation->{'simulationReference'};
+    $massFunctionParameters  ->{'nbodyOperator'     }->{'nbodyOperator'}->[2]->{'simulationURL'             }->{'value'} = $simulation->{'simulationURL'      };
+    $massFunctionParameters  ->{'nbodyOperator'     }->{'nbodyOperator'}->[3]->{'description'               }->{'value'} = $simulation->{'description'        };
+    $massFunctionParameters  ->{'nbodyOperator'     }->{'nbodyOperator'}->[3]->{'simulationReference'       }->{'value'} = $simulation->{'simulationReference'};
+    $massFunctionParameters  ->{'nbodyOperator'     }->{'nbodyOperator'}->[3]->{'simulationURL'             }->{'value'} = $simulation->{'simulationURL'      };
+    $massFunctionParameters  ->{'nbodyOperator'     }->{'nbodyOperator'}->[4]->{'description'               }->{'value'} = $simulation->{'description'        };
+    $massFunctionParameters  ->{'nbodyOperator'     }->{'nbodyOperator'}->[4]->{'simulationReference'       }->{'value'} = $simulation->{'simulationReference'};
+    $massFunctionParameters  ->{'nbodyOperator'     }->{'nbodyOperator'}->[4]->{'simulationURL'             }->{'value'} = $simulation->{'simulationURL'      };
     ## Write the parameter file.
     my $parameterFileName = $simulation->{'path'}."progenitorMassFunctions_".$modelGroup.".xml";
     open(my $outputFile,">",$parameterFileName);
