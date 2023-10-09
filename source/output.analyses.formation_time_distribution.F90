@@ -22,7 +22,7 @@
   !!}
   
   use :: Galactic_Filters                , only : galacticFilterAll
-  use :: Node_Property_Extractors        , only : nodePropertyExtractorMassParent_
+  use :: Node_Property_Extractors        , only : nodePropertyExtractorMassHalo
 
   !![
   <outputAnalysis name="outputAnalysisFormationTimeDistribution">
@@ -304,7 +304,6 @@ contains
           &amp;                                    covarianceDiagonalize                                                                              , &amp;
           &amp;                                    covarianceTargetOnly                                                                               , &amp;
           &amp;                                    rootVarianceTargetFractional                                                                       , &amp;
-          &amp;                                    likelihoodInLog                                                                                    , &amp;
           &amp;                                    cosmologyParameters_                                                                               , &amp;
           &amp;                                    cosmologyFunctions_                                                                                , &amp;
           &amp;                                    darkMatterProfileDMO_                                                                              , &amp;
@@ -354,7 +353,7 @@ contains
          &                                                                                                  redshiftParent
     double precision                                      , intent(in   ), allocatable, dimension(:    ) :: rootVarianceTargetFractional
     logical                                               , intent(in   )                                :: covarianceDiagonalize          , covarianceTargetOnly      , &
-         &                                                                                                  likelihoodInLog                , alwaysIsolatedOnly
+         &                                                                                                  alwaysIsolatedOnly
     class           (cosmologyFunctionsClass             ), intent(inout), target                        :: cosmologyFunctions_
     class           (cosmologyParametersClass            ), intent(inout), target                        :: cosmologyParameters_
     class           (darkMatterProfileDMOClass           ), intent(in   ), target                        :: darkMatterProfileDMO_
