@@ -209,7 +209,7 @@ contains
          <description>Label for the target dataset.</description>
        </inputParameter>
        !!]
-       self=outputAnalysisFormationTimeDistribution(char(fileName),label,comment,targetLabel,indexParent,indexRedshift,redshiftParent,redshiftMinimum,redshiftMaximum,covarianceDiagonalize,covarianceTargetOnly,rootVarianceTargetFractional,alwaysIsolatedOnly,cosmologyFunctions_,cosmologyParameters_,darkMatterProfileDMO_,virialDensityContrast_,virialDensityContrastDefinition_,nbodyHaloMassError_,outputTimes_)
+       self=formationTimeDistributionConstructorFile(char(fileName),label,comment,targetLabel,indexParent,indexRedshift,redshiftParent,redshiftMinimum,redshiftMaximum,covarianceDiagonalize,covarianceTargetOnly,rootVarianceTargetFractional,alwaysIsolatedOnly,cosmologyFunctions_,cosmologyParameters_,darkMatterProfileDMO_,virialDensityContrast_,virialDensityContrastDefinition_,nbodyHaloMassError_,outputTimes_)
     else
        !![
        <inputParameter>
@@ -294,13 +294,17 @@ contains
        !![
        <conditionalCall>
         <call>
-         self=outputAnalysisFormationTimeDistribution(                                                                                                  &amp;
+          self=outputAnalysisFormationTimeDistribution(                                                                                                 &amp;
           &amp;                                    label                                                                                              , &amp;
-          &amp;                                    comment                                                                                            , &amp;                                                         &amp;                                    massParentMaximum                                                                                  , &amp;                                                         &amp;                                    massParentMinimum                                                                                  , &amp;                                                         &amp;                                    countRedshiftProgenitor                                                                            , &amp;
-          &amp;                                    cosmologyFunctions_%cosmicTime(cosmologyFunctions_%expansionFactorFromRedshift(redshiftProgenitor)), &amp;                                                         &amp;                                    cosmologyFunctions_%cosmicTime(cosmologyFunctions_%expansionFactorFromRedshift(redshiftParent    )), &amp;
-          &amp;                                    alwaysIsolatedOnly                                                                                 , &amp;
+          &amp;                                    comment                                                                                            , &amp;
           &amp;                                    redshiftMinimum                                                                                    , &amp;
           &amp;                                    redshiftMaximum                                                                                    , &amp;
+          &amp;                                    countRedshiftProgenitor                                                                            , &amp;
+          &amp;                                    massParentMinimum                                                                                  , &amp;
+          &amp;                                    massParentMaximum                                                                                  , &amp;
+          &amp;                                    cosmologyFunctions_%cosmicTime(cosmologyFunctions_%expansionFactorFromRedshift(redshiftProgenitor)), &amp;
+          &amp;                                    cosmologyFunctions_%cosmicTime(cosmologyFunctions_%expansionFactorFromRedshift(redshiftParent    )), &amp;
+          &amp;                                    alwaysIsolatedOnly                                                                                 , &amp;
           &amp;                                    covarianceDiagonalize                                                                              , &amp;
           &amp;                                    covarianceTargetOnly                                                                               , &amp;
           &amp;                                    rootVarianceTargetFractional                                                                       , &amp;
@@ -310,8 +314,10 @@ contains
           &amp;                                    virialDensityContrast_                                                                             , &amp;
           &amp;                                    virialDensityContrastDefinition_                                                                   , &amp;
           &amp;                                    nbodyHaloMassError_                                                                                , &amp;
-          &amp;                                    outputTimes_                                                                                         &amp;
-          &amp;                                    {conditions}                                                                                         &amp;
+          &amp;                                    outputTimes_                                                                                       , &amp;
+          &amp;                                    targetLabel                                                                                        , &amp;
+          &amp;                                    functionValueTarget                                                                                , &amp;
+          &amp;                                    functionCovarianceTarget                                                                             &amp;
           &amp;                                   )
         </call>
         <argument name="targetLabel"              value="targetLabel"              parameterPresent="parameters"/>
@@ -360,10 +366,11 @@ contains
     class           (outputTimesClass                    ), intent(inout), target                        :: outputTimes_
     class           (virialDensityContrastClass          ), intent(in   ), target                        :: virialDensityContrastDefinition_, virialDensityContrast_
     class           (nbodyHaloMassErrorClass             ), intent(in   ), target                        :: nbodyHaloMassError_
-    double precision                                                                                     :: massParentMinimum               , massParentMaximum        , &                                           &                                                                                                  timeProgenitor                  , timeParent             
+    double precision                                                                                     :: massParentMinimum               , massParentMaximum        , &
+         &                                                                                                  timeProgenitor                  , timeParent
     double precision                                                     , allocatable, dimension(:    ) :: functionValueTarget             , massRatio                , &
          &                                                                                                  redshiftProgenitor_val          , massParents              , &
-         &                                                                                                  massParentsMinimum              , massParentsMaximum
+         &                                                                                                  massParentsMinimum              , massParentsMaximum       ,  redshiftProgenitor
     double precision                                                     , allocatable, dimension(:,:  ) :: functionCovarianceTarget
     double precision                                                     , allocatable, dimension(:,:,:) :: functionValuesTarget
     integer         (c_size_t                            )               , allocatable, dimension(:,:,:) :: functionCountsTarget
@@ -396,9 +403,9 @@ contains
        massParentMaximum=massParents        (indexParent  +1)*sqrt(massParents(2)/massParents(1))
     end if
     !Extracting redshift min and max
-    redshiftMinimum = redshiftProgenitor_val(1)
-    redshiftMaximum = redshiftProgenitor_val(size(redshiftProgenitor_val))
-    !redshiftProgenitor  =redshiftProgenitors(indexRedshift+1)
+    redshiftMinimum =redshiftProgenitor_val(1)
+    redshiftMaximum =redshiftProgenitor_val(size(redshiftProgenitor_val))
+    redshiftProgenitor  =redshiftProgenitor_val(indexRedshift+1)
     ! Extract the target function values.
     allocate(functionValueTarget(size(redshiftProgenitor_val)))
     functionValueTarget=functionValuesTarget(indexParent+1,:,indexRedshift+1)
@@ -413,7 +420,7 @@ contains
     timeProgenitor    =cosmologyFunctions_%cosmicTime(cosmologyFunctions_%expansionFactorFromRedshift(redshiftProgenitor))
     timeParent        =cosmologyFunctions_%cosmicTime(cosmologyFunctions_%expansionFactorFromRedshift(redshiftParent    ))
     ! Build the object.
-    self              =outputAnalysisFormationTimeDistribution(label,comment,redshiftProgenitors(1),redshiftProgenitors(size(redshiftProgenitors)),size(redshiftProgenitors,kind=c_size_t),massParentMinimum,massParentMaximum,timeProgenitor,timeParent,alwaysIsolatedOnly,redshiftMinimum,redshiftMaximum,covarianceDiagonalize,covarianceTargetOnly,rootVarianceTargetFractional,cosmologyParameters_,cosmologyFunctions_,darkMatterProfileDMO_,virialDensityContrast_,virialDensityContrastDefinition_,nbodyHaloMassError_,outputTimes_,targetLabel,functionValueTarget,functionCovarianceTarget)
+    self              =formationTimeDistributionConstructorInternal(label,comment,redshiftMinimum,redshiftMaximum,size(redshiftProgenitor_val,kind=c_size_t),massParentMinimum,massParentMaximum,timeProgenitor,timeParent,alwaysIsolatedOnly,covarianceDiagonalize,covarianceTargetOnly,rootVarianceTargetFractional,cosmologyParameters_,cosmologyFunctions_,darkMatterProfileDMO_,virialDensityContrast_,virialDensityContrastDefinition_,nbodyHaloMassError_,outputTimes_,targetLabel,functionValueTarget,functionCovarianceTarget)
     !![
     <constructorAssign variables="fileName, indexParent, indexRedshift"/>
     !!]
@@ -425,16 +432,18 @@ contains
     Internal constructor for the ``formationTimeDistribution'' output analysis class.
     !!}
     use :: HDF5_Access                             , only : hdf5Access
-    use :: Galactic_Filters                        , only : filterList                                      , galacticFilterDescendantNode                , galacticFilterHaloAlwaysIsolated              , galacticFilterHaloIsolated                  , &
-          &                                                 galacticFilterHaloMass                          , galacticFilterNot                           , galacticFilterHaloMassRange_
+    use :: Galactic_Filters                        , only : filterList                                      , galacticFilterDescendantNode                , galacticFilterHaloAlwaysIsolated             ,&
+      &                                                     galacticFilterHaloIsolated                      , galacticFilterHaloMass                      , galacticFilterNot                            ,&
+      &                                                     galacticFilterHaloMassRange
     use :: Node_Property_Extractors                , only : nodePropertyExtractorDescendantNode             , nodePropertyExtractorNodeFormationTime
     use :: Numerical_Comparison                    , only : Values_Agree
-    use :: Numerical_Ranges                        , only : Make_Range                                      , rangeTypeLogarithmic
+    use :: Numerical_Ranges                        , only : Make_Range                                      , rangeTypeLinear
     use :: Cosmology_Functions                     , only : cosmologyFunctionsMatterLambda
     use :: Cosmology_Parameters                    , only : cosmologyParametersSimple
     use :: Dark_Matter_Profiles_DMO                , only : darkMatterProfileDMOClass
     use :: Error                                   , only : Error_Report
-    use :: Output_Analysis_Distribution_Normalizers, only : normalizerList                                  , outputAnalysisDistributionNormalizerUnitarity_, outputAnalysisDistributionNormalizerBinWidth, outputAnalysisDistributionNormalizerSequence
+    use :: Output_Analysis_Distribution_Normalizers, only : normalizerList                                  , outputAnalysisDistributionNormalizerUnitarity , outputAnalysisDistributionNormalizerBinWidth,&
+      &                                                     outputAnalysisDistributionNormalizerSequence
     use :: Output_Analysis_Weight_Operators        , only : outputAnalysisWeightOperatorSubsampling         , weightOperatorList
     use :: Output_Analysis_Property_Operators      , only : outputAnalysisPropertyOperatorIdentity
     use :: Output_Analyses_Options                 , only : outputAnalysisCovarianceModelPoisson
@@ -471,19 +480,20 @@ contains
     type            (galacticFilterDescendantNode                    ), pointer                                 :: galacticFilterParentNode_
     type            (galacticFilterNot                               ), pointer                                 :: galacticFilterNot_
     !type            (galacticFilterHaloMass                          ), pointer                                 :: galacticFilterParentMassMinimum_                      , galacticFilterParentMassMaximum_
-    type            (galacticFilterHaloMassRange                     ), pointer                                 :: galacticFilterParentMassMinimum_                       ,galacticFilterParentMassMaximum_
+    type            (galacticFilterHaloMassRange                     ), pointer                                 :: galacticFilterParentMassMinimum_                     ,galacticFilterParentMassMaximum_,&
+       &                                                                                                           galacticFilterHaloMassRange_ 
     type            (galacticFilterHaloAlwaysIsolated                ), pointer                                 :: galacticFilterHaloAlwaysIsolated_
     type            (filterList                                      ), pointer                                 :: filters_                                               , filtersParent_
     type            (nodePropertyExtractorMassHalo                   ), pointer                                 :: nodePropertyExtractorMassProgenitor_
     type            (nodePropertyExtractorDescendantNode             ), pointer                                 :: nodePropertyExtractorParentNode_
-    type            (nodePropertyExtractor                           ), pointer                                 :: nodePropertyExtractorNodeFormationTime_
+    type            (nodePropertyExtractorNodeFormationTime          ), pointer                                 :: nodePropertyExtractorNodeFormationTime_
     type            (outputAnalysisDistributionNormalizerSequence    ), pointer                                 :: outputAnalysisDistributionNormalizer_
-    type            (outputAnalysisDistributionNormalizerUnitary     ), pointer                                 :: outputAnalysisDistributionNormalizerUnitary_
+    type            (outputAnalysisDistributionNormalizerUnitarity   ), pointer                                 :: outputAnalysisDistributionNormalizerUnitarity_
     type            (outputAnalysisDistributionNormalizerBinWidth    ), pointer                                 :: outputAnalysisDistributionNormalizerBinWidth_
     type            (normalizerList                                  ), pointer                                 :: normalizer_
     type            (weightOperatorList                              ), pointer                                 :: weightOperator_
     type            (outputAnalysisWeightOperatorSubsampling         ), pointer                                 :: outputAnalysisWeightOperatorSubsampling_
-    type            (outputAnalysisPropertyOperatorIdentity          ), pointer                                 :: outputAnalysisPropertyIdentity_
+    type            (outputAnalysisPropertyOperatorIdentity          ), pointer                                 :: outputAnalysisPropertyOperatorIdentity_
     integer         (c_size_t                                        )                                          :: iOutput                                                , bufferCount
     type            (varying_string                                  )                                          :: message
     character       (len=10                                          )                                          :: timeLabel
@@ -541,7 +551,7 @@ contains
     filtersParent_     %next%filter_ => galacticFilterNot_
     if (self%alwaysIsolatedOnly) then
        allocate(galacticFilterHaloAlwaysIsolated_               )
-       allocate(filters_                         %nextnext      )
+       allocate(filters_                         %next%next     )
        allocate(filtersParent_                   %next%next     )
        filters_           %next%next%filter_ => galacticFilterHaloAlwaysIsolated_
        filtersParent_     %next%next%filter_ => galacticFilterHaloAlwaysIsolated_
@@ -553,6 +563,8 @@ contains
     end if
     
     ! Build a filter which selects isolated halos, above a suitable lower mass for formation time distribution. 
+    allocate(     galacticFilterHaloIsolated_               )
+    allocate(     galacticFilterHaloMassRange_              )
     allocate(     filters_                                  )
     allocate(     filters_                        %next     )
     filters_                %filter_ => galacticFilterHaloIsolated_
@@ -564,9 +576,6 @@ contains
     !![
     <referenceConstruct                             object="galacticFilterHaloIsolated_"      constructor="galacticFilterHaloIsolated  (                                                                                           )"/>
     <referenceConstruct                             object="galacticFilterHaloMassRange_"     constructor="galacticFilterHaloMassRange (massParentMinimum,massParentMaximum,cosmologyFunctions_,cosmologyParameters_,darkMatterProfileDMO_,virialDensityContrast_,virialDensityContrastDefinition_)"/>
-    <referenceConstruct                             object="galacticFilterParentMassMinimum_" constructor="galacticFilterHaloMass      (massParentMinimum                                 ,cosmologyFunctions_,cosmologyParameters_,darkMatterProfileDMO_,virialDensityContrast_,virialDensityContrastDefinition_)"/>
-    <referenceConstruct                             object="galacticFilterParentMassMaximum_" constructor="galacticFilterHaloMass      (massParentMaximum                                 ,cosmologyFunctions_,cosmologyParameters_,darkMatterProfileDMO_,virialDensityContrast_,virialDensityContrastDefinition_)"/>
-    <referenceConstruct                             object="galacticFilterNot_"               constructor="galacticFilterNot           (galacticFilterParentMassMaximum_                                                                               )"/>
     <referenceConstruct isResult="yes" owner="self" object="galacticFilterParentMass_"        constructor="galacticFilterAll           (filtersParent_                                                                                                 )"/>
     <referenceConstruct                             object="galacticFilterParentNode_"        constructor="galacticFilterDescendantNode(timeParent                                        ,allowSelf,cosmologyFunctions_,self%galacticFilterParentMass_)"/>
     !!]
@@ -580,9 +589,9 @@ contains
     <referenceConstruct                             object="nodePropertyExtractorParentNode_"     constructor="nodePropertyExtractorDescendantNode(                                                            timeParent,cosmologyFunctions_   ,self%nodePropertyExtractorMassParent_    )"/>
     !!]
     ! Build a node property extractor for distribution of formation time
-    allocate(nodePropertyExtractor_)
+    allocate(nodePropertyExtractorNodeFormationTime_)
     !![
-    <referenceConstruct                             object="nodePropertyExtractor_"               constructor="nodePropertyExtractorNodeFormationTime()"/>
+    <referenceConstruct                             object="nodePropertyExtractorNodeFormationTime_"               constructor="nodePropertyExtractorNodeFormationTime()"/>
     !!]
     ! Create a distribution normalizer which normalizes to bin width.
     allocate(outputAnalysisDistributionNormalizerUnitarity_       )
@@ -625,7 +634,7 @@ contains
          &                                redshiftProgenitors                                          , &
          &                                bufferCount                                                  , &
          &                                outputWeight                                                 , &
-         &                                nodePropertyExtractor_                                       , &
+         &                                nodePropertyExtractorNodeFormationTime_                      , &
          &                                outputAnalysisPropertyOperatorIdentity_                      , &
          &                                outputAnalysisPropertyOperatorIdentity_                      , &
          &                                outputAnalysisWeightOperatorSubsampling_                     , &
@@ -647,19 +656,19 @@ contains
          &                               )
     !![
     <objectDestructor name="galacticFilterHaloIsolated_"                    />
-    <objectDestructor name="galacticFilterHaloMassRange"                    />
+    <objectDestructor name="galacticFilterHaloMassRange_"                    />
     <objectDestructor name="galacticFilterParentMassMinimum_"               />
     <objectDestructor name="galacticFilterParentMassMaximum_"               />
     <objectDestructor name="galacticFilterParentNode_"                      />
     <objectDestructor name="galacticFilterNot_"                             />
     <objectDestructor name="galacticFilter_"                                />
-    <objectDestructor name="nodePropertyExtractor_"                         />
+    <objectDestructor name="nodePropertyExtractorNodeFormationTime_"         />
     <objectDestructor name="nodePropertyExtractorMassProgenitor_"           />
     <objectDestructor name="nodePropertyExtractorParentNode_"               />
     <objectDestructor name="outputAnalysisDistributionNormalizerUnitarity_" />
     <objectDestructor name="outputAnalysisDistributionNormalizerBinWidth_"  />
     <objectDestructor name="outputAnalysisDistributionNormalizer_"          />
-    <objectDestructor name="outputAnalysisPropertyIdentity_"                />
+    <objectDestructor name="outputAnalysisPropertyOperatorIdentity_"        />
     <objectDestructor name="outputAnalysisWeightOperatorSubsampling_"       />
     !!]
     if (self%alwaysIsolatedOnly) then
