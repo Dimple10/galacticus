@@ -209,7 +209,7 @@ contains
          <description>Label for the target dataset.</description>
        </inputParameter>
        !!]
-       self=formationTimeDistributionConstructorFile(char(fileName),label,comment,targetLabel,indexParent,indexRedshift,redshiftParent,redshiftMinimum,redshiftMaximum,covarianceDiagonalize,covarianceTargetOnly,rootVarianceTargetFractional,alwaysIsolatedOnly,cosmologyFunctions_,cosmologyParameters_,darkMatterProfileDMO_,virialDensityContrast_,virialDensityContrastDefinition_,nbodyHaloMassError_,outputTimes_)
+       self=outputAnalysisFormationTimeDistribution(char(fileName),label,comment,targetLabel,redshiftParent,indexParent,indexRedshift,covarianceDiagonalize,covarianceTargetOnly,rootVarianceTargetFractional,alwaysIsolatedOnly,cosmologyFunctions_,cosmologyParameters_,darkMatterProfileDMO_,virialDensityContrast_,virialDensityContrastDefinition_,nbodyHaloMassError_,outputTimes_)
     else
        !![
        <inputParameter>
@@ -340,7 +340,7 @@ contains
     return
   end function formationTimeDistributionConstructorParameters
   
-  function formationTimeDistributionConstructorFile(fileName,label,comment,targetLabel,indexParent,indexRedshift,redshiftParent,redshiftMinimum,redshiftMaximum,covarianceDiagonalize,covarianceTargetOnly,rootVarianceTargetFractional,alwaysIsolatedOnly,cosmologyFunctions_,cosmologyParameters_,darkMatterProfileDMO_,virialDensityContrast_,virialDensityContrastDefinition_,nbodyHaloMassError_,outputTimes_) result(self)
+  function formationTimeDistributionConstructorFile(fileName,label,comment,targetLabel,redshiftParent,indexParent,indexRedshift,covarianceDiagonalize,covarianceTargetOnly,rootVarianceTargetFractional,alwaysIsolatedOnly,cosmologyFunctions_,cosmologyParameters_,darkMatterProfileDMO_,virialDensityContrast_,virialDensityContrastDefinition_,nbodyHaloMassError_,outputTimes_) result(self)
     !!{
     Constructor for the ``formationTimeDistribution'' output analysis class which reads all required properties from file.
     !!}
@@ -356,7 +356,8 @@ contains
     type            (varying_string                      ), intent(in   )                                :: label                          , targetLabel               , &
          &                                                                                                  comment
     integer                                               , intent(in   )                                :: indexParent                    , indexRedshift
-    <!--double precision                                      , intent(in   )                                :: redshiftMinimum                , redshiftMaximum           , redshiftParent --/>
+    double precision                                      , intent(in   )                                :: redshiftParent
+    !--double precision                                      , intent(in   )                                :: redshiftMinimum                , redshiftMaximum           , redshiftParent --/>
     double precision                                      , intent(in   ), allocatable, dimension(:    ) :: rootVarianceTargetFractional
     logical                                               , intent(in   )                                :: covarianceDiagonalize          , covarianceTargetOnly      , &
          &                                                                                                  alwaysIsolatedOnly
@@ -367,7 +368,8 @@ contains
     class           (virialDensityContrastClass          ), intent(in   ), target                        :: virialDensityContrastDefinition_, virialDensityContrast_
     class           (nbodyHaloMassErrorClass             ), intent(in   ), target                        :: nbodyHaloMassError_
     double precision                                                                                     :: massParentMinimum               , massParentMaximum        , &
-         &                                                                                                  timeProgenitor                  , timeParent
+         &                                                                                                  timeProgenitor                  , timeParent               , &
+         &                                                                                                  redshiftMinimum                 , redshiftMaximum
     double precision                                                     , allocatable, dimension(:    ) :: functionValueTarget             , massRatio                , &
          &                                                                                                  redshiftProgenitor_val          , massParents              , &
          &                                                                                                  massParentsMinimum              , massParentsMaximum
@@ -407,6 +409,7 @@ contains
     redshiftMinimum =redshiftProgenitor_val(1)
     redshiftMaximum =redshiftProgenitor_val(size(redshiftProgenitor_val))
     redshiftProgenitor  =redshiftProgenitor_val(indexRedshift+1)
+    !redshiftParent  =redshiftProgenitor_val(indexParent+1)
     ! Extract the target function values.
     allocate(functionValueTarget(size(redshiftProgenitor_val)))
     functionValueTarget=functionValuesTarget(indexParent+1,:,indexRedshift+1)
@@ -421,7 +424,7 @@ contains
     timeProgenitor    =cosmologyFunctions_%cosmicTime(cosmologyFunctions_%expansionFactorFromRedshift(redshiftProgenitor))
     timeParent        =cosmologyFunctions_%cosmicTime(cosmologyFunctions_%expansionFactorFromRedshift(redshiftParent    ))
     ! Build the object.
-    self              =formationTimeDistributionConstructorInternal(label,comment,redshiftMinimum,redshiftMaximum,size(redshiftProgenitor_val,kind=c_size_t),massParentMinimum,massParentMaximum,timeProgenitor,timeParent,alwaysIsolatedOnly,covarianceDiagonalize,covarianceTargetOnly,rootVarianceTargetFractional,cosmologyParameters_,cosmologyFunctions_,darkMatterProfileDMO_,virialDensityContrast_,virialDensityContrastDefinition_,nbodyHaloMassError_,outputTimes_,targetLabel,functionValueTarget,functionCovarianceTarget)
+    self              =outputAnalysisFormationTimeDistribution(label,comment,redshiftMinimum,redshiftMaximum,size(redshiftProgenitor_val,kind=c_size_t),massParentMinimum,massParentMaximum,timeProgenitor,timeParent,alwaysIsolatedOnly,covarianceDiagonalize,covarianceTargetOnly,rootVarianceTargetFractional,cosmologyParameters_,cosmologyFunctions_,darkMatterProfileDMO_,virialDensityContrast_,virialDensityContrastDefinition_,nbodyHaloMassError_,outputTimes_,targetLabel,functionValueTarget,functionCovarianceTarget)
     !![
     <constructorAssign variables="fileName, indexParent, indexRedshift"/>
     !!]
@@ -459,7 +462,7 @@ contains
     integer         (c_size_t                                        ), intent(in   )                           :: countRedshiftProgenitor
     logical                                                           , intent(in   )                           :: alwaysIsolatedOnly                                     , covarianceDiagonalize                   , &
          &                                                                                                         covarianceTargetOnly
-    <!--double precision                                                  , intent(in   )                           :: redshiftMinimum                                        , redshiftMaximum --/>
+    double precision                                                  , intent(in   )                           :: redshiftMinimum                                        , redshiftMaximum
     class           (cosmologyParametersClass                        ), intent(inout), target                   :: cosmologyParameters_
     class           (cosmologyFunctionsClass                         ), intent(inout), target                   :: cosmologyFunctions_
     class           (darkMatterProfileDMOClass                       ), intent(in   ), target                   :: darkMatterProfileDMO_
@@ -491,11 +494,11 @@ contains
     type            (outputAnalysisDistributionNormalizerSequence    ), pointer                                 :: outputAnalysisDistributionNormalizer_
     type            (outputAnalysisDistributionNormalizerUnitarity   ), pointer                                 :: outputAnalysisDistributionNormalizerUnitarity_
     type            (outputAnalysisDistributionNormalizerBinWidth    ), pointer                                 :: outputAnalysisDistributionNormalizerBinWidth_
-    type            (outputAnalysisDistributionOperatorIdentity      ), pointer                                 :: outputAnalysisDistributionOperatorIdentity_
     type            (normalizerList                                  ), pointer                                 :: normalizer_
     type            (weightOperatorList                              ), pointer                                 :: weightOperator_
     type            (outputAnalysisWeightOperatorSubsampling         ), pointer                                 :: outputAnalysisWeightOperatorSubsampling_
     type            (outputAnalysisPropertyOperatorIdentity          ), pointer                                 :: outputAnalysisPropertyOperatorIdentity_
+    type            (outputAnalysisDistributionOperatorIdentity      ), pointer                                 :: outputAnalysisDistributionOperatorIdentity_
     integer         (c_size_t                                        )                                          :: iOutput                                                , bufferCount
     type            (varying_string                                  )                                          :: message
     character       (len=10                                          )                                          :: timeLabel
@@ -612,6 +615,12 @@ contains
     allocate(     outputAnalysisPropertyOperatorIdentity_  )
     !![
     <referenceConstruct                             object="outputAnalysisPropertyOperatorIdentity_"  constructor="outputAnalysisPropertyOperatorIdentity          (                                                                                                                                        )"/>
+    !!]
+    ! Build outputAnalysisDistributionOperatorIdentity
+    allocate(     outputAnalysisDistributionOperatorIdentity_  )
+    !![
+    <referenceConstruct                             object="outputAnalysisDistributionOperatorIdentity_"  constructor="outputAnalysisDistributionOperatorIdentity       (
+                                                                                                                          )"/>
     !!]
     ! Build a weight operator that accounts for subsampling weights.
     allocate(     outputAnalysisWeightOperatorSubsampling_ )
