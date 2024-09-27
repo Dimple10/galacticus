@@ -36,8 +36,8 @@
       <massRatioProgenitorMaximum value="10" />
       <massRatioProgenitorMinimum value="1e-05" />
       <orderMaximum value="2" />
-      <simulationReference value="Klypin, Yepes, Gottlober, Hess; 2016; MNRAS; 457; 4340" />
-      <simulationURL value="https://www.cosmosim.org/cms/simulations/mdpl2/" />
+      <simulationReference value="Nadler et al.; 2022;"/>
+      <simulationURL value="http://web.stanford.edu/group/gfc/symphony" />
       <snapshotParents value="125" />
       <snapshotsProgenitors value="124 120 107 94 75 52 26" />
     </nbodyOperator>
@@ -50,8 +50,8 @@
       <redshiftFormationMinimum value="0.0" />
       <redshiftFormationMaximum value="10.0" />
       <fractionFormation value="0.5" />
-      <simulationReference value="Klypin, Yepes, Gottlober, Hess; 2016; MNRAS; 457; 4340" />
-      <simulationURL value="https://www.cosmosim.org/cms/simulations/mdpl2/" />
+      <simulationReference value="Nadler et al.; 2022;" />
+      <simulationURL value="http://web.stanford.edu/group/gfc/symphony" />
       <snapshotParents value="125" />
     </nbodyOperator>
     <nbodyOperator value="timeLastMajorMerger">
@@ -63,8 +63,8 @@
       <redshiftMergerMinimum value="0.0" />
       <redshiftMergerMaximum value="10.0" />
       <ratioMajor value="0.3" />
-      <simulationReference value="Klypin, Yepes, Gottlober, Hess; 2016; MNRAS; 457; 4340" />
-      <simulationURL value="https://www.cosmosim.org/cms/simulations/mdpl2/" />
+      <simulationReference value="Nadler et al.; 2022;" />
+      <simulationURL value="http://web.stanford.edu/group/gfc/symphony" />
       <snapshotParents value="125" />
     </nbodyOperator>
   </nbodyOperator>

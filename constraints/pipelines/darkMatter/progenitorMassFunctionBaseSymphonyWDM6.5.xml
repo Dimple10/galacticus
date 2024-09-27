@@ -8,7 +8,7 @@
   <!-- Include parameters -->
   <xi:include href="haloMassFunctionParameters.xml" xpointer="xpointer(parameters/*)" xmlns:xi="http://www.w3.org/2001/XInclude"/>
   <xi:include href="simulation_Symphony_MilkyWay.xml"        xpointer="xpointer(parameters/*)" xmlns:xi="http://www.w3.org/2001/XInclude"/>
-  <xi:include href="cosmology_Symphony.xml"         xpointer="xpointer(parameters/*)" xmlns:xi="http://www.w3.org/2001/XInclude"/>
+  <xi:include href="cosmology_Symphony_nonCDM.xml"         xpointer="xpointer(parameters/*)" xmlns:xi="http://www.w3.org/2001/XInclude"/>
   <xi:include href="transferFunction_Symphony_WDM6.5.xml"     xpointer="xpointer(parameters/*)" xmlns:xi="http://www.w3.org/2001/XInclude"/>
   <xi:include href="progenitorMassFunctionParameters.xml" xpointer="xpointer(parameters/*)" xmlns:xi="http://www.w3.org/2001/XInclude"/>
   <xi:include href="progenitorMassFunctionResolution.xml" xpointer="xpointer(parameters/*)" xmlns:xi="http://www.w3.org/2001/XInclude"/>

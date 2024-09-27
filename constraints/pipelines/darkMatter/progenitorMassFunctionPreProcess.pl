@@ -521,7 +521,7 @@ sub symphonyZoomInBuilder {
 
     # Set snapshots to process for each resolution, corresponding to z ~ 0.0, 0.02, 0.1, 0.5, 1.0, 2.0, 4.0, 8.0.
     # expansion factors:  1.0000,   0.66503,   0.50239,   0.32987,   0.20064 (grabs from snapshot #)
-    # my $snapshots = "235  203  181 148 109";
+    my $snapshots = "235  203  181 148 109";
     
     # Initialize lists of parent halo masses.
     my $massParent;
@@ -535,7 +535,8 @@ sub symphonyZoomInBuilder {
     $parameters->{'cosmologyParameters'}->{'OmegaBaryon'    }->{'value'} =  0.047;
     # List available simulations
     my @models;
-    find( (sub {my @path = split(/\//,$File::Find::dir);push(@models,$_ eq "tree_0_0_0.dat" ? {simulation => $path[-2], realization => $path[-1]}  : ())}), ($options{'simulationDataPath'}."/Symphony_ZoomIns") );
+    find( { wanted => (sub {my @path = split(/\//,$File::Find::dir);push(@models,$_ eq "tree_0_0_0.dat" ? {simulation => $path[-2], realization => $path[-1]}  : ())}), follow => 1, follow_skip => 2 }, ($options{'simulationDataPath'}."/Symphony_ZoomIns") );
+    #find( wanted => (sub {my @path = split(/\//,$File::Find::dir);push(@models,$_ eq "tree_0_0_0.dat" ? {simulation => $path[-2], realization => $path[-1]}  : ())}), ($options{'simulationDataPath'}."/Symphony_ZoomIns") );
     #splice(@models,1); ##NOTE-- deletes everything but first entry to test 1
     my $xml         = new XML::Simple();
     my $hostHaloIDs = $xml->XMLin("constraints/pipelines/darkMatter/symphonyZoomInHostHaloIDs.xml");
@@ -575,11 +576,11 @@ sub symphonyZoomInBuilder {
 	# Clone parameters.
 	my $parameters_ = dclone($parameters);
 	# Set output file.
-	$parameters_->{'nbodyOperator'}->{'nbodyOperator'}->[6]->{'fileName'}->{'value'} = $outputFileName;
+	$parameters_->{'nbodyOperator'}->{'nbodyOperator'}->[5]->{'fileName'}->{'value'} = $outputFileName;
 	# Set the snapshots to select.
 	#$parameters_->{'nbodyOperator'}->{'nbodyOperator'}->[3]->{'selectedValues'}->{'value'} = $snapshots;
 	# Set the hostedRootID to select.
-	$parameters_->{'nbodyOperator'}->{'nbodyOperator'}->[4]->{'selectedValues'}->{'value'} = $model->{'hostHaloID'};
+	$parameters_->{'nbodyOperator'}->{'nbodyOperator'}->[3]->{'selectedValues'}->{'value'} = $model->{'hostHaloID'};
 	# Add an operator to shift snapshot numbers. All Symphony simulations should have 235 snapshots. There are fewer
 	# snapshots in the Rockstar trees because Rockstar ignores snapshots with no halos and renumbers. So, here we want to
 	# adjust the snapshot numbers such that a=1 is always snapshot 235.
@@ -656,12 +657,18 @@ sub symphonyZoomInBuilder {
     # Add an importer for each parent.
     @{$massFunctionParameters->{'nbodyImporter'}->{'nbodyImporter'}} =
         map
-    {{
+    {
+       $_ eq "Halo004" || $_ eq "Halo113"
+       ?
+       ()
+       :
+       {
     	value      => "IRATE",
     	fileName   => {value => $simulation->{'path'}.$modelGroup."/".$_."/identifyNonFlyby_progenitors.hdf5"},
     	properties => {value => "massVirial expansionFactor hostedRootID snapshotID particleID descendantID"},
     	snapshot   => {value => "1"}
-    }} @{$modelRealizations{$modelGroup}}; ## NOTE: This line is currently incomplete - it will need to be given the list of realizations available for this "group" (i.e. "@{$modelRealizations{$modelGroup}}"). And, the "fileName" will need to be changed to use the appropriate filename for the Symphony simulation for this group and realization, so something like: fileName => {value => $simulation->{'path'}.$modelGroup."/".$_."/identifyNonFlyby_progenitors.hdf5"}.
+       }
+    } @{$modelRealizations{$modelGroup}}; ## NOTE: This line is currently incomplete - it will need to be given the list of realizations available for this "group" (i.e. "@{$modelRealizations{$modelGroup}}"). And, the "fileName" will need to be changed to use the appropriate filename for the Symphony simulation for this group and realization, so something like: fileName => {value => $simulation->{'path'}.$modelGroup."/".$_."/identifyNonFlyby_progenitors.hdf5"}.
     
     # Determine minimum and maximum progenitor mass ratios for the mass function.
     my $massParticle;
@@ -713,9 +720,9 @@ sub symphonyZoomInBuilder {
     $massFunctionParameters  ->{'nbodyOperator'     }->{'nbodyOperator'}->[2]->{'snapshotParents'           }->{'value'} = $snapshotParents;
     $massFunctionParameters  ->{'nbodyOperator'     }->{'nbodyOperator'}->[2]->{'snapshotsProgenitors'      }->{'value'} = $snapshotsProgenitors;
     $massFunctionParameters  ->{'nbodyOperator'     }->{'nbodyOperator'}->[3]->{'snapshotParents'           }->{'value'} = $snapshotParents;
-    $massFunctionParameters  ->{'nbodyOperator'     }->{'nbodyOperator'}->[3]->{'snapshotsProgenitors'      }->{'value'} = $snapshotsProgenitors;
+    #$massFunctionParameters  ->{'nbodyOperator'     }->{'nbodyOperator'}->[3]->{'snapshotsProgenitors'      }->{'value'} = $snapshotsProgenitors;
     $massFunctionParameters  ->{'nbodyOperator'     }->{'nbodyOperator'}->[4]->{'snapshotParents'           }->{'value'} = $snapshotParents;
-    $massFunctionParameters  ->{'nbodyOperator'     }->{'nbodyOperator'}->[4]->{'snapshotsProgenitors'      }->{'value'} = $snapshotsProgenitors;
+    #$massFunctionParameters  ->{'nbodyOperator'     }->{'nbodyOperator'}->[4]->{'snapshotsProgenitors'      }->{'value'} = $snapshotsProgenitors;
     # Set other task properties.
     $massFunctionParameters  ->{'outputFileName'}                                                              ->{'value'} = $outputFileName;
     $massFunctionParameters  ->{'nbodyOperator'     }->{'nbodyOperator'}->[1]->{'description'               }->{'value'} = $simulation->{'description'        };

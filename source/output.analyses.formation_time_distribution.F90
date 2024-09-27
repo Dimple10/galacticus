@@ -448,6 +448,7 @@ contains
     use :: Error                                   , only : Error_Report
     use :: Output_Analysis_Distribution_Normalizers, only : normalizerList                                  , outputAnalysisDistributionNormalizerUnitarity , outputAnalysisDistributionNormalizerBinWidth,&
       &                                                     outputAnalysisDistributionNormalizerSequence
+    use :: Output_Analysis_Distribution_Operators  , only : outputAnalysisDistributionOperatorIdentity
     use :: Output_Analysis_Weight_Operators        , only : outputAnalysisWeightOperatorSubsampling         , weightOperatorList
     use :: Output_Analysis_Property_Operators      , only : outputAnalysisPropertyOperatorIdentity
     use :: Output_Analyses_Options                 , only : outputAnalysisCovarianceModelPoisson
@@ -619,8 +620,7 @@ contains
     ! Build outputAnalysisDistributionOperatorIdentity
     allocate(     outputAnalysisDistributionOperatorIdentity_  )
     !![
-    <referenceConstruct                             object="outputAnalysisDistributionOperatorIdentity_"  constructor="outputAnalysisDistributionOperatorIdentity       (
-                                                                                                                          )"/>
+    <referenceConstruct                             object="outputAnalysisDistributionOperatorIdentity_"  constructor="outputAnalysisDistributionOperatorIdentity( )"/>
     !!]
     ! Build a weight operator that accounts for subsampling weights.
     allocate(     outputAnalysisWeightOperatorSubsampling_ )
