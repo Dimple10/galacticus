@@ -1,0 +1,484 @@
+diff --git a/constraints/pipelines/darkMatter/cosmology_MDPL.xml b/constraints/pipelines/darkMatter/cosmology_MDPL.xml
+index 412f77207..daa4c08bd 100644
+--- a/constraints/pipelines/darkMatter/cosmology_MDPL.xml
++++ b/constraints/pipelines/darkMatter/cosmology_MDPL.xml
+@@ -25,10 +25,7 @@
+       <running             value="0.000"/>
+     </powerSpectrumPrimordial>
+   </powerSpectrumPrimordial>
+-  <powerSpectrumWindowFunction value="ETHOS">
+-    <cW   value="=[haloMassFunctionParameters::cW]"  />
+-    <beta value="=[haloMassFunctionParameters::beta]"/>
+-  </powerSpectrumWindowFunction>
++  <powerSpectrumWindowFunction value="topHat"/>
+   <cosmologicalMassVariance value="filteredPower">
+     <!-- Normalize to a reference power spectrum at small scales because the actual power spectrum we used excludes modes which do
+          not fit into the cosmological box. Normalizing that power spectrum would result in too much power on small scales to
+diff --git a/constraints/pipelines/darkMatter/progenitorMassFunctionBaseSymphonyIDM1GeV_envelope.xml b/constraints/pipelines/darkMatter/progenitorMassFunctionBaseSymphonyIDM1GeV_envelope.xml
+index d7ff0a13a..e50d036c5 100644
+--- a/constraints/pipelines/darkMatter/progenitorMassFunctionBaseSymphonyIDM1GeV_envelope.xml
++++ b/constraints/pipelines/darkMatter/progenitorMassFunctionBaseSymphonyIDM1GeV_envelope.xml
+@@ -8,7 +8,7 @@
+   <!-- Include parameters -->
+   <xi:include href="haloMassFunctionParameters.xml" xpointer="xpointer(parameters/*)" xmlns:xi="http://www.w3.org/2001/XInclude"/>
+   <xi:include href="simulation_Symphony_MilkyWay.xml"        xpointer="xpointer(parameters/*)" xmlns:xi="http://www.w3.org/2001/XInclude"/>
+-  <xi:include href="cosmology_Symphony.xml"         xpointer="xpointer(parameters/*)" xmlns:xi="http://www.w3.org/2001/XInclude"/>
++  <xi:include href="cosmology_Symphony_nonCDM.xml"         xpointer="xpointer(parameters/*)" xmlns:xi="http://www.w3.org/2001/XInclude"/>
+   <xi:include href="transferFunction_Symphony_IDM1GeV_envelope.xml"     xpointer="xpointer(parameters/*)" xmlns:xi="http://www.w3.org/2001/XInclude"/>
+   <xi:include href="progenitorMassFunctionParameters.xml" xpointer="xpointer(parameters/*)" xmlns:xi="http://www.w3.org/2001/XInclude"/>
+   <xi:include href="progenitorMassFunctionResolution.xml" xpointer="xpointer(parameters/*)" xmlns:xi="http://www.w3.org/2001/XInclude"/>
+diff --git a/constraints/pipelines/darkMatter/progenitorMassFunctionBaseSymphonyIDM1GeV_halfmode.xml b/constraints/pipelines/darkMatter/progenitorMassFunctionBaseSymphonyIDM1GeV_halfmode.xml
+index 07fc6d06e..2fa99890d 100644
+--- a/constraints/pipelines/darkMatter/progenitorMassFunctionBaseSymphonyIDM1GeV_halfmode.xml
++++ b/constraints/pipelines/darkMatter/progenitorMassFunctionBaseSymphonyIDM1GeV_halfmode.xml
+@@ -8,7 +8,7 @@
+   <!-- Include parameters -->
+   <xi:include href="haloMassFunctionParameters.xml" xpointer="xpointer(parameters/*)" xmlns:xi="http://www.w3.org/2001/XInclude"/>
+   <xi:include href="simulation_Symphony_MilkyWay.xml"        xpointer="xpointer(parameters/*)" xmlns:xi="http://www.w3.org/2001/XInclude"/>
+-  <xi:include href="cosmology_Symphony.xml"         xpointer="xpointer(parameters/*)" xmlns:xi="http://www.w3.org/2001/XInclude"/>
++  <xi:include href="cosmology_Symphony_nonCDM.xml"         xpointer="xpointer(parameters/*)" xmlns:xi="http://www.w3.org/2001/XInclude"/>
+   <xi:include href="transferFunction_Symphony_IDM1GeV_halfmode.xml"     xpointer="xpointer(parameters/*)" xmlns:xi="http://www.w3.org/2001/XInclude"/>
+   <xi:include href="progenitorMassFunctionParameters.xml" xpointer="xpointer(parameters/*)" xmlns:xi="http://www.w3.org/2001/XInclude"/>
+   <xi:include href="progenitorMassFunctionResolution.xml" xpointer="xpointer(parameters/*)" xmlns:xi="http://www.w3.org/2001/XInclude"/>
+diff --git a/constraints/pipelines/darkMatter/progenitorMassFunctionBaseSymphonyIDM1e-2GeV_envelope.xml b/constraints/pipelines/darkMatter/progenitorMassFunctionBaseSymphonyIDM1e-2GeV_envelope.xml
+index 71208165f..71c1d7406 100644
+--- a/constraints/pipelines/darkMatter/progenitorMassFunctionBaseSymphonyIDM1e-2GeV_envelope.xml
++++ b/constraints/pipelines/darkMatter/progenitorMassFunctionBaseSymphonyIDM1e-2GeV_envelope.xml
+@@ -8,7 +8,7 @@
+   <!-- Include parameters -->
+   <xi:include href="haloMassFunctionParameters.xml" xpointer="xpointer(parameters/*)" xmlns:xi="http://www.w3.org/2001/XInclude"/>
+   <xi:include href="simulation_Symphony_MilkyWay.xml"        xpointer="xpointer(parameters/*)" xmlns:xi="http://www.w3.org/2001/XInclude"/>
+-  <xi:include href="cosmology_Symphony.xml"         xpointer="xpointer(parameters/*)" xmlns:xi="http://www.w3.org/2001/XInclude"/>
++  <xi:include href="cosmology_Symphony_nonCDM.xml"         xpointer="xpointer(parameters/*)" xmlns:xi="http://www.w3.org/2001/XInclude"/>
+   <xi:include href="transferFunction_Symphony_IDM1e-2GeV_envelope.xml"     xpointer="xpointer(parameters/*)" xmlns:xi="http://www.w3.org/2001/XInclude"/>
+   <xi:include href="progenitorMassFunctionParameters.xml" xpointer="xpointer(parameters/*)" xmlns:xi="http://www.w3.org/2001/XInclude"/>
+   <xi:include href="progenitorMassFunctionResolution.xml" xpointer="xpointer(parameters/*)" xmlns:xi="http://www.w3.org/2001/XInclude"/>
+diff --git a/constraints/pipelines/darkMatter/progenitorMassFunctionBaseSymphonyIDM1e-2GeV_halfmode.xml b/constraints/pipelines/darkMatter/progenitorMassFunctionBaseSymphonyIDM1e-2GeV_halfmode.xml
+index f9c843a92..c50a4ab50 100644
+--- a/constraints/pipelines/darkMatter/progenitorMassFunctionBaseSymphonyIDM1e-2GeV_halfmode.xml
++++ b/constraints/pipelines/darkMatter/progenitorMassFunctionBaseSymphonyIDM1e-2GeV_halfmode.xml
+@@ -8,7 +8,7 @@
+   <!-- Include parameters -->
+   <xi:include href="haloMassFunctionParameters.xml" xpointer="xpointer(parameters/*)" xmlns:xi="http://www.w3.org/2001/XInclude"/>
+   <xi:include href="simulation_Symphony_MilkyWay.xml"        xpointer="xpointer(parameters/*)" xmlns:xi="http://www.w3.org/2001/XInclude"/>
+-  <xi:include href="cosmology_Symphony.xml"         xpointer="xpointer(parameters/*)" xmlns:xi="http://www.w3.org/2001/XInclude"/>
++  <xi:include href="cosmology_Symphony_nonCDM.xml"         xpointer="xpointer(parameters/*)" xmlns:xi="http://www.w3.org/2001/XInclude"/>
+   <xi:include href="transferFunction_Symphony_IDM1e-2GeV_halfmode.xml"     xpointer="xpointer(parameters/*)" xmlns:xi="http://www.w3.org/2001/XInclude"/>
+   <xi:include href="progenitorMassFunctionParameters.xml" xpointer="xpointer(parameters/*)" xmlns:xi="http://www.w3.org/2001/XInclude"/>
+   <xi:include href="progenitorMassFunctionResolution.xml" xpointer="xpointer(parameters/*)" xmlns:xi="http://www.w3.org/2001/XInclude"/>
+diff --git a/constraints/pipelines/darkMatter/progenitorMassFunctionBaseSymphonyIDM1e-4GeV_envelope.xml b/constraints/pipelines/darkMatter/progenitorMassFunctionBaseSymphonyIDM1e-4GeV_envelope.xml
+index efa6c34c0..f7d4998e6 100644
+--- a/constraints/pipelines/darkMatter/progenitorMassFunctionBaseSymphonyIDM1e-4GeV_envelope.xml
++++ b/constraints/pipelines/darkMatter/progenitorMassFunctionBaseSymphonyIDM1e-4GeV_envelope.xml
+@@ -8,7 +8,7 @@
+   <!-- Include parameters -->
+   <xi:include href="haloMassFunctionParameters.xml" xpointer="xpointer(parameters/*)" xmlns:xi="http://www.w3.org/2001/XInclude"/>
+   <xi:include href="simulation_Symphony_MilkyWay.xml"        xpointer="xpointer(parameters/*)" xmlns:xi="http://www.w3.org/2001/XInclude"/>
+-  <xi:include href="cosmology_Symphony.xml"         xpointer="xpointer(parameters/*)" xmlns:xi="http://www.w3.org/2001/XInclude"/>
++  <xi:include href="cosmology_Symphony_nonCDM.xml"         xpointer="xpointer(parameters/*)" xmlns:xi="http://www.w3.org/2001/XInclude"/>
+   <xi:include href="transferFunction_Symphony_IDM1e-4GeV_envelope.xml"     xpointer="xpointer(parameters/*)" xmlns:xi="http://www.w3.org/2001/XInclude"/>
+   <xi:include href="progenitorMassFunctionParameters.xml" xpointer="xpointer(parameters/*)" xmlns:xi="http://www.w3.org/2001/XInclude"/>
+   <xi:include href="progenitorMassFunctionResolution.xml" xpointer="xpointer(parameters/*)" xmlns:xi="http://www.w3.org/2001/XInclude"/>
+diff --git a/constraints/pipelines/darkMatter/progenitorMassFunctionBaseSymphonyIDM1e-4GeV_halfmode.xml b/constraints/pipelines/darkMatter/progenitorMassFunctionBaseSymphonyIDM1e-4GeV_halfmode.xml
+index d7c0eddef..e51dfd161 100644
+--- a/constraints/pipelines/darkMatter/progenitorMassFunctionBaseSymphonyIDM1e-4GeV_halfmode.xml
++++ b/constraints/pipelines/darkMatter/progenitorMassFunctionBaseSymphonyIDM1e-4GeV_halfmode.xml
+@@ -8,7 +8,7 @@
+   <!-- Include parameters -->
+   <xi:include href="haloMassFunctionParameters.xml" xpointer="xpointer(parameters/*)" xmlns:xi="http://www.w3.org/2001/XInclude"/>
+   <xi:include href="simulation_Symphony_MilkyWay.xml"        xpointer="xpointer(parameters/*)" xmlns:xi="http://www.w3.org/2001/XInclude"/>
+-  <xi:include href="cosmology_Symphony.xml"         xpointer="xpointer(parameters/*)" xmlns:xi="http://www.w3.org/2001/XInclude"/>
++  <xi:include href="cosmology_Symphony_nonCDM.xml"         xpointer="xpointer(parameters/*)" xmlns:xi="http://www.w3.org/2001/XInclude"/>
+   <xi:include href="transferFunction_Symphony_IDM1e-4GeV_halfmode.xml"     xpointer="xpointer(parameters/*)" xmlns:xi="http://www.w3.org/2001/XInclude"/>
+   <xi:include href="progenitorMassFunctionParameters.xml" xpointer="xpointer(parameters/*)" xmlns:xi="http://www.w3.org/2001/XInclude"/>
+   <xi:include href="progenitorMassFunctionResolution.xml" xpointer="xpointer(parameters/*)" xmlns:xi="http://www.w3.org/2001/XInclude"/>
+diff --git a/constraints/pipelines/darkMatter/progenitorMassFunctionBaseSymphonyLMC.xml b/constraints/pipelines/darkMatter/progenitorMassFunctionBaseSymphonyLMC.xml
+index 60006cdb4..ff70d1ffc 100644
+--- a/constraints/pipelines/darkMatter/progenitorMassFunctionBaseSymphonyLMC.xml
++++ b/constraints/pipelines/darkMatter/progenitorMassFunctionBaseSymphonyLMC.xml
+@@ -8,7 +8,7 @@
+   <!-- Include parameters -->
+   <xi:include href="haloMassFunctionParameters.xml" xpointer="xpointer(parameters/*)" xmlns:xi="http://www.w3.org/2001/XInclude"/>
+   <xi:include href="simulation_Symphony_LMC.xml"        xpointer="xpointer(parameters/*)" xmlns:xi="http://www.w3.org/2001/XInclude"/>
+-  <xi:include href="cosmology_Symphony.xml"         xpointer="xpointer(parameters/*)" xmlns:xi="http://www.w3.org/2001/XInclude"/>
++  <xi:include href="cosmology_Symphony_nonCDM.xml"         xpointer="xpointer(parameters/*)" xmlns:xi="http://www.w3.org/2001/XInclude"/>
+   <xi:include href="transferFunction_Symphony_CDM.xml"     xpointer="xpointer(parameters/*)" xmlns:xi="http://www.w3.org/2001/XInclude"/>
+   <xi:include href="progenitorMassFunctionParameters.xml" xpointer="xpointer(parameters/*)" xmlns:xi="http://www.w3.org/2001/XInclude"/>
+   <xi:include href="progenitorMassFunctionResolution.xml" xpointer="xpointer(parameters/*)" xmlns:xi="http://www.w3.org/2001/XInclude"/>
+diff --git a/constraints/pipelines/darkMatter/progenitorMassFunctionBaseSymphonyMilkyWay.xml b/constraints/pipelines/darkMatter/progenitorMassFunctionBaseSymphonyMilkyWay.xml
+index c4a90d440..3693a1187 100644
+--- a/constraints/pipelines/darkMatter/progenitorMassFunctionBaseSymphonyMilkyWay.xml
++++ b/constraints/pipelines/darkMatter/progenitorMassFunctionBaseSymphonyMilkyWay.xml
+@@ -8,7 +8,7 @@
+   <!-- Include parameters -->
+   <xi:include href="haloMassFunctionParameters.xml" xpointer="xpointer(parameters/*)" xmlns:xi="http://www.w3.org/2001/XInclude"/>
+   <xi:include href="simulation_Symphony_MilkyWay.xml"        xpointer="xpointer(parameters/*)" xmlns:xi="http://www.w3.org/2001/XInclude"/>
+-  <xi:include href="cosmology_Symphony.xml"         xpointer="xpointer(parameters/*)" xmlns:xi="http://www.w3.org/2001/XInclude"/>
++  <xi:include href="cosmology_Symphony_CDM.xml"         xpointer="xpointer(parameters/*)" xmlns:xi="http://www.w3.org/2001/XInclude"/>
+   <xi:include href="transferFunction_Symphony_CDM.xml"     xpointer="xpointer(parameters/*)" xmlns:xi="http://www.w3.org/2001/XInclude"/>
+   <xi:include href="progenitorMassFunctionParameters.xml" xpointer="xpointer(parameters/*)" xmlns:xi="http://www.w3.org/2001/XInclude"/>
+   <xi:include href="progenitorMassFunctionResolution.xml" xpointer="xpointer(parameters/*)" xmlns:xi="http://www.w3.org/2001/XInclude"/>
+diff --git a/constraints/pipelines/darkMatter/progenitorMassFunctionBaseSymphonyMilkyWay_hires.xml b/constraints/pipelines/darkMatter/progenitorMassFunctionBaseSymphonyMilkyWay_hires.xml
+index adeb270b4..3c8808eef 100644
+--- a/constraints/pipelines/darkMatter/progenitorMassFunctionBaseSymphonyMilkyWay_hires.xml
++++ b/constraints/pipelines/darkMatter/progenitorMassFunctionBaseSymphonyMilkyWay_hires.xml
+@@ -8,7 +8,7 @@
+   <!-- Include parameters -->
+   <xi:include href="haloMassFunctionParameters.xml" xpointer="xpointer(parameters/*)" xmlns:xi="http://www.w3.org/2001/XInclude"/>
+   <xi:include href="simulation_Symphony_MilkyWay_hires.xml"        xpointer="xpointer(parameters/*)" xmlns:xi="http://www.w3.org/2001/XInclude"/>
+-  <xi:include href="cosmology_Symphony.xml"         xpointer="xpointer(parameters/*)" xmlns:xi="http://www.w3.org/2001/XInclude"/>
++  <xi:include href="cosmology_Symphony_CDM.xml"         xpointer="xpointer(parameters/*)" xmlns:xi="http://www.w3.org/2001/XInclude"/>
+   <xi:include href="transferFunction_Symphony_CDM.xml"     xpointer="xpointer(parameters/*)" xmlns:xi="http://www.w3.org/2001/XInclude"/>
+   <xi:include href="mergerTreeEvolution.xml"        xpointer="xpointer(parameters/*)" xmlns:xi="http://www.w3.org/2001/XInclude"/>
+ 
+diff --git a/constraints/pipelines/darkMatter/progenitorMassFunctionBaseSymphonyWDM10.xml b/constraints/pipelines/darkMatter/progenitorMassFunctionBaseSymphonyWDM10.xml
+index 5838792e4..ba017e6c9 100644
+--- a/constraints/pipelines/darkMatter/progenitorMassFunctionBaseSymphonyWDM10.xml
++++ b/constraints/pipelines/darkMatter/progenitorMassFunctionBaseSymphonyWDM10.xml
+@@ -9,7 +9,7 @@
+   <xi:include href="haloMassFunctionParameters.xml" xpointer="xpointer(parameters/*)" xmlns:xi="http://www.w3.org/2001/XInclude"/>
+   <xi:include href="simulation_Symphony_MilkyWay.xml"        xpointer="xpointer(parameters/*)" xmlns:xi="http://www.w3.org/2001/XInclude"/>
+   <xi:include href="transferFunction_Symphony_WDM10.xml"     xpointer="xpointer(parameters/*)" xmlns:xi="http://www.w3.org/2001/XInclude"/>
+-  <xi:include href="cosmology_Symphony.xml"         xpointer="xpointer(parameters/*)" xmlns:xi="http://www.w3.org/2001/XInclude"/>
++  <xi:include href="cosmology_Symphony_nonCDM.xml"         xpointer="xpointer(parameters/*)" xmlns:xi="http://www.w3.org/2001/XInclude"/>
+   <xi:include href="progenitorMassFunctionParameters.xml" xpointer="xpointer(parameters/*)" xmlns:xi="http://www.w3.org/2001/XInclude"/>
+   <xi:include href="progenitorMassFunctionResolution.xml" xpointer="xpointer(parameters/*)" xmlns:xi="http://www.w3.org/2001/XInclude"/>
+   <xi:include href="mergerTreeEvolution.xml"        xpointer="xpointer(parameters/*)" xmlns:xi="http://www.w3.org/2001/XInclude"/>
+diff --git a/constraints/pipelines/darkMatter/progenitorMassFunctionBaseSymphonyWDM3.xml b/constraints/pipelines/darkMatter/progenitorMassFunctionBaseSymphonyWDM3.xml
+index 3341f6ad9..8bccc7353 100644
+--- a/constraints/pipelines/darkMatter/progenitorMassFunctionBaseSymphonyWDM3.xml
++++ b/constraints/pipelines/darkMatter/progenitorMassFunctionBaseSymphonyWDM3.xml
+@@ -8,7 +8,7 @@
+   <!-- Include parameters -->
+   <xi:include href="haloMassFunctionParameters.xml" xpointer="xpointer(parameters/*)" xmlns:xi="http://www.w3.org/2001/XInclude"/>
+   <xi:include href="simulation_Symphony_MilkyWay.xml"        xpointer="xpointer(parameters/*)" xmlns:xi="http://www.w3.org/2001/XInclude"/>
+-  <xi:include href="cosmology_Symphony.xml"         xpointer="xpointer(parameters/*)" xmlns:xi="http://www.w3.org/2001/XInclude"/>
++  <xi:include href="cosmology_Symphony_nonCDM.xml"         xpointer="xpointer(parameters/*)" xmlns:xi="http://www.w3.org/2001/XInclude"/>
+   <xi:include href="transferFunction_Symphony_WDM3.xml"     xpointer="xpointer(parameters/*)" xmlns:xi="http://www.w3.org/2001/XInclude"/>
+   <xi:include href="progenitorMassFunctionParameters.xml" xpointer="xpointer(parameters/*)" xmlns:xi="http://www.w3.org/2001/XInclude"/>
+   <xi:include href="progenitorMassFunctionResolution.xml" xpointer="xpointer(parameters/*)" xmlns:xi="http://www.w3.org/2001/XInclude"/>
+diff --git a/constraints/pipelines/darkMatter/progenitorMassFunctionBaseSymphonyWDM4.xml b/constraints/pipelines/darkMatter/progenitorMassFunctionBaseSymphonyWDM4.xml
+index 2c8693033..d40aebfc5 100644
+--- a/constraints/pipelines/darkMatter/progenitorMassFunctionBaseSymphonyWDM4.xml
++++ b/constraints/pipelines/darkMatter/progenitorMassFunctionBaseSymphonyWDM4.xml
+@@ -8,7 +8,7 @@
+   <!-- Include parameters -->
+   <xi:include href="haloMassFunctionParameters.xml" xpointer="xpointer(parameters/*)" xmlns:xi="http://www.w3.org/2001/XInclude"/>
+   <xi:include href="simulation_Symphony_MilkyWay.xml"        xpointer="xpointer(parameters/*)" xmlns:xi="http://www.w3.org/2001/XInclude"/>
+-  <xi:include href="cosmology_Symphony.xml"         xpointer="xpointer(parameters/*)" xmlns:xi="http://www.w3.org/2001/XInclude"/>
++  <xi:include href="cosmology_Symphony_nonCDM.xml"         xpointer="xpointer(parameters/*)" xmlns:xi="http://www.w3.org/2001/XInclude"/>
+   <xi:include href="transferFunction_Symphony_WDM4.xml"     xpointer="xpointer(parameters/*)" xmlns:xi="http://www.w3.org/2001/XInclude"/>
+   <xi:include href="progenitorMassFunctionParameters.xml" xpointer="xpointer(parameters/*)" xmlns:xi="http://www.w3.org/2001/XInclude"/>
+   <xi:include href="progenitorMassFunctionResolution.xml" xpointer="xpointer(parameters/*)" xmlns:xi="http://www.w3.org/2001/XInclude"/>
+diff --git a/constraints/pipelines/darkMatter/progenitorMassFunctionBaseSymphonyWDM5.xml b/constraints/pipelines/darkMatter/progenitorMassFunctionBaseSymphonyWDM5.xml
+index 364e96499..14fd65c0e 100644
+--- a/constraints/pipelines/darkMatter/progenitorMassFunctionBaseSymphonyWDM5.xml
++++ b/constraints/pipelines/darkMatter/progenitorMassFunctionBaseSymphonyWDM5.xml
+@@ -8,7 +8,7 @@
+   <!-- Include parameters -->
+   <xi:include href="haloMassFunctionParameters.xml" xpointer="xpointer(parameters/*)" xmlns:xi="http://www.w3.org/2001/XInclude"/>
+   <xi:include href="simulation_Symphony_MilkyWay.xml"        xpointer="xpointer(parameters/*)" xmlns:xi="http://www.w3.org/2001/XInclude"/>
+-  <xi:include href="cosmology_Symphony.xml"         xpointer="xpointer(parameters/*)" xmlns:xi="http://www.w3.org/2001/XInclude"/>
++  <xi:include href="cosmology_Symphony_nonCDM.xml"         xpointer="xpointer(parameters/*)" xmlns:xi="http://www.w3.org/2001/XInclude"/>
+   <xi:include href="transferFunction_Symphony_WDM5.xml"     xpointer="xpointer(parameters/*)" xmlns:xi="http://www.w3.org/2001/XInclude"/>
+   <xi:include href="progenitorMassFunctionParameters.xml" xpointer="xpointer(parameters/*)" xmlns:xi="http://www.w3.org/2001/XInclude"/>
+   <xi:include href="progenitorMassFunctionResolution.xml" xpointer="xpointer(parameters/*)" xmlns:xi="http://www.w3.org/2001/XInclude"/>
+diff --git a/constraints/pipelines/darkMatter/progenitorMassFunctionBaseSymphonyWDM6.5.xml b/constraints/pipelines/darkMatter/progenitorMassFunctionBaseSymphonyWDM6.5.xml
+index 716e6fc4a..381f40d7e 100644
+--- a/constraints/pipelines/darkMatter/progenitorMassFunctionBaseSymphonyWDM6.5.xml
++++ b/constraints/pipelines/darkMatter/progenitorMassFunctionBaseSymphonyWDM6.5.xml
+@@ -8,7 +8,7 @@
+   <!-- Include parameters -->
+   <xi:include href="haloMassFunctionParameters.xml" xpointer="xpointer(parameters/*)" xmlns:xi="http://www.w3.org/2001/XInclude"/>
+   <xi:include href="simulation_Symphony_MilkyWay.xml"        xpointer="xpointer(parameters/*)" xmlns:xi="http://www.w3.org/2001/XInclude"/>
+-  <xi:include href="cosmology_Symphony.xml"         xpointer="xpointer(parameters/*)" xmlns:xi="http://www.w3.org/2001/XInclude"/>
++  <xi:include href="cosmology_Symphony_nonCDM.xml"         xpointer="xpointer(parameters/*)" xmlns:xi="http://www.w3.org/2001/XInclude"/>
+   <xi:include href="transferFunction_Symphony_WDM6.5.xml"     xpointer="xpointer(parameters/*)" xmlns:xi="http://www.w3.org/2001/XInclude"/>
+   <xi:include href="progenitorMassFunctionParameters.xml" xpointer="xpointer(parameters/*)" xmlns:xi="http://www.w3.org/2001/XInclude"/>
+   <xi:include href="progenitorMassFunctionResolution.xml" xpointer="xpointer(parameters/*)" xmlns:xi="http://www.w3.org/2001/XInclude"/>
+diff --git a/constraints/pipelines/darkMatter/progenitorMassFunctionBaseSymphonyWDM6.xml b/constraints/pipelines/darkMatter/progenitorMassFunctionBaseSymphonyWDM6.xml
+index 268521c07..41a7c593b 100644
+--- a/constraints/pipelines/darkMatter/progenitorMassFunctionBaseSymphonyWDM6.xml
++++ b/constraints/pipelines/darkMatter/progenitorMassFunctionBaseSymphonyWDM6.xml
+@@ -8,7 +8,7 @@
+   <!-- Include parameters -->
+   <xi:include href="haloMassFunctionParameters.xml" xpointer="xpointer(parameters/*)" xmlns:xi="http://www.w3.org/2001/XInclude"/>
+   <xi:include href="simulation_Symphony_MilkyWay.xml"        xpointer="xpointer(parameters/*)" xmlns:xi="http://www.w3.org/2001/XInclude"/>
+-  <xi:include href="cosmology_Symphony.xml"         xpointer="xpointer(parameters/*)" xmlns:xi="http://www.w3.org/2001/XInclude"/>
++  <xi:include href="cosmology_Symphony_nonCDM.xml"         xpointer="xpointer(parameters/*)" xmlns:xi="http://www.w3.org/2001/XInclude"/>
+   <xi:include href="transferFunction_Symphony_WDM6.xml"     xpointer="xpointer(parameters/*)" xmlns:xi="http://www.w3.org/2001/XInclude"/>
+   <xi:include href="progenitorMassFunctionParameters.xml" xpointer="xpointer(parameters/*)" xmlns:xi="http://www.w3.org/2001/XInclude"/>
+   <xi:include href="progenitorMassFunctionResolution.xml" xpointer="xpointer(parameters/*)" xmlns:xi="http://www.w3.org/2001/XInclude"/>
+diff --git a/constraints/pipelines/darkMatter/progenitorMassFunctionBaseSymphonyfdm_113e-22eV.xml b/constraints/pipelines/darkMatter/progenitorMassFunctionBaseSymphonyfdm_113e-22eV.xml
+index 3221a2fd9..5c99f1c7b 100644
+--- a/constraints/pipelines/darkMatter/progenitorMassFunctionBaseSymphonyfdm_113e-22eV.xml
++++ b/constraints/pipelines/darkMatter/progenitorMassFunctionBaseSymphonyfdm_113e-22eV.xml
+@@ -8,7 +8,7 @@
+   <!-- Include parameters -->
+   <xi:include href="haloMassFunctionParameters.xml" xpointer="xpointer(parameters/*)" xmlns:xi="http://www.w3.org/2001/XInclude"/>
+   <xi:include href="simulation_Symphony_MilkyWay.xml"        xpointer="xpointer(parameters/*)" xmlns:xi="http://www.w3.org/2001/XInclude"/>
+-  <xi:include href="cosmology_Symphony.xml"         xpointer="xpointer(parameters/*)" xmlns:xi="http://www.w3.org/2001/XInclude"/>
++  <xi:include href="cosmology_Symphony_nonCDM.xml"         xpointer="xpointer(parameters/*)" xmlns:xi="http://www.w3.org/2001/XInclude"/>
+   <xi:include href="transferFunction_Symphony_fdm_113e-22eV.xml"     xpointer="xpointer(parameters/*)" xmlns:xi="http://www.w3.org/2001/XInclude"/>
+   <xi:include href="progenitorMassFunctionParameters.xml" xpointer="xpointer(parameters/*)" xmlns:xi="http://www.w3.org/2001/XInclude"/>
+   <xi:include href="progenitorMassFunctionResolution.xml" xpointer="xpointer(parameters/*)" xmlns:xi="http://www.w3.org/2001/XInclude"/>
+diff --git a/constraints/pipelines/darkMatter/progenitorMassFunctionBaseSymphonyfdm_151e-22eV.xml b/constraints/pipelines/darkMatter/progenitorMassFunctionBaseSymphonyfdm_151e-22eV.xml
+index e4e9bbcbb..c88d45c64 100644
+--- a/constraints/pipelines/darkMatter/progenitorMassFunctionBaseSymphonyfdm_151e-22eV.xml
++++ b/constraints/pipelines/darkMatter/progenitorMassFunctionBaseSymphonyfdm_151e-22eV.xml
+@@ -8,7 +8,7 @@
+   <!-- Include parameters -->
+   <xi:include href="haloMassFunctionParameters.xml" xpointer="xpointer(parameters/*)" xmlns:xi="http://www.w3.org/2001/XInclude"/>
+   <xi:include href="simulation_Symphony_MilkyWay.xml"        xpointer="xpointer(parameters/*)" xmlns:xi="http://www.w3.org/2001/XInclude"/>
+-  <xi:include href="cosmology_Symphony.xml"         xpointer="xpointer(parameters/*)" xmlns:xi="http://www.w3.org/2001/XInclude"/>
++  <xi:include href="cosmology_Symphony_nonCDM.xml"         xpointer="xpointer(parameters/*)" xmlns:xi="http://www.w3.org/2001/XInclude"/>
+   <xi:include href="transferFunction_Symphony_fdm_151e-22eV.xml"     xpointer="xpointer(parameters/*)" xmlns:xi="http://www.w3.org/2001/XInclude"/>
+   <xi:include href="progenitorMassFunctionParameters.xml" xpointer="xpointer(parameters/*)" xmlns:xi="http://www.w3.org/2001/XInclude"/>
+   <xi:include href="progenitorMassFunctionResolution.xml" xpointer="xpointer(parameters/*)" xmlns:xi="http://www.w3.org/2001/XInclude"/>
+diff --git a/constraints/pipelines/darkMatter/progenitorMassFunctionBaseSymphonyfdm_185e-22eV.xml b/constraints/pipelines/darkMatter/progenitorMassFunctionBaseSymphonyfdm_185e-22eV.xml
+index ca09e1fa6..23342a5ea 100644
+--- a/constraints/pipelines/darkMatter/progenitorMassFunctionBaseSymphonyfdm_185e-22eV.xml
++++ b/constraints/pipelines/darkMatter/progenitorMassFunctionBaseSymphonyfdm_185e-22eV.xml
+@@ -8,7 +8,7 @@
+   <!-- Include parameters -->
+   <xi:include href="haloMassFunctionParameters.xml" xpointer="xpointer(parameters/*)" xmlns:xi="http://www.w3.org/2001/XInclude"/>
+   <xi:include href="simulation_Symphony_MilkyWay.xml"        xpointer="xpointer(parameters/*)" xmlns:xi="http://www.w3.org/2001/XInclude"/>
+-  <xi:include href="cosmology_Symphony.xml"         xpointer="xpointer(parameters/*)" xmlns:xi="http://www.w3.org/2001/XInclude"/>
++  <xi:include href="cosmology_Symphony_nonCDM.xml"         xpointer="xpointer(parameters/*)" xmlns:xi="http://www.w3.org/2001/XInclude"/>
+   <xi:include href="transferFunction_Symphony_fdm_185e-22eV.xml"     xpointer="xpointer(parameters/*)" xmlns:xi="http://www.w3.org/2001/XInclude"/>
+   <xi:include href="progenitorMassFunctionParameters.xml" xpointer="xpointer(parameters/*)" xmlns:xi="http://www.w3.org/2001/XInclude"/>
+   <xi:include href="progenitorMassFunctionResolution.xml" xpointer="xpointer(parameters/*)" xmlns:xi="http://www.w3.org/2001/XInclude"/>
+diff --git a/constraints/pipelines/darkMatter/progenitorMassFunctionBaseSymphonyfdm_25.9e-22eV.xml b/constraints/pipelines/darkMatter/progenitorMassFunctionBaseSymphonyfdm_25.9e-22eV.xml
+index 3a5c65d08..8a5363664 100644
+--- a/constraints/pipelines/darkMatter/progenitorMassFunctionBaseSymphonyfdm_25.9e-22eV.xml
++++ b/constraints/pipelines/darkMatter/progenitorMassFunctionBaseSymphonyfdm_25.9e-22eV.xml
+@@ -8,7 +8,7 @@
+   <!-- Include parameters -->
+   <xi:include href="haloMassFunctionParameters.xml" xpointer="xpointer(parameters/*)" xmlns:xi="http://www.w3.org/2001/XInclude"/>
+   <xi:include href="simulation_Symphony_MilkyWay.xml"        xpointer="xpointer(parameters/*)" xmlns:xi="http://www.w3.org/2001/XInclude"/>
+-  <xi:include href="cosmology_Symphony.xml"         xpointer="xpointer(parameters/*)" xmlns:xi="http://www.w3.org/2001/XInclude"/>
++  <xi:include href="cosmology_Symphony_nonCDM.xml"         xpointer="xpointer(parameters/*)" xmlns:xi="http://www.w3.org/2001/XInclude"/>
+   <xi:include href="transferFunction_Symphony_fdm_25.9e-22eV.xml"     xpointer="xpointer(parameters/*)" xmlns:xi="http://www.w3.org/2001/XInclude"/>
+   <xi:include href="progenitorMassFunctionParameters.xml" xpointer="xpointer(parameters/*)" xmlns:xi="http://www.w3.org/2001/XInclude"/>
+   <xi:include href="progenitorMassFunctionResolution.xml" xpointer="xpointer(parameters/*)" xmlns:xi="http://www.w3.org/2001/XInclude"/>
+diff --git a/constraints/pipelines/darkMatter/progenitorMassFunctionBaseSymphonyfdm_490e-22eV.xml b/constraints/pipelines/darkMatter/progenitorMassFunctionBaseSymphonyfdm_490e-22eV.xml
+index c7db6d99d..cc35c2099 100644
+--- a/constraints/pipelines/darkMatter/progenitorMassFunctionBaseSymphonyfdm_490e-22eV.xml
++++ b/constraints/pipelines/darkMatter/progenitorMassFunctionBaseSymphonyfdm_490e-22eV.xml
+@@ -8,7 +8,7 @@
+   <!-- Include parameters -->
+   <xi:include href="haloMassFunctionParameters.xml" xpointer="xpointer(parameters/*)" xmlns:xi="http://www.w3.org/2001/XInclude"/>
+   <xi:include href="simulation_Symphony_MilkyWay.xml"        xpointer="xpointer(parameters/*)" xmlns:xi="http://www.w3.org/2001/XInclude"/>
+-  <xi:include href="cosmology_Symphony.xml"         xpointer="xpointer(parameters/*)" xmlns:xi="http://www.w3.org/2001/XInclude"/>
++  <xi:include href="cosmology_Symphony_nonCDM.xml"         xpointer="xpointer(parameters/*)" xmlns:xi="http://www.w3.org/2001/XInclude"/>
+   <xi:include href="transferFunction_Symphony_fdm_490e-22eV.xml"     xpointer="xpointer(parameters/*)" xmlns:xi="http://www.w3.org/2001/XInclude"/>
+   <xi:include href="progenitorMassFunctionParameters.xml" xpointer="xpointer(parameters/*)" xmlns:xi="http://www.w3.org/2001/XInclude"/>
+   <xi:include href="progenitorMassFunctionResolution.xml" xpointer="xpointer(parameters/*)" xmlns:xi="http://www.w3.org/2001/XInclude"/>
+diff --git a/constraints/pipelines/darkMatter/progenitorMassFunctionBaseSymphonyfdm_69.4e-22eV.xml b/constraints/pipelines/darkMatter/progenitorMassFunctionBaseSymphonyfdm_69.4e-22eV.xml
+index e5858c0f7..9241475a3 100644
+--- a/constraints/pipelines/darkMatter/progenitorMassFunctionBaseSymphonyfdm_69.4e-22eV.xml
++++ b/constraints/pipelines/darkMatter/progenitorMassFunctionBaseSymphonyfdm_69.4e-22eV.xml
+@@ -8,7 +8,7 @@
+   <!-- Include parameters -->
+   <xi:include href="haloMassFunctionParameters.xml" xpointer="xpointer(parameters/*)" xmlns:xi="http://www.w3.org/2001/XInclude"/>
+   <xi:include href="simulation_Symphony_MilkyWay.xml"        xpointer="xpointer(parameters/*)" xmlns:xi="http://www.w3.org/2001/XInclude"/>
+-  <xi:include href="cosmology_Symphony.xml"         xpointer="xpointer(parameters/*)" xmlns:xi="http://www.w3.org/2001/XInclude"/>
++  <xi:include href="cosmology_Symphony_nonCDM.xml"         xpointer="xpointer(parameters/*)" xmlns:xi="http://www.w3.org/2001/XInclude"/>
+   <xi:include href="transferFunction_Symphony_fdm_69.4e-22eV.xml"     xpointer="xpointer(parameters/*)" xmlns:xi="http://www.w3.org/2001/XInclude"/>
+   <xi:include href="progenitorMassFunctionParameters.xml" xpointer="xpointer(parameters/*)" xmlns:xi="http://www.w3.org/2001/XInclude"/>
+   <xi:include href="progenitorMassFunctionResolution.xml" xpointer="xpointer(parameters/*)" xmlns:xi="http://www.w3.org/2001/XInclude"/>
+diff --git a/constraints/pipelines/darkMatter/progenitorMassFunctionCompute.xml b/constraints/pipelines/darkMatter/progenitorMassFunctionCompute.xml
+index ec103822a..8296ee7db 100644
+--- a/constraints/pipelines/darkMatter/progenitorMassFunctionCompute.xml
++++ b/constraints/pipelines/darkMatter/progenitorMassFunctionCompute.xml
+@@ -36,8 +36,8 @@
+       <massRatioProgenitorMaximum value="10" />
+       <massRatioProgenitorMinimum value="1e-05" />
+       <orderMaximum value="2" />
+-      <simulationReference value="Klypin, Yepes, Gottlober, Hess; 2016; MNRAS; 457; 4340" />
+-      <simulationURL value="https://www.cosmosim.org/cms/simulations/mdpl2/" />
++      <simulationReference value="Nadler et al.; 2022;"/>
++      <simulationURL value="http://web.stanford.edu/group/gfc/symphony" />
+       <snapshotParents value="125" />
+       <snapshotsProgenitors value="124 120 107 94 75 52 26" />
+     </nbodyOperator>
+@@ -50,8 +50,8 @@
+       <redshiftFormationMinimum value="0.0" />
+       <redshiftFormationMaximum value="10.0" />
+       <fractionFormation value="0.5" />
+-      <simulationReference value="Klypin, Yepes, Gottlober, Hess; 2016; MNRAS; 457; 4340" />
+-      <simulationURL value="https://www.cosmosim.org/cms/simulations/mdpl2/" />
++      <simulationReference value="Nadler et al.; 2022;" />
++      <simulationURL value="http://web.stanford.edu/group/gfc/symphony" />
+       <snapshotParents value="125" />
+     </nbodyOperator>
+     <nbodyOperator value="timeLastMajorMerger">
+@@ -63,8 +63,8 @@
+       <redshiftMergerMinimum value="0.0" />
+       <redshiftMergerMaximum value="10.0" />
+       <ratioMajor value="0.3" />
+-      <simulationReference value="Klypin, Yepes, Gottlober, Hess; 2016; MNRAS; 457; 4340" />
+-      <simulationURL value="https://www.cosmosim.org/cms/simulations/mdpl2/" />
++      <simulationReference value="Nadler et al.; 2022;" />
++      <simulationURL value="http://web.stanford.edu/group/gfc/symphony" />
+       <snapshotParents value="125" />
+     </nbodyOperator>
+   </nbodyOperator>
+diff --git a/constraints/pipelines/darkMatter/progenitorMassFunctionPreProcess.pl b/constraints/pipelines/darkMatter/progenitorMassFunctionPreProcess.pl
+index ee621accf..f6e0212f1 100755
+--- a/constraints/pipelines/darkMatter/progenitorMassFunctionPreProcess.pl
++++ b/constraints/pipelines/darkMatter/progenitorMassFunctionPreProcess.pl
+@@ -521,7 +521,7 @@ sub symphonyZoomInBuilder {
+ 
+     # Set snapshots to process for each resolution, corresponding to z ~ 0.0, 0.02, 0.1, 0.5, 1.0, 2.0, 4.0, 8.0.
+     # expansion factors:  1.0000,   0.66503,   0.50239,   0.32987,   0.20064 (grabs from snapshot #)
+-    # my $snapshots = "235  203  181 148 109";
++    my $snapshots = "235  203  181 148 109";
+     
+     # Initialize lists of parent halo masses.
+     my $massParent;
+@@ -535,7 +535,8 @@ sub symphonyZoomInBuilder {
+     $parameters->{'cosmologyParameters'}->{'OmegaBaryon'    }->{'value'} =  0.047;
+     # List available simulations
+     my @models;
+-    find( (sub {my @path = split(/\//,$File::Find::dir);push(@models,$_ eq "tree_0_0_0.dat" ? {simulation => $path[-2], realization => $path[-1]}  : ())}), ($options{'simulationDataPath'}."/Symphony_ZoomIns") );
++    find( { wanted => (sub {my @path = split(/\//,$File::Find::dir);push(@models,$_ eq "tree_0_0_0.dat" ? {simulation => $path[-2], realization => $path[-1]}  : ())}), follow => 1, follow_skip => 2 }, ($options{'simulationDataPath'}."/Symphony_ZoomIns") );
++    #find( wanted => (sub {my @path = split(/\//,$File::Find::dir);push(@models,$_ eq "tree_0_0_0.dat" ? {simulation => $path[-2], realization => $path[-1]}  : ())}), ($options{'simulationDataPath'}."/Symphony_ZoomIns") );
+     #splice(@models,1); ##NOTE-- deletes everything but first entry to test 1
+     my $xml         = new XML::Simple();
+     my $hostHaloIDs = $xml->XMLin("constraints/pipelines/darkMatter/symphonyZoomInHostHaloIDs.xml");
+@@ -575,11 +576,11 @@ sub symphonyZoomInBuilder {
+ 	# Clone parameters.
+ 	my $parameters_ = dclone($parameters);
+ 	# Set output file.
+-	$parameters_->{'nbodyOperator'}->{'nbodyOperator'}->[6]->{'fileName'}->{'value'} = $outputFileName;
++	$parameters_->{'nbodyOperator'}->{'nbodyOperator'}->[5]->{'fileName'}->{'value'} = $outputFileName;
+ 	# Set the snapshots to select.
+ 	#$parameters_->{'nbodyOperator'}->{'nbodyOperator'}->[3]->{'selectedValues'}->{'value'} = $snapshots;
+ 	# Set the hostedRootID to select.
+-	$parameters_->{'nbodyOperator'}->{'nbodyOperator'}->[4]->{'selectedValues'}->{'value'} = $model->{'hostHaloID'};
++	$parameters_->{'nbodyOperator'}->{'nbodyOperator'}->[3]->{'selectedValues'}->{'value'} = $model->{'hostHaloID'};
+ 	# Add an operator to shift snapshot numbers. All Symphony simulations should have 235 snapshots. There are fewer
+ 	# snapshots in the Rockstar trees because Rockstar ignores snapshots with no halos and renumbers. So, here we want to
+ 	# adjust the snapshot numbers such that a=1 is always snapshot 235.
+@@ -656,12 +657,18 @@ sub symphonyZoomInBuilder {
+     # Add an importer for each parent.
+     @{$massFunctionParameters->{'nbodyImporter'}->{'nbodyImporter'}} =
+         map
+-    {{
++    {
++       $_ eq "Halo004" || $_ eq "Halo113"
++       ?
++       ()
++       :
++       {
+     	value      => "IRATE",
+     	fileName   => {value => $simulation->{'path'}.$modelGroup."/".$_."/identifyNonFlyby_progenitors.hdf5"},
+     	properties => {value => "massVirial expansionFactor hostedRootID snapshotID particleID descendantID"},
+     	snapshot   => {value => "1"}
+-    }} @{$modelRealizations{$modelGroup}}; ## NOTE: This line is currently incomplete - it will need to be given the list of realizations available for this "group" (i.e. "@{$modelRealizations{$modelGroup}}"). And, the "fileName" will need to be changed to use the appropriate filename for the Symphony simulation for this group and realization, so something like: fileName => {value => $simulation->{'path'}.$modelGroup."/".$_."/identifyNonFlyby_progenitors.hdf5"}.
++       }
++    } @{$modelRealizations{$modelGroup}}; ## NOTE: This line is currently incomplete - it will need to be given the list of realizations available for this "group" (i.e. "@{$modelRealizations{$modelGroup}}"). And, the "fileName" will need to be changed to use the appropriate filename for the Symphony simulation for this group and realization, so something like: fileName => {value => $simulation->{'path'}.$modelGroup."/".$_."/identifyNonFlyby_progenitors.hdf5"}.
+     
+     # Determine minimum and maximum progenitor mass ratios for the mass function.
+     my $massParticle;
+@@ -713,9 +720,9 @@ sub symphonyZoomInBuilder {
+     $massFunctionParameters  ->{'nbodyOperator'     }->{'nbodyOperator'}->[2]->{'snapshotParents'           }->{'value'} = $snapshotParents;
+     $massFunctionParameters  ->{'nbodyOperator'     }->{'nbodyOperator'}->[2]->{'snapshotsProgenitors'      }->{'value'} = $snapshotsProgenitors;
+     $massFunctionParameters  ->{'nbodyOperator'     }->{'nbodyOperator'}->[3]->{'snapshotParents'           }->{'value'} = $snapshotParents;
+-    $massFunctionParameters  ->{'nbodyOperator'     }->{'nbodyOperator'}->[3]->{'snapshotsProgenitors'      }->{'value'} = $snapshotsProgenitors;
++    #$massFunctionParameters  ->{'nbodyOperator'     }->{'nbodyOperator'}->[3]->{'snapshotsProgenitors'      }->{'value'} = $snapshotsProgenitors;
+     $massFunctionParameters  ->{'nbodyOperator'     }->{'nbodyOperator'}->[4]->{'snapshotParents'           }->{'value'} = $snapshotParents;
+-    $massFunctionParameters  ->{'nbodyOperator'     }->{'nbodyOperator'}->[4]->{'snapshotsProgenitors'      }->{'value'} = $snapshotsProgenitors;
++    #$massFunctionParameters  ->{'nbodyOperator'     }->{'nbodyOperator'}->[4]->{'snapshotsProgenitors'      }->{'value'} = $snapshotsProgenitors;
+     # Set other task properties.
+     $massFunctionParameters  ->{'outputFileName'}                                                              ->{'value'} = $outputFileName;
+     $massFunctionParameters  ->{'nbodyOperator'     }->{'nbodyOperator'}->[1]->{'description'               }->{'value'} = $simulation->{'description'        };
+diff --git a/source/output.analyses.formation_time_distribution.F90 b/source/output.analyses.formation_time_distribution.F90
+index d2c087dfa..1b68dc582 100644
+--- a/source/output.analyses.formation_time_distribution.F90
++++ b/source/output.analyses.formation_time_distribution.F90
+@@ -448,6 +448,7 @@ contains
+     use :: Error                                   , only : Error_Report
+     use :: Output_Analysis_Distribution_Normalizers, only : normalizerList                                  , outputAnalysisDistributionNormalizerUnitarity , outputAnalysisDistributionNormalizerBinWidth,&
+       &                                                     outputAnalysisDistributionNormalizerSequence
++    use :: Output_Analysis_Distribution_Operators  , only : outputAnalysisDistributionOperatorIdentity
+     use :: Output_Analysis_Weight_Operators        , only : outputAnalysisWeightOperatorSubsampling         , weightOperatorList
+     use :: Output_Analysis_Property_Operators      , only : outputAnalysisPropertyOperatorIdentity
+     use :: Output_Analyses_Options                 , only : outputAnalysisCovarianceModelPoisson
+@@ -619,8 +620,7 @@ contains
+     ! Build outputAnalysisDistributionOperatorIdentity
+     allocate(     outputAnalysisDistributionOperatorIdentity_  )
+     !![
+-    <referenceConstruct                             object="outputAnalysisDistributionOperatorIdentity_"  constructor="outputAnalysisDistributionOperatorIdentity       (
+-                                                                                                                          )"/>
++    <referenceConstruct                             object="outputAnalysisDistributionOperatorIdentity_"  constructor="outputAnalysisDistributionOperatorIdentity( )"/>
+     !!]
+     ! Build a weight operator that accounts for subsampling weights.
+     allocate(     outputAnalysisWeightOperatorSubsampling_ )
+diff --git a/source/utility.MPI.F90 b/source/utility.MPI.F90
+index 356582d60..f42b3a3c9 100644
+--- a/source/utility.MPI.F90
++++ b/source/utility.MPI.F90
+@@ -99,14 +99,16 @@ module MPI_Utilities
+      generic   :: median           => mpiMedianArray
+      procedure ::                     mpiSumScalarInt            , mpiSumArrayInt
+      procedure ::                     mpiSumScalarSizeT          , mpiSumArraySizeT       , &
+-          &                           mpiSumArrayTwoSizeT        , mpiSumArrayThreeSizeT
++          &                           mpiSumArrayTwoSizeT        , mpiSumArrayThreeSizeT  , &
++          &                           mpiSumArrayFourSizeT
+      procedure ::                     mpiSumScalarDouble         , mpiSumArrayDouble      , &
+           &                           mpiSumArrayTwoDouble       , mpiSumArrayThreeDouble
+      generic   :: sum              => mpiSumScalarInt            , mpiSumArrayInt         , &
+           &                           mpiSumScalarDouble         , mpiSumArrayDouble      , &
+           &                           mpiSumArrayTwoDouble       , mpiSumArrayThreeDouble , &
+           &                           mpiSumScalarSizeT          , mpiSumArraySizeT       , &
+-          &                           mpiSumArrayTwoSizeT        , mpiSumArrayThreeSizeT
++          &                           mpiSumArrayTwoSizeT        , mpiSumArrayThreeSizeT  , &
++          &                           mpiSumArrayFourSizeT
+      procedure ::                     mpiAnyLogicalScalar
+      generic   :: any              => mpiAnyLogicalScalar
+      procedure ::                     mpiAllLogicalScalar
+@@ -1069,6 +1071,42 @@ contains
+     return
+   end function mpiSumArrayThreeSizeT
+   
++  function mpiSumArrayFourSizeT(self,array,mask)
++    !!{
++    Sum a rank-4 integer array over all processes, returning it to all processes.
++    !!}
++    use :: Error  , only : Error_Report
++#ifdef USEMPI
++    use :: MPI_F08, only : MPI_AllReduce, MPI_Integer8, MPI_Sum
++#endif
++    implicit none
++    class  (mpiObject), intent(in   )                                                                                               :: self
++    integer(c_size_t ), intent(in   ), dimension( :               , :               , :               , :               )           :: array
++    logical           , intent(in   ), dimension(0:                                                                     ), optional :: mask
++    integer(c_size_t )               , dimension(size(array,dim=1),size(array,dim=2),size(array,dim=3),size(array,dim=4))           :: mpiSumArrayFourSizeT
++#ifdef USEMPI
++    integer(c_size_t )               , dimension(size(array,dim=1),size(array,dim=2),size(array,dim=3),size(array,dim=4))           :: maskedArray
++    integer                                                                                                                         :: iError               , activeCount
++#endif
++
++#ifdef USEMPI
++    ! Sum the array over all processes.
++    maskedArray=array
++    activeCount=self%count()
++    if (present(mask)) then
++       if (.not.mask(self%rank())) maskedArray=0_c_size_t
++       activeCount=count(mask)
++    end if
++    call MPI_AllReduce(maskedArray,mpiSumArrayFourSizeT,size(array),MPI_Integer8,MPI_Sum,mpiSelf%communicator,iError)
++    if (iError /= 0) call Error_Report('MPI all reduce failed'//{introspection:location})
++#else
++    !$GLC attributes unused :: self, array, mask
++    mpiSumArrayFourSizeT=0_c_size_t
++    call Error_Report('code was not compiled for MPI'//{introspection:location})
++#endif
++    return
++  end function mpiSumArrayFourSizeT
++
+   integer function mpiSumScalarInt(self,scalar,mask)
+     !!{
+     Sum an integer scalar over all processes, returning it to all processes.
