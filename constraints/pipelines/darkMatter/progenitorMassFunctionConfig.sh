@@ -2,7 +2,9 @@
 #PBS -N mcmc_all
 #PBS -l nodes=4:ppn=16
 #PBS -j oe
-#PBS -o mcmc_all.log
+#PBS -o mcmc_topHat_sharpK.log
+#PBS -m ea
+#PBS -M dsarnaaik@carnegiescience.edu
 #PBS -V
 if [ ! -z ${PBS_O_WORKDIR+x} ]; then
  cd $PBS_O_WORKDIR
@@ -18,5 +20,5 @@ export GALACTICUS_CPPFLAGS="-I/home/abenson/Galacticus/Tools/include"
 ulimit -t unlimited
 ulimit -c unlimited
 export OMP_NUM_THREADS=1
-mpirun --n 16 --map-by node --bind-to none -mca btl ^openib ./Galacticus.exe constraints/pipelines/darkMatter/progenitorMassFunctionConfig.xml
+/usr/bin/time -v mpirun --n 16 --map-by node --bind-to none -mca btl ^openib ./Galacticus.exe constraints/pipelines/darkMatter/progenitorMassFunctionConfig.xml
 exit
