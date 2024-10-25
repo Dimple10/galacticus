@@ -1,5 +1,5 @@
 !! Copyright 2009, 2010, 2011, 2012, 2013, 2014, 2015, 2016, 2017, 2018,
-!!           2019, 2020, 2021, 2022, 2023
+!!           2019, 2020, 2021, 2022, 2023, 2024
 !!    Andrew Benson <abenson@carnegiescience.edu>
 !!
 !! This file is part of Galacticus.
@@ -21,8 +21,6 @@
   Implements a node operator class that promotes sub-sub-halos.
   !!}
 
-  use :: Dark_Matter_Profiles_DMO, only : darkMatterProfileDMOClass
-
   !![
   <nodeOperator name="nodeOperatorSubsubhaloPromotion">
    <description>A node operator class that promotes sub-sub-halos.</description>
@@ -33,9 +31,7 @@
      A node operator class that shifts node indices at node promotion.
      !!}
      private
-     class(darkMatterProfileDMOClass), pointer :: darkMatterProfileDMO_ => null()
    contains
-     final     ::                          subsubhaloPromotionDestructor
      procedure :: differentialEvolution => subsubhaloPromotionDifferentialEvolution
   end type nodeOperatorSubsubhaloPromotion
   
@@ -57,31 +53,22 @@ contains
     implicit none
     type (nodeOperatorSubsubhaloPromotion)                :: self
     type (inputParameters                ), intent(inout) :: parameters
-    class(darkMatterProfileDMOClass      ), pointer       :: darkMatterProfileDMO_
 
-    !![
-    <objectBuilder class="darkMatterProfileDMO" name="darkMatterProfileDMO_" source="parameters"/>
-    !!]
-    self=nodeOperatorSubsubhaloPromotion(darkMatterProfileDMO_)
+    self=nodeOperatorSubsubhaloPromotion()
     !![
     <inputParametersValidate source="parameters"/>
-    <objectDestructor name="darkMatterProfileDMO_"/>
     !!]
     return
   end function subsubhaloPromotionConstructorParameters
 
-  function subsubhaloPromotionConstructorInternal(darkMatterProfileDMO_) result(self)
+  function subsubhaloPromotionConstructorInternal() result(self)
     !!{
     Internal constructor for the {\normalfont \ttfamily subsubhaloPromotion} node operator class.
     !!}
-    use            :: Error               , only : Component_List           , Error_Report
-    use            :: Galacticus_Nodes    , only : defaultSatelliteComponent
+    use:: Error           , only : Component_List           , Error_Report
+    use:: Galacticus_Nodes, only : defaultSatelliteComponent
     implicit none
-    type (nodeOperatorSubsubhaloPromotion)                        :: self
-    class(darkMatterProfileDMOClass      ), intent(in   ), target :: darkMatterProfileDMO_
-    !![
-    <constructorAssign variables="*darkMatterProfileDMO_"/>
-    !!]
+    type(nodeOperatorSubsubhaloPromotion) :: self
 
     if (.not.defaultSatelliteComponent%positionIsGettable())                                                             &
             & call Error_Report                                                                                          &
@@ -96,31 +83,21 @@ contains
     return
   end function subsubhaloPromotionConstructorInternal
 
-  subroutine subsubhaloPromotionDestructor(self)
-    !!{
-    Destructor for the {\normalfont \ttfamily subsubhaloPromotion} node operator class.
-    !!}
-    implicit none
-    type(nodeOperatorSubsubhaloPromotion), intent(inout) :: self
-
-    !![
-    <objectDestructor name="self%darkMatterProfileDMO_"/>
-    !!]
-    return
-  end subroutine subsubhaloPromotionDestructor
-
   subroutine subsubhaloPromotionDifferentialEvolution(self,node,interrupt,functionInterrupt,propertyType)
     !!{
     Determine if sub-sub-halos should be promoted.
     !!}
-    use :: Galacticus_Nodes, only : propertyInactive, nodeComponentSatellite
+    use :: Galacticus_Nodes          , only : propertyInactive           , nodeComponentSatellite
+    use :: Galactic_Structure_Options, only : componentTypeDarkMatterOnly, massTypeDark
+    use :: Mass_Distributions        , only : massDistributionClass
     implicit none
     class           (nodeOperatorSubsubhaloPromotion), intent(inout), target  :: self
-    type            (treeNode                       ), intent(inout)          :: node
+    type            (treeNode                       ), intent(inout), target  :: node
     logical                                          , intent(inout)          :: interrupt
     procedure       (interruptTask                  ), intent(inout), pointer :: functionInterrupt
     integer                                          , intent(in   )          :: propertyType
     class           (nodeComponentSatellite         )               , pointer :: satellite        , satelliteHost
+    class           (massDistributionClass          )               , pointer :: massDistribution_
     double precision                                 , dimension(3)           :: positionSatellite
     double precision                                                          :: radiusSatellite  , massBoundHost, &
          &                                                                       massEnclosedHost
@@ -136,9 +113,13 @@ contains
     positionSatellite =  satellite%position ()
     radiusSatellite   =  sqrt(sum(positionSatellite**2))
     ! Determine the mass enclosed by this orbit and the bound mass of the host.
-    satelliteHost    => node         %parent               %satellite   (                           )
-    massBoundHost    =  satelliteHost                      %boundMass   (                           )
-    massEnclosedHost =  self         %darkMatterProfileDMO_%enclosedMass(node%parent,radiusSatellite)
+    massDistribution_ => node             %parent%massDistribution    (componentTypeDarkMatterOnly,massTypeDark)
+    satelliteHost     => node             %parent%satellite           (                                        )
+    massBoundHost     =  satelliteHost           %boundMass           (                                        )
+    massEnclosedHost  =  massDistribution_       %massEnclosedBySphere(radiusSatellite                         )
+    !![
+    <objectDestructor name="massDistribution_"/>
+    !!]
     ! If the satellite is within the radius enclosing the total bound mass of the host it will not be promoted.
     if (massEnclosedHost <= massBoundHost) return
     ! The satellite is outside the current bound radius of the host, so should be promoted. Trigger an interrupt.
@@ -147,14 +128,16 @@ contains
     return
   end subroutine subsubhaloPromotionDifferentialEvolution
   
-  subroutine subsubhaloPromotionPromote(node)
+  subroutine subsubhaloPromotionPromote(node,timeEnd)
     !!{
     Promote a sub-sub-halo into its host's host.
     !!}
     use :: Satellite_Promotion, only : Satellite_Move_To_New_Host
     implicit none
-    type(treeNode), intent(inout), target  :: node
-
+    type            (treeNode), intent(inout), target   :: node
+    double precision          , intent(in   ), optional :: timeEnd
+    !$GLC attributes unused :: timeEnd
+    
     ! Move the sub-sub-halo into its host's host.
     call Satellite_Move_To_New_Host(node,node%parent%parent)
     return

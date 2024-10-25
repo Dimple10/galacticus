@@ -1,5 +1,5 @@
 !! Copyright 2009, 2010, 2011, 2012, 2013, 2014, 2015, 2016, 2017, 2018,
-!!           2019, 2020, 2021, 2022, 2023
+!!           2019, 2020, 2021, 2022, 2023, 2024
 !!    Andrew Benson <abenson@carnegiescience.edu>
 !!
 !! This file is part of Galacticus.
@@ -16,6 +16,8 @@
 !!
 !!    You should have received a copy of the GNU General Public License
 !!    along with Galacticus.  If not, see <http://www.gnu.org/licenses/>.
+
+  !+ Contributions to this file made by: Sachi Weerasooriya
 
   !!{
   An implementation of accretion from the \gls{igm} onto halos using simple truncation to
@@ -198,16 +200,19 @@ contains
     return
   end subroutine coldModeDestructor
 
-  subroutine coldModeCalculationReset(self,node)
+  subroutine coldModeCalculationReset(self,node,uniqueID)
     !!{
     Reset the accretion rate calculation.
     !!}
+    use :: Kind_Numbers, only : kind_int8
     implicit none
-    class(accretionHaloColdMode), intent(inout) :: self
-    type (treeNode             ), intent(inout) :: node
+    class  (accretionHaloColdMode), intent(inout) :: self
+    type   (treeNode             ), intent(inout) :: node
+    integer(kind_int8            ), intent(in   ) :: uniqueID
+    !$GLC attributes unused :: node
 
     self%coldFractionComputed=.false.
-    self%lastUniqueID        =node%uniqueID()
+    self%lastUniqueID        =uniqueID
     return
   end subroutine coldModeCalculationReset
 
@@ -396,9 +401,8 @@ contains
          &                                                           chemicalDensitiesCold
     !$omp threadprivate(chemicalDensities,chemicalDensitiesCold,chemicalDensitiesHot)
     double precision                                              :: massToDensityConversion, numberDensityHydrogen, &
-         &                                                           temperature            , temperatureHot       , &
-         &                                                           temperatureCold        , fractionCold         , &
-         &                                                           fractionHot
+         &                                                           temperatureHot         , temperatureCold      , &
+         &                                                           fractionHot            , fractionCold
 
     ! Get the basic component.
     basic                => node%basic()
@@ -407,7 +411,7 @@ contains
     ! Compute the temperature and density of accreting material, assuming accreted has is at the virial temperature and that the
     ! overdensity is one third of the mean overdensity of the halo.
     temperatureHot            =  self%darkMatterHaloScale_     %temperatureVirial(node        )
-    temperature               =  self%intergalacticMediumState_%temperature      (basic%time())
+    temperatureCold           =  self%intergalacticMediumState_%temperature      (basic%time())
     numberDensityHydrogen     =  hydrogenByMassPrimordial                  &
          &                       /atomicMassHydrogen                       &
          &                       *self %cosmologyParameters_%omegaBaryon() &
@@ -472,7 +476,7 @@ contains
        coldModeColdModeFraction=1.0d0
     case (accretionModeHot%ID,accretionModeCold%ID)
        ! Reset calculations if necessary.
-       if (node%uniqueID() /= self%lastUniqueID) call self%calculationReset(node)
+       if (node%uniqueID() /= self%lastUniqueID) call self%calculationReset(node,node%uniqueID())
        ! Compute cold fraction if not already computed.
        if (.not.self%coldFractionComputed) then
           ! Get the basic component.

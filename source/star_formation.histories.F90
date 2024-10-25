@@ -1,5 +1,5 @@
 !! Copyright 2009, 2010, 2011, 2012, 2013, 2014, 2015, 2016, 2017, 2018,
-!!           2019, 2020, 2021, 2022, 2023
+!!           2019, 2020, 2021, 2022, 2023, 2024
 !!    Andrew Benson <abenson@carnegiescience.edu>
 !!
 !! This file is part of Galacticus.
@@ -35,6 +35,18 @@ module Star_Formation_Histories
   implicit none
   private
 
+  ! Enumeration of possible star formation history age bin structures.
+  !![
+  <enumeration>
+   <name>starFormationHistoryAges</name>
+   <description>Used to specify distribution of age bins in star formation histories.</description>
+   <visibility>public</visibility>
+   <entry label="arbitrary"      description="Ages are arbitrary and may vary between galaxies/components/outputs."/>
+   <entry label="fixedPerOutput" description="Ages are fixed per output."                                          />
+   <entry label="fixed"          description="Ages are fixed globally."                                          />
+  </enumeration>
+  !!]
+
   !![
   <functionClass>
    <name>starFormationHistory</name>
@@ -47,16 +59,18 @@ module Star_Formation_Histories
     <description>Create the star formation history object.</description>
     <type>void</type>
     <pass>yes</pass>
-    <argument>type            (treeNode), intent(inout) :: node</argument>
-    <argument>type            (history ), intent(inout) :: historyStarFormation</argument>
-    <argument>double precision          , intent(in   ) :: timeBegin</argument>
+    <argument>type            (treeNode), intent(inout), target   :: node</argument>
+    <argument>type            (history ), intent(inout)           :: historyStarFormation</argument>
+    <argument>double precision          , intent(in   )           :: timeBegin</argument>
+    <argument>double precision          , intent(in   ), optional :: timeEnd</argument>
    </method>
    <method name="scales" >
     <description>Set ODE solver absolute scales for a star formation history object.</description>
     <type>void</type>
     <pass>yes</pass>
     <argument>type            (history   ), intent(inout) :: historyStarFormation</argument>
-    <argument>double precision            , intent(in   ) :: massStellar</argument>
+    <argument>type            (treeNode  ), intent(inout) :: node</argument>
+    <argument>double precision            , intent(in   ) :: massStellar, massGas</argument>
     <argument>type            (abundances), intent(in   ) :: abundancesStellar</argument>
    </method>
    <method name="rate" >
@@ -68,42 +82,103 @@ module Star_Formation_Histories
     <argument>type            (abundances), intent(in   ) :: abundancesFuel</argument>
     <argument>double precision            , intent(in   ) :: rateStarFormation</argument>
    </method>
-   <method name="output" >
-    <description>Output the star formation history.</description>
-    <type>void</type>
-    <pass>yes</pass>
-    <argument>type   (treeNode                    ), intent(inout), target :: node</argument>
-    <argument>logical                              , intent(in   )         :: nodePassesFilter</argument>
-    <argument>type   (history                     ), intent(inout)         :: historyStarFormation</argument>
-    <argument>integer(c_size_t                    ), intent(in   )         :: indexOutput</argument>
-    <argument>integer(kind=kind_int8              ), intent(in   )         :: indexTree</argument>
-    <argument>type   (enumerationComponentTypeType), intent(in   )         :: componentType</argument>
-    <argument>type   (ompLock                     ), intent(inout)         :: treeLock</argument>
-   </method>
-   <method name="outputFlush" >
-    <description>Flush any buffered output.</description>
-    <type>void</type>
-    <pass>yes</pass>
-    <argument>type(enumerationComponentTypeType), intent(in   ) :: componentType</argument>
-    <argument>type(ompLock                     ), intent(inout) :: treeLock</argument>
-    <code>
-     !$GLC attributes unused :: self, componentType
-     ! Do nothing by default.
-    </code>
-   </method>
    <method name="metallicityBoundaries" >
     <description>Return a (zero-indexed) array of metallicity boundaries for this history.</description>
     <type>double precision, allocatable, dimension(:)</type>
     <pass>yes</pass>
    </method>
-   <method name="perOutputTabualtionIsStatic" >
-    <description>Return true if the tabulation (in time and metallicity) is static (independent of node) per output.</description>
-    <type>logical</type>
+   <method name="times" >
+    <description>Return an array of times for this history \emph{if} the tabulation in time is static per output.</description>
+    <type>double precision, allocatable, dimension(:)</type>
+    <pass>yes</pass>
+    <argument>type            (treeNode), intent(inout), optional :: node                </argument>
+    <argument>integer         (c_size_t), intent(in   ), optional :: indexOutput         </argument>
+    <argument>type            (history ), intent(in   ), optional :: starFormationHistory</argument>
+    <argument>logical                   , intent(in   ), optional :: allowTruncation     </argument>
+    <argument>double precision          , intent(  out), optional :: timeStart           </argument>
+    <modules>Error</modules>
+    <code>
+      !$GLC attributes unused :: allowTruncation
+      if (     present(node).and.     present(indexOutput         )) call Error_Report('only one of `node` and `indexOutput` may be provided'        //{introspection:location})
+      if (.not.present(node).and..not.present(indexOutput         )) call Error_Report('one of `node` and `indexOutput` must be provided'            //{introspection:location})
+      if (     present(node).and..not.present(starFormationHistory)) call Error_Report('`node` requires that `starFormationHistory` must be provided'//{introspection:location})
+      if (present(indexOutput)) then
+        allocate(starFormationHistoryTimes(0))
+        call Error_Report('times are not static'//{introspection:location})
+      else if (present(node)) then
+        allocate(starFormationHistoryTimes(size(starFormationHistory%time)))
+        starFormationHistoryTimes=starFormationHistory%time
+      end if
+      if (present(timeStart)) timeStart=0.0d0
+    </code>
+   </method>
+   <method name="masses" >
+    <description>Return an array of masses of stars formed for this history.</description>
+    <type>double precision, allocatable, dimension(:,:)</type>
+    <pass>yes</pass>
+    <argument>type   (treeNode), intent(inout)           :: node                </argument>
+    <argument>type   (history ), intent(in   )           :: starFormationHistory</argument>
+    <argument>logical          , intent(in   ), optional :: allowTruncation     </argument>
+    <code>
+      !$GLC attributes unused :: allowTruncation
+      allocate(starFormationHistoryMasses(size(starFormationHistory%data,dim=1),size(starFormationHistory%data,dim=2)))
+      starFormationHistoryMasses=starFormationHistory%data
+    </code>
+   </method>
+   <method name="ageDistribution" >
+    <description>Return an enumeration member indicating what may be assumed about the distribution of ages in the star formation histories.</description>
+    <type>type(enumerationStarFormationHistoryAgesType)</type>
     <pass>yes</pass>
     <code>
      !$GLC attributes unused :: self
-     starFormationHistoryPerOutputTabualtionIsStatic=.false.
+     starFormationHistoryAgeDistribution=starFormationHistoryAgesArbitrary
     </code>
+   </method>
+   <method name="update">
+     <description>Update the star formation history after an output time is reached.</description>
+     <type>void</type>
+     <pass>yes</pass>
+     <argument>type   (treeNode), intent(inout), target :: node                </argument>
+     <argument>integer(c_size_t), intent(in   )         :: indexOutput         </argument>
+     <argument>type   (history ), intent(inout)         :: historyStarFormation</argument>
+     <code>
+       !$GLC attributes unused :: self, node, indexOutput, historyStarFormation
+     </code>
+   </method>
+   <method name="rangeIsSufficient">
+     <description>Return true if the star formation history spans a sufficient range of times.</description>
+     <type>logical</type>
+     <pass>yes</pass>
+     <argument>type(history), intent(in   ) :: starFormationHistory, rangeHistory</argument>
+     <code>
+       !$GLC attributes unused :: self, starFormationHistory, rangeHistory
+       starFormationHistoryRangeIsSufficient=.true.
+     </code>
+   </method>
+   <method name="extend">
+     <description>Extend a star formation history to span a sufficient range of times.</description>
+     <type>void</type>
+     <pass>yes</pass>
+     <argument>type            (history), intent(inout)               :: starFormationHistory</argument>
+     <argument>double precision         , intent(in   ), dimension(:) :: times               </argument>
+     <modules>Error</modules>
+     <code>
+       !$GLC attributes unused :: self, starFormationHistory, times
+       call Error_Report("unexpected attempt to extend star formation history"//{introspection:location})
+     </code>
+   </method>
+   <method name="move">
+     <description>Move one star formation history into another.</description>
+     <type>void</type>
+     <pass>yes</pass>
+     <argument>type(treeNode), intent(inout) :: node1                , node2                </argument>
+     <argument>type(history ), intent(inout) :: starFormationHistory1, starFormationHistory2</argument>
+     <modules>Error</modules>
+     <code>
+       !$GLC attributes unused :: self, node1, node2
+       call starFormationHistory1%increment(starFormationHistory2,autoExtend=.true.)
+       call starFormationHistory2%reset    (                                       )
+     </code>
    </method>
   </functionClass>
   !!]

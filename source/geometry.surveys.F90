@@ -1,5 +1,5 @@
 !! Copyright 2009, 2010, 2011, 2012, 2013, 2014, 2015, 2016, 2017, 2018,
-!!           2019, 2020, 2021, 2022, 2023
+!!           2019, 2020, 2021, 2022, 2023, 2024
 !!    Andrew Benson <abenson@carnegiescience.edu>
 !!
 !! This file is part of Galacticus.
@@ -49,8 +49,8 @@ module Geometry_Surveys
     <description>Returns the minimum distance (in Mpc) at which a galaxy of the specified {\normalfont \ttfamily mass} (in $M_\odot$) would be included in the survey.</description>
     <type>double precision</type>
     <pass>yes</pass>
-    <argument>double precision, intent(in   ), optional :: mass , magnitudeAbsolute, luminosity</argument>
-    <argument>integer         , intent(in   ), optional :: field</argument>
+    <argument>double precision, intent(in   ), optional :: mass , magnitudeAbsolute, luminosity, starFormationRate</argument>
+    <argument>integer         , intent(in   ), optional :: field                                                  </argument>
     <code>
      !$GLC attributes unused :: self, mass, field, magnitudeAbsolute, luminosity
      surveyGeometryDistanceMinimum=0.0d0
@@ -60,8 +60,8 @@ module Geometry_Surveys
     <description>Returns the maximum distance (in Mpc) at which a galaxy of the specified {\normalfont \ttfamily mass} (in $M_\odot$) could be detected.</description>
     <type>double precision</type>
     <pass>yes</pass>
-    <argument>double precision, intent(in   ), optional :: mass , magnitudeAbsolute, luminosity</argument>
-    <argument>integer         , intent(in   ), optional :: field</argument>
+    <argument>double precision, intent(in   ), optional :: mass , magnitudeAbsolute, luminosity, starFormationRate</argument>
+    <argument>integer         , intent(in   ), optional :: field                                                  </argument>
    </method>
    <method name="solidAngle" >
     <description>Return the solid angle (in steradians) of the survey.</description>

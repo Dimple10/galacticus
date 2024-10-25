@@ -1,5 +1,5 @@
 !! Copyright 2009, 2010, 2011, 2012, 2013, 2014, 2015, 2016, 2017, 2018,
-!!           2019, 2020, 2021, 2022, 2023
+!!           2019, 2020, 2021, 2022, 2023, 2024
 !!    Andrew Benson <abenson@carnegiescience.edu>
 !!
 !! This file is part of Galacticus.
@@ -104,14 +104,20 @@ contains
     return
   end subroutine bertschingerDestructor
 
-  double precision function bertschingerVelocityScale(self,node)
+  double precision function bertschingerVelocityScale(self,node) result(velocityScale)
     !!{
     Returns the velocity scale to use for {\normalfont \ttfamily node}. Use the maximum circular velocity.
     !!}
+    use :: Mass_Distributions, only : massDistributionClass
     implicit none
     class(accretionHaloBertschinger), intent(inout) :: self
     type (treeNode                 ), intent(inout) :: node
-
-    bertschingerVelocityScale=self%darkMatterProfileDMO_%circularVelocityMaximum(node)
+    class(massDistributionClass    ), pointer       :: massDistribution_
+    
+    massDistribution_ => self             %darkMatterProfileDMO_       %get(node)
+    velocityScale     =  massDistribution_%velocityRotationCurveMaximum    (    )
+    !![
+    <objectDestructor name="massDistribution_"/>
+    !!]
     return
   end function bertschingerVelocityScale

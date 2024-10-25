@@ -1,5 +1,5 @@
 !! Copyright 2009, 2010, 2011, 2012, 2013, 2014, 2015, 2016, 2017, 2018,
-!!           2019, 2020, 2021, 2022, 2023
+!!           2019, 2020, 2021, 2022, 2023, 2024
 !!    Andrew Benson <abenson@carnegiescience.edu>
 !!
 !! This file is part of Galacticus.
@@ -109,7 +109,7 @@ contains
     type (dependencyRegEx                  ), dimension(1)  :: dependenciesSatelliteMerger 
 
     dependenciesSatelliteMerger(1)=dependencyRegEx(dependencyDirectionAfter,'^remnantStructure:')
-    call satelliteMergerEvent%attach(self,satelliteMerger ,openMPThreadBindingAtLevel,label='galaxyMajorMergerTime',dependencies=dependenciesSatelliteMerger)
+    call satelliteMergerEvent%attach(self,satelliteMerger,openMPThreadBindingAtLevel,label='galaxyMajorMergerTime',dependencies=dependenciesSatelliteMerger)
     return
   end subroutine galaxyMajorMergerTimeAutoHook
   
@@ -121,7 +121,7 @@ contains
     implicit none
     type(nodeOperatorGalaxyMajorMergerTime), intent(inout) :: self
 
-    if (satelliteMergerEvent%isAttached(self,satelliteMerger )) call satelliteMergerEvent%detach(self,satelliteMerger )
+    if (satelliteMergerEvent%isAttached(self,satelliteMerger)) call satelliteMergerEvent%detach(self,satelliteMerger)
     !![
     <objectDestructor name="self%mergerMassMovements_"/>
     !!]

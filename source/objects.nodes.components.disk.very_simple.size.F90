@@ -1,5 +1,5 @@
 !! Copyright 2009, 2010, 2011, 2012, 2013, 2014, 2015, 2016, 2017, 2018,
-!!           2019, 2020, 2021, 2022, 2023
+!!           2019, 2020, 2021, 2022, 2023, 2024
 !!    Andrew Benson <abenson@carnegiescience.edu>
 !!
 !! This file is part of Galacticus.
@@ -65,8 +65,7 @@ module Node_Component_Disk_Very_Simple_Size
     </property>
    </properties>
    <bindings>
-    <binding method="enclosedMass"   function="Node_Component_Disk_Very_Simple_Size_Enclosed_Mass"   bindsTo="component" />
-    <binding method="surfaceDensity" function="Node_Component_Disk_Very_Simple_Size_Surface_Density" bindsTo="component" />
+    <binding method="massDistribution" function="Node_Component_Disk_Very_Simple_Size_Mass_Distribution" bindsTo="component"/>
    </bindings>
    <functions>objects.nodes.components.disk.very_simple.size.bound_functions.inc</functions>
   </component>
@@ -121,7 +120,8 @@ contains
     use :: Galacticus_Nodes                         , only : defaultDiskComponent
     use :: Input_Parameters                         , only : inputParameter             , inputParameters
     use :: Mass_Distributions                       , only : massDistributionCylindrical
-    use :: Node_Component_Disk_Very_Simple_Size_Data, only : diskMassDistribution
+    use :: Node_Component_Disk_Very_Simple_Size_Data, only : massDistributionStellar_   , massDistributionGas_
+    use :: Galactic_Structure_Options               , only : componentTypeDisk          , massTypeStellar     , massTypeGaseous
     implicit none
     type(inputParameters), intent(inout) :: parameters
     type(inputParameters)                :: subParameters
@@ -130,15 +130,33 @@ contains
        ! Find our parameters.
        subParameters=parameters%subParameters('componentDisk')
        !![
-       <objectBuilder class="massDistribution" parameterName="diskMassDistribution" name="diskMassDistribution" source="subParameters" threadPrivate="yes">
+       <objectBuilder class="massDistribution" parameterName="massDistributionDisk" name="massDistributionStellar_" source="subParameters" threadPrivate="yes">
         <default>
-         <diskMassDistribution value="exponentialDisk">
+         <massDistributionDisk value="exponentialDisk">
           <dimensionless value="true"/>
-         </diskMassDistribution>
+         </massDistributionDisk>
         </default>
        </objectBuilder>
        !!]
-       if (.not.diskMassDistribution%isDimensionless()) call Error_Report('disk mass distribution must be dimensionless'//{introspection:location})
+      ! Validate the disk mass distribution.
+       select type (massDistributionStellar_)
+       class is (massDistributionCylindrical)
+          ! The disk mass distribution must have cylindrical symmetry. So, this is acceptable.        
+       class default
+          call Error_Report('only cylindrically symmetric mass distributions are allowed'//{introspection:location})
+       end select
+       if (.not.massDistributionStellar_%isDimensionless()) call Error_Report('disk mass distribution must be dimensionless'//{introspection:location})
+       ! Duplicate the dimensionless mass distribution to use for the gas component, and set component and mass types in both.
+       !$omp critical(diskVerySimpleSizeDeepCopy)
+       allocate(massDistributionGas_,mold=massDistributionStellar_)
+       !![
+       <deepCopyReset variables="massDistributionStellar_"/>
+       <deepCopy source="massDistributionStellar_" destination="massDistributionGas_"/>
+       <deepCopyFinalize variables="massDistributionGas_"/>  
+       !!]
+       !$omp end critical(diskVerySimpleSizeDeepCopy)
+       call massDistributionStellar_%setTypes(componentTypeDisk,massTypeStellar)
+       call massDistributionGas_    %setTypes(componentTypeDisk,massTypeGaseous)
     end if
     return
   end subroutine Node_Component_Disk_Very_Simple_Size_Thread_Initialize
@@ -153,12 +171,13 @@ contains
     Uninitializes the tree node standard merging statistics module.
     !!}
     use :: Galacticus_Nodes                         , only : defaultDiskComponent
-    use :: Node_Component_Disk_Very_Simple_Size_Data, only : diskMassDistribution
+    use :: Node_Component_Disk_Very_Simple_Size_Data, only : massDistributionStellar_, massDistributionGas_
     implicit none
 
     if (defaultDiskComponent%verySimpleSizeIsActive()) then
        !![
-       <objectDestructor name="diskMassDistribution" />
+       <objectDestructor name="massDistributionStellar_"/>
+       <objectDestructor name="massDistributionGas_"    />
        !!]
     end if
     return
@@ -169,16 +188,19 @@ contains
     <unitName>Node_Component_Disk_Very_Simple_Size_Calculation_Reset</unitName>
   </calculationResetTask>
   !!]
-  subroutine Node_Component_Disk_Very_Simple_Size_Calculation_Reset(node)
+  subroutine Node_Component_Disk_Very_Simple_Size_Calculation_Reset(node,uniqueID)
     !!{
     Reset very simple size disk structure calculations.
     !!}
     use :: Galacticus_Nodes                         , only : treeNode
+    use :: Kind_Numbers                             , only : kind_int8
     use :: Node_Component_Disk_Very_Simple_Size_Data, only : Node_Component_Disk_Very_Simple_Size_Reset
     implicit none
-    type(treeNode), intent(inout) :: node
+    type   (treeNode ), intent(inout) :: node
+    integer(kind_int8), intent(in   ) :: uniqueID
+    !$GLC attributes unused :: node
 
-    call Node_Component_Disk_Very_Simple_Size_Reset(node%uniqueID())
+    call Node_Component_Disk_Very_Simple_Size_Reset(uniqueID)
     return
   end subroutine Node_Component_Disk_Very_Simple_Size_Calculation_Reset
 
@@ -319,9 +341,9 @@ contains
     !!{
     Write the tabulation state to file.
     !!}
-    use            :: Display                                  , only : displayMessage      , verbosityLevelInfo
-    use, intrinsic :: ISO_C_Binding                            , only : c_ptr               , c_size_t
-    use            :: Node_Component_Disk_Very_Simple_Size_Data, only : diskMassDistribution
+    use            :: Display                                  , only : displayMessage          , verbosityLevelInfo
+    use, intrinsic :: ISO_C_Binding                            , only : c_ptr                   , c_size_t
+    use            :: Node_Component_Disk_Very_Simple_Size_Data, only : massDistributionStellar_, massDistributionGas_
     implicit none
     integer          , intent(in   ) :: stateFile
     integer(c_size_t), intent(in   ) :: stateOperationID
@@ -329,7 +351,7 @@ contains
 
     call displayMessage('Storing state for: componentDisk -> standard',verbosity=verbosityLevelInfo)
     !![
-    <stateStore variables="diskMassDistribution"/>
+    <stateStore variables="massDistributionStellar_ massDistributionGas_"/>
     !!]
     return
   end subroutine Node_Component_Disk_Very_Simple_Size_State_Store
@@ -343,9 +365,9 @@ contains
     !!{
     Retrieve the tabulation state from the file.
     !!}
-    use            :: Display                                  , only : displayMessage         , verbosityLevelInfo
-    use, intrinsic :: ISO_C_Binding                            , only : c_ptr                  , c_size_t
-    use            :: Node_Component_Disk_Very_Simple_Size_Data, only : diskMassDistribution
+    use            :: Display                                  , only : displayMessage          , verbosityLevelInfo
+    use, intrinsic :: ISO_C_Binding                            , only : c_ptr                   , c_size_t
+    use            :: Node_Component_Disk_Very_Simple_Size_Data, only : massDistributionStellar_, massDistributionGas_
     implicit none
     integer          , intent(in   ) :: stateFile
     integer(c_size_t), intent(in   ) :: stateOperationID
@@ -353,7 +375,7 @@ contains
 
     call displayMessage('Retrieving state for: componentDisk -> standard',verbosity=verbosityLevelInfo)
     !![
-    <stateRestore variables="diskMassDistribution"/>
+    <stateRestore variables="massDistributionStellar_ massDistributionGas_"/>
     !!]
     return
   end subroutine Node_Component_Disk_Very_Simple_Size_State_Retrieve

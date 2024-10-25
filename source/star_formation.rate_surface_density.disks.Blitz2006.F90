@@ -1,5 +1,5 @@
 !! Copyright 2009, 2010, 2011, 2012, 2013, 2014, 2015, 2016, 2017, 2018,
-!!           2019, 2020, 2021, 2022, 2023
+!!           2019, 2020, 2021, 2022, 2023, 2024
 !!    Andrew Benson <abenson@carnegiescience.edu>
 !!
 !! This file is part of Galacticus.
@@ -22,7 +22,6 @@
   !!}
 
   use :: Kind_Numbers       , only : kind_int8
-  use :: Galactic_Structure , only : galacticStructureClass
   use :: Root_Finder        , only : rootFinder
   use :: Math_Exponentiation, only : fastExponentiator
   
@@ -38,9 +37,9 @@
      \nu_\mathrm{SF}(R) = \nu_\mathrm{SF,0} \left[ 1 + \left({\Sigma_\mathrm{HI}\over \Sigma_0}\right)^q \right],
     \end{equation}
     where $q=${\normalfont \ttfamily [surfaceDensityExponent]} and $\Sigma_0=${\normalfont \ttfamily [surfaceDensityCritical]}
-    are parameters and the surface density of molecular gas $\Sigma_\mathrm{H_2} = (P_\mathrm{ext}/P_0)^\alpha
+    are parameters, the surface density of molecular gas $\Sigma_\mathrm{H_2} = (P_\mathrm{ext}/P_0)^\alpha
     \Sigma_\mathrm{HI}$, where $\alpha=${\normalfont \ttfamily [pressureExponent]} and $P_0=${\normalfont \ttfamily
-    [pressureCharacteristic]} are parameters and the hydrostatic pressure in the disk plane assuming location isothermal gas
+    [pressureCharacteristic]} are parameters, and the hydrostatic pressure in the disk plane assuming locally isothermal gas
     and stellar components is given by
     \begin{equation}
      P_\mathrm{ext} \approx {\pi\over 2} \G \Sigma_\mathrm{gas} \left[ \Sigma_\mathrm{gas} + \left({\sigma_\mathrm{gas}\over
@@ -61,10 +60,9 @@
      Implementation of the \cite{blitz_role_2006} star formation rate surface density law for galactic disks.
      !!}
      private
-     class           (galacticStructureClass), pointer                       :: galacticStructure_                           => null()
      integer         (kind_int8             )                                :: lastUniqueID
      logical                                                                 :: factorsComputed                                       , assumeMonotonicSurfaceDensity                      , &
-          &                                                                     assumeExponentialDisk                                 , useTabulation
+          &                                                                     isExponentialDisk                                     , useTabulation
      double precision                                                        :: heightToRadialScaleDisk                               , pressureCharacteristic                             , &
           &                                                                     pressureExponent                                      , starFormationFrequencyNormalization                , &
           &                                                                     surfaceDensityCritical                                , surfaceDensityExponent                             , &
@@ -92,7 +90,6 @@
        <method description="Reset memoized calculations."                                                                       method="calculationReset"          />
        <method description="Compute various factors."                                                                           method="computeFactors"            />
        <method description="Compute the pressure ratio."                                                                        method="pressureRatio"             />
-       <method description="Compute the pressure ratio for an exponential disk."                                                method="pressureRatioExponential"  />
        <method description="Compute the integral of the star formation rate surface density in the fully-molecular regime."     method="integralFullyMolecular"    />
        <method description="Compute the integral of the star formation rate surface density in the partially-molecular regime." method="integralPartiallyMolecular"/>
      </methods>
@@ -105,7 +102,6 @@
      procedure :: unchanged                  => blitz2006Unchanged
      procedure :: intervals                  => blitz2006Intervals
      procedure :: pressureRatio              => blitz2006PressureRatio
-     procedure :: pressureRatioExponential   => blitz2006PressureRatioExponential
      procedure :: integralFullyMolecular     => blitz2006IntegralFullyMolecular
      procedure :: integralPartiallyMolecular => blitz2006IntegralPartiallyMolecular
   end type starFormationRateSurfaceDensityDisksBlitz2006
@@ -132,13 +128,11 @@ contains
     implicit none
     type            (starFormationRateSurfaceDensityDisksBlitz2006)                :: self
     type            (inputParameters                              ), intent(inout) :: parameters
-    class           (galacticStructureClass                       ), pointer       :: galacticStructure_
     double precision                                                               :: velocityDispersionDiskGas          , heightToRadialScaleDisk, &
          &                                                                            surfaceDensityCritical             , surfaceDensityExponent , &
          &                                                                            starFormationFrequencyNormalization, pressureCharacteristic , &
          &                                                                            pressureExponent
-    logical                                                                        :: assumeMonotonicSurfaceDensity      , assumeExponentialDisk  , &
-         &                                                                            useTabulation
+    logical                                                                        :: assumeMonotonicSurfaceDensity      , useTabulation
 
     !![
     <inputParameter>
@@ -152,42 +146,42 @@ contains
       <name>heightToRadialScaleDisk</name>
       <defaultSource>\citep{kregel_flattening_2002}</defaultSource>
       <defaultValue>0.137d0</defaultValue>
-      <description>The ratio of scale height to scale radius for disks in the ``Blitz-Rosolowsky2006'' star formation timescale calculation.</description>
+      <description>The ratio of scale height to scale radius for disks in the \cite{blitz_role_2006} star formation timescale calculation.</description>
       <source>parameters</source>
     </inputParameter>
     <inputParameter>
       <name>surfaceDensityCritical</name>
       <defaultSource>\citep{bigiel_star_2008}</defaultSource>
       <defaultValue>200.0d0</defaultValue>
-      <description>The surface density (in units of $M_\odot$ pc$^{-2}$) in the ``Blitz-Rosolowsky2006'' star formation timescale calculation at which low-density truncation begins.</description>
+      <description>The surface density (in units of $M_\odot$ pc$^{-2}$) in the \cite{blitz_role_2006} star formation timescale calculation at which low-density truncation begins.</description>
       <source>parameters</source>
     </inputParameter>
     <inputParameter>
       <name>surfaceDensityExponent</name>
       <defaultSource>\citep{bigiel_star_2008}</defaultSource>
       <defaultValue>0.4d0</defaultValue>
-      <description>The exponent for surface density in the ``Blitz-Rosolowsky2006'' star formation timescale calculation at in the high density regime.</description>
+      <description>The exponent for surface density in the \cite{blitz_role_2006} star formation timescale calculation at in the high density regime.</description>
       <source>parameters</source>
     </inputParameter>
     <inputParameter>
       <name>starFormationFrequencyNormalization</name>
       <defaultSource>\citep{leroy_star_2008}</defaultSource>
       <defaultValue>5.25d-10</defaultValue>
-      <description>The star formation frequency (in the low-density limit and in units of yr$^{-1}$) in the ``Blitz-Rosolowsky2006'' star formation timescale calculation.</description>
+      <description>The star formation frequency (in the low-density limit and in units of yr$^{-1}$) in the \cite{blitz_role_2006} star formation timescale calculation.</description>
       <source>parameters</source>
     </inputParameter>
     <inputParameter>
       <name>pressureCharacteristic</name>
       <defaultSource>\citep{blitz_role_2006}</defaultSource>
       <defaultValue>4.54d0</defaultValue>
-      <description>The characteristic pressure (given as $P_0/k_\mathrm{B}$ in units of K cm$^{-3}$) in the scaling relation of molecular hydrogen fraction with disk pressure in the ``Blitz-Rosolowsky2006'' star formation timescale calculation.</description>
+      <description>The characteristic pressure (given as $P_0/k_\mathrm{B}$ in units of K cm$^{-3}$) in the scaling relation of molecular hydrogen fraction with disk pressure in the \cite{blitz_role_2006} star formation timescale calculation.</description>
       <source>parameters</source>
     </inputParameter>
     <inputParameter>
       <name>pressureExponent</name>
       <defaultSource>\citep{blitz_role_2006}</defaultSource>
       <defaultValue>0.92d0</defaultValue>
-      <description>The exponent in the scaling relation of molecular hydrogen fraction with disk pressure in the ``Blitz-Rosolowsky2006'' star formation timescale calculation.</description>
+      <description>The exponent in the scaling relation of molecular hydrogen fraction with disk pressure in the \cite{blitz_role_2006} star formation timescale calculation.</description>
       <source>parameters</source>
     </inputParameter>
     <inputParameter>
@@ -197,28 +191,20 @@ contains
       <source>parameters</source>
     </inputParameter>
     <inputParameter>
-      <name>assumeExponentialDisk</name>
-      <defaultValue>.false.</defaultValue>
-      <description>If true, assume that the surface density in disks follows an exponential profile, $\exp(-r/r_\mathrm{d})$.</description>
-      <source>parameters</source>
-    </inputParameter>
-    <inputParameter>
       <name>useTabulation</name>
       <defaultValue>.false.</defaultValue>
       <description>If true, then use tabulated solutions to the integrated star formation rate.</description>
       <source>parameters</source>
     </inputParameter>
-    <objectBuilder class="galacticStructure" name="galacticStructure_" source="parameters"/>
     !!]
-    self=starFormationRateSurfaceDensityDisksBlitz2006(velocityDispersionDiskGas,heightToRadialScaleDisk,surfaceDensityCritical,surfaceDensityExponent,starFormationFrequencyNormalization,pressureCharacteristic,pressureExponent,assumeMonotonicSurfaceDensity,assumeExponentialDisk,useTabulation,galacticStructure_)
+    self=starFormationRateSurfaceDensityDisksBlitz2006(velocityDispersionDiskGas,heightToRadialScaleDisk,surfaceDensityCritical,surfaceDensityExponent,starFormationFrequencyNormalization,pressureCharacteristic,pressureExponent,assumeMonotonicSurfaceDensity,useTabulation)
     !![
     <inputParametersValidate source="parameters"/>
-    <objectDestructor name="galacticStructure_"/>
     !!]
     return
   end function blitz2006ConstructorParameters
 
-  function blitz2006ConstructorInternal(velocityDispersionDiskGas,heightToRadialScaleDisk,surfaceDensityCritical,surfaceDensityExponent,starFormationFrequencyNormalization,pressureCharacteristic,pressureExponent,assumeMonotonicSurfaceDensity,assumeExponentialDisk,useTabulation,galacticStructure_) result(self)
+  function blitz2006ConstructorInternal(velocityDispersionDiskGas,heightToRadialScaleDisk,surfaceDensityCritical,surfaceDensityExponent,starFormationFrequencyNormalization,pressureCharacteristic,pressureExponent,assumeMonotonicSurfaceDensity,useTabulation) result(self)
     !!{
     Internal constructor for the {\normalfont \ttfamily blitz2006} star formation surface density rate from disks class.
     !!}
@@ -230,18 +216,16 @@ contains
     use :: Root_Finder                     , only : rangeExpandMultiplicative, rangeExpandSignExpectNegative, rangeExpandSignExpectPositive
     use :: Hashes_Cryptographic            , only : Hash_MD5
     implicit none
-    type            (starFormationRateSurfaceDensityDisksBlitz2006)                        :: self
-    class           (galacticStructureClass                       ), intent(in   ), target :: galacticStructure_
-    double precision                                               , intent(in   )         :: velocityDispersionDiskGas          , heightToRadialScaleDisk, &
-         &                                                                                    surfaceDensityCritical             , surfaceDensityExponent , &
-         &                                                                                    starFormationFrequencyNormalization, pressureCharacteristic , &
-         &                                                                                    pressureExponent
-    logical                                                        , intent(in   )         :: assumeMonotonicSurfaceDensity      , assumeExponentialDisk  , &
-         &                                                                                    useTabulation
-    type            (varying_string                               )                        :: descriptorString
-    character       (len=17                                       )                        :: parameterLabel
+    type            (starFormationRateSurfaceDensityDisksBlitz2006)                :: self
+    double precision                                               , intent(in   ) :: velocityDispersionDiskGas          , heightToRadialScaleDisk, &
+         &                                                                            surfaceDensityCritical             , surfaceDensityExponent , &
+         &                                                                            starFormationFrequencyNormalization, pressureCharacteristic , &
+         &                                                                            pressureExponent
+    logical                                                        , intent(in   ) :: assumeMonotonicSurfaceDensity      , useTabulation
+    type            (varying_string                               )                :: descriptorString
+    character       (len=17                                       )                :: parameterLabel
     !![
-    <constructorAssign variables="velocityDispersionDiskGas, heightToRadialScaleDisk, surfaceDensityCritical, surfaceDensityExponent, starFormationFrequencyNormalization, pressureCharacteristic, pressureExponent, assumeMonotonicSurfaceDensity, assumeExponentialDisk, useTabulation, *galacticStructure_"/>
+    <constructorAssign variables="velocityDispersionDiskGas, heightToRadialScaleDisk, surfaceDensityCritical, surfaceDensityExponent, starFormationFrequencyNormalization, pressureCharacteristic, pressureExponent, assumeMonotonicSurfaceDensity, useTabulation"/>
     !!]
 
     self%lastUniqueID   =-1_kind_int8
@@ -255,29 +239,16 @@ contains
     ! Build fast exponentiator.
     self%pressureRatioExponentiator         =fastExponentiator(0.0d0,1.0d0,pressureExponent,1000.0d0,.false.)
     ! Build root finder.
-    if (self%assumeExponentialDisk) then
-       self%finder=rootFinder(                                                                       &
-            &                 rootFunction                 =blitz2006CriticalDensityExponentialRoot, &
-            &                 toleranceAbsolute            =0.0d+0                                 , &
-            &                 toleranceRelative            =1.0d-4                                 , &
-            &                 rangeExpandUpward            =2.0d0                                  , &
-            &                 rangeExpandDownward          =0.5d0                                  , &
-            &                 rangeExpandUpwardSignExpect  =rangeExpandSignExpectNegative          , &
-            &                 rangeExpandDownwardSignExpect=rangeExpandSignExpectPositive          , &
-            &                 rangeExpandType              =rangeExpandMultiplicative                &
-            &                )
-    else
-       self%finder=rootFinder(                                                                       &
-            &                 rootFunction                 =blitz2006CriticalDensityRoot           , &
-            &                 toleranceAbsolute            =0.0d+0                                 , &
-            &                 toleranceRelative            =1.0d-4                                 , &
-            &                 rangeExpandUpward            =2.0d+0                                 , &
-            &                 rangeExpandDownward          =0.5d+0                                 , &
-            &                 rangeExpandUpwardSignExpect  =rangeExpandSignExpectNegative          , &
-            &                 rangeExpandDownwardSignExpect=rangeExpandSignExpectPositive          , &
-            &                 rangeExpandType              =rangeExpandMultiplicative                &
-            &                )
-    end if
+    self%finder=rootFinder(                                                             &
+         &                 rootFunction                 =blitz2006CriticalDensityRoot , &
+         &                 toleranceAbsolute            =0.0d+0                       , &
+         &                 toleranceRelative            =1.0d-4                       , &
+         &                 rangeExpandUpward            =2.0d+0                       , &
+         &                 rangeExpandDownward          =0.5d+0                       , &
+         &                 rangeExpandUpwardSignExpect  =rangeExpandSignExpectNegative, &
+         &                 rangeExpandDownwardSignExpect=rangeExpandSignExpectPositive, &
+         &                 rangeExpandType              =rangeExpandMultiplicative      &
+         &                )
     ! Initialize memoized values.
     self%massGasPrevious                     =-huge(0.0d0)
     self%massStellarPrevious                 =-huge(0.0d0)
@@ -328,22 +299,22 @@ contains
     type(starFormationRateSurfaceDensityDisksBlitz2006), intent(inout) :: self
 
     if (calculationResetEvent%isAttached(self,blitz2006CalculationReset)) call calculationResetEvent%detach(self,blitz2006CalculationReset)
-    !![
-    <objectDestructor name="self%galacticStructure_"/>
-    !!]
     return
   end subroutine blitz2006Destructor
 
-  subroutine blitz2006CalculationReset(self,node)
+  subroutine blitz2006CalculationReset(self,node,uniqueID)
     !!{
     Reset the Kennicutt-Schmidt relation calculation.
     !!}
+    use :: Kind_Numbers, only : kind_int8
     implicit none
-    class(starFormationRateSurfaceDensityDisksBlitz2006), intent(inout) :: self
-    type (treeNode                                     ), intent(inout) :: node
+    class  (starFormationRateSurfaceDensityDisksBlitz2006), intent(inout) :: self
+    type   (treeNode                                     ), intent(inout) :: node
+    integer(kind_int8                                    ), intent(in   ) :: uniqueID
+    !$GLC attributes unused :: node
 
     self%factorsComputed       =.false.
-    self%lastUniqueID          =node%uniqueID()
+    self%lastUniqueID          =uniqueID
     self%radiusCriticalPrevious=-huge(0.0d0)
     return
   end subroutine blitz2006CalculationReset
@@ -362,7 +333,7 @@ contains
          &                                                                            surfaceDensityGas, factorBoost
 
     ! Check if node differs from previous one for which we performed calculations.
-    if (node%uniqueID() /= self%lastUniqueID) call self%calculationReset(node)
+    if (node%uniqueID() /= self%lastUniqueID) call self%calculationReset(node,node%uniqueID())
     ! Compute factors.
     call self%computeFactors(node)
     ! Return zero rate for non-positive radius or mass.
@@ -424,12 +395,16 @@ contains
     !!}
     use :: Abundances_Structure            , only : abundances
     use :: Galacticus_Nodes                , only : nodeComponentDisk
+    use :: Galactic_Structure_Options      , only : componentTypeDisk              , massTypeGaseous                  , massTypeStellar
+    use :: Mass_Distributions              , only : massDistributionClass          , massDistributionCylindricalScaler, massDistributionExponentialDisk
     use :: Numerical_Constants_Math        , only : Pi
     use :: Numerical_Constants_Astronomical, only : gravitationalConstantGalacticus
     implicit none
     class(starFormationRateSurfaceDensityDisksBlitz2006), intent(inout) :: self
     type (treeNode                                     ), intent(inout) :: node
     class(nodeComponentDisk                            ), pointer       :: disk
+    class(massDistributionClass                        ), pointer       :: massDistributionGaseous, massDistributionStellar, &
+         &                                                                 massDistribution_
     type (abundances                                   ), save          :: abundancesFuel
     !$omp threadprivate(abundancesFuel)
 
@@ -445,8 +420,48 @@ contains
           abundancesFuel=disk%abundancesGas()
           call abundancesFuel%massToMassFraction(self%massGas)
           self%hydrogenMassFraction=abundancesFuel%hydrogenMassFraction()
+          ! Determine if we have an exponential disk.
+          massDistributionGaseous => node%massDistribution(componentType=componentTypeDisk,massType=massTypeGaseous)
+          massDistributionStellar => node%massDistribution(componentType=componentTypeDisk,massType=massTypeStellar)
+          self%isExponentialDisk  =  .true.
+          select type (massDistributionGaseous)
+          class is (massDistributionExponentialDisk)
+             ! The disk is exponential - no change needed.
+          class is (massDistributionCylindricalScaler     )
+             ! Check the unscale distribution.
+             massDistribution_ => massDistributionGaseous%unscaled()
+             select type (massDistribution_)
+             class is (massDistributionExponentialDisk)
+                ! The disk is exponential - no change needed.
+             class default
+                self%isExponentialDisk=.false.
+             end select
+          class default
+             ! Not an exponential distribution.
+             self%isExponentialDisk=.false.
+          end select
+          select type (massDistributionStellar)
+          class is (massDistributionExponentialDisk)
+             ! The disk is exponential - no change needed.
+          class is (massDistributionCylindricalScaler     )
+             ! Check the unscale distribution.
+             massDistribution_ => massDistributionStellar%unscaled()
+             select type (massDistribution_)
+             class is (massDistributionExponentialDisk)
+                ! The disk is exponential - no change needed.
+             class default
+                self%isExponentialDisk=.false.
+             end select
+          class default
+             ! Not an exponential distribution.
+             self%isExponentialDisk=.false.
+          end select
+          !![
+	  <objectDestructor name="massDistributionGaseous"/>
+	  <objectDestructor name="massDistributionStellar"/>
+	  !!]
           ! Properties required for exponential disks.
-          if (self%assumeExponentialDisk .and. self%massStellar >= 0.0d0 .and. self%radiusDisk > 0.0d0) then
+          if (self%isExponentialDisk .and. self%massStellar >= 0.0d0 .and. self%radiusDisk > 0.0d0) then
              self%pressureRatioCoefficient     =+gravitationalConstantGalacticus          &
                   &                             /8.0d0                                    &
                   &                             /Pi                                       &
@@ -483,20 +498,36 @@ contains
     !!{
     Returns intervals to use for integrating the \cite{krumholz_star_2009} star formation rate over a galactic disk.
     !!}
+    use :: Mass_Distributions              , only : massDistributionClass
+    use :: Galactic_Structure_Options      , only : componentTypeDisk              , massTypeGaseous                  , massTypeStellar
     use :: Numerical_Constants_Math        , only : Pi
     use :: Numerical_Constants_Astronomical, only : gravitationalConstantGalacticus
     implicit none
     class           (starFormationRateSurfaceDensityDisksBlitz2006), intent(inout), target                      :: self
     double precision                                                              , allocatable, dimension(:,:) :: blitz2006Intervals
     type            (treeNode                                     ), intent(inout), target                      :: node
-    double precision                                               , intent(in   )                              :: radiusInner                  , radiusOuter
+    double precision                                               , intent(in   )                              :: radiusInner                             , radiusOuter
     logical                                                        , intent(inout), allocatable, dimension(  :) :: intervalIsAnalytic
     double precision                                               , intent(inout), allocatable, dimension(  :) :: integralsAnalytic
-    double precision                                                                                            :: coefficientNormalization     , coefficientFactorBoost, &
-         &                                                                                                         coefficientFactorBoostStellar, coefficientMolecular
+    class           (massDistributionClass                        ), pointer                                    :: massDistributionGaseous                 , massDistributionStellar
+    double precision                                               , parameter                                  :: factorBoostStellarCoefficientTiny=1.0d-6
+    double precision                                                                                            :: coefficientNormalization                , coefficientFactorBoost       , &
+         &                                                                                                         coefficientFactorBoostStellar           , coefficientMolecular         , &
+         &                                                                                                         rootValueInner                          , rootValueOuter               , &
+         &                                                                                                         radiusAnalytic                          , sqrtTerm
+    logical                                                                                                     :: thresholdCondition                      , assumeMonotonicSurfaceDensity
 
     ! Check if we can assume a monotonic surface density.
-    if (self%assumeMonotonicSurfaceDensity) then
+    massDistributionGaseous       =>  node                   %massDistribution                       (componentType=componentTypeDisk,massType=massTypeGaseous)
+    massDistributionStellar       =>  node                   %massDistribution                       (componentType=componentTypeDisk,massType=massTypeStellar)
+    assumeMonotonicSurfaceDensity =   massDistributionGaseous%assumeMonotonicDecreasingSurfaceDensity(                                                        ) &
+         &                           .and.                                                                                                                      &
+         &                            massDistributionStellar%assumeMonotonicDecreasingSurfaceDensity(                                                        )
+    !![
+    <objectDestructor name="massDistributionGaseous"/>
+    <objectDestructor name="massDistributionStellar"/>
+    !!]
+    if (assumeMonotonicSurfaceDensity) then
        ! Set the critical radius to a very negative value so that pressure ratio is always computed.
        self%radiusCritical=-huge(0.0d0)
        ! Compute factors.
@@ -506,12 +537,27 @@ contains
           allocate(blitz2006Intervals(2,0))
           self%radiusCritical=-huge(0.0d0)          
        else
+          self_ => self
+          node_ => node
           ! Test if the inner radius is below the pressure threshold.
-          if (self%pressureRatio(node,radiusInner) <= 1.0d0) then
+          if (self%isExponentialDisk) then
+             ! For exponential disks this condition has a simple analytic form.
+             rootValueInner       =-huge(0.0d0)
+             if (self%pressureRatioCoefficient > 0.0d0 .and. -exponent(self%pressureRatioCoefficient) < maxExponent(0.0d0)) then
+                thresholdCondition=1.0d0/self%pressureRatioCoefficient-self%factorBoostStellarCoefficient >= 1.0d0
+             else
+                thresholdCondition=.true.
+             end if
+           else
+             ! For generic disks test this numerically.
+             rootValueInner       =blitz2006CriticalDensityRoot(radiusInner)
+             thresholdCondition   =rootValueInner                                                         <= 0.0d0
+          end if          
+          if (thresholdCondition) then
              ! The entire disk is below the pressure threshold so use a single interval.
              allocate(blitz2006Intervals(2,1))
              allocate(intervalIsAnalytic(  1))
-             if (self%assumeExponentialDisk.and.self%useTabulation) then
+             if (self%isExponentialDisk.and.self%useTabulation) then
                 call computeCoefficients()
                 allocate(integralsAnalytic(1))
                 intervalIsAnalytic=.true.
@@ -523,13 +569,14 @@ contains
              self%radiusCritical=-huge(0.0d0)
           else
              ! Compute coefficients needed for analytic solutions.
-             if (self%assumeExponentialDisk.and.self%useTabulation) call computeCoefficients()
+             if (self%isExponentialDisk.and.self%useTabulation) call computeCoefficients()
              ! Test the surface density at the outer radius.
-             if (self%pressureRatio(node,radiusOuter) >= 1.0d0) then
+             rootValueOuter=blitz2006CriticalDensityRoot(radiusOuter)
+             if (rootValueOuter >= 0.0d0) then
                 ! Entire disk is above the pressure threshold so use a single interval.
                 allocate(blitz2006Intervals(2,1))
                 allocate(intervalIsAnalytic(  1))
-                if (self%assumeExponentialDisk.and.self%useTabulation) then
+                if (self%isExponentialDisk.and.self%useTabulation) then
                    allocate(integralsAnalytic (  1))
                    intervalIsAnalytic =.true.
                    integralsAnalytic  =self%integralFullyMolecular(coefficientNormalization,coefficientFactorBoost,radiusInner,radiusOuter)
@@ -541,17 +588,56 @@ contains
              else
                 ! The disk transitions the pressure threshold - attempt to locate the radius at which this happens and use two
                 ! intervals split at this point.
-                self_ => self
-                node_ => node
-                if (self%radiusCriticalPrevious > 0.0d0) then
-                   self%radiusCritical=self%finder%find(rootGuess=self%radiusCriticalPrevious)
+                if (self%isExponentialDisk) then
+                   ! For exponential disks we have an analytic solution for the transition radius.
+                   if (self%factorBoostStellarCoefficient <= factorBoostStellarCoefficientTiny) then
+                      radiusAnalytic=+0.5d0*log(self%pressureRatioCoefficient)
+                   else
+                      sqrtTerm      =+(                                                                                      &
+                           &                 +  9.0d0*self%pressureRatioCoefficient**2*self%factorBoostStellarCoefficient**2 &
+                           &           +sqrt(                                                                                &
+                           &                 +  3.0d0                                                                        &
+                           &                )                                                                                &
+                           &           *sqrt(                                                                                &
+                           &                 +256.0d0*self%pressureRatioCoefficient**3                                       &
+                           &                 + 27.0d0*self%pressureRatioCoefficient**4*self%factorBoostStellarCoefficient**4 &
+                           &                )                                                                                &
+                           &          )**(1.0d0/3.0d0)
+                      radiusAnalytic=+2.0d0                                                                                                                  &
+                           &         *log(                                                                                                                   &
+                           &              +0.5d0                                                                                                             &
+                           &              *sqrt(                                                                                                             &
+                           &                          -4.0d0* (2.0d0/3.0d0)**(1.0d0/3.0d0)                      *self%pressureRatioCoefficient     /sqrtTerm &
+                           &                          +1.0d0/( 2.0d0       **(1.0d0/3.0d0)*3.0d0**(2.0d0/3.0d0))                                   *sqrtTerm &
+                           &                   )                                                                                                             &
+                           &              +0.5d0                                                                                                             &
+                           &              *sqrt(                                                                                                             &
+                           &                          +4.0d0* (2.0d0/3.0d0)**(1.0d0/3.0d0)                      *self%pressureRatioCoefficient     /sqrtTerm &
+                           &                          -1.0d0/( 2.0d0       **(1.0d0/3.0d0)*3.0d0**(2.0d0/3.0d0))                                   *sqrtTerm &
+                           &                          +2.0d0                                                                                                 &
+                           &                                                                                    *self%pressureRatioCoefficient               &
+                           &                                                                                    *self%factorBoostStellarCoefficient          &
+                           &                    /sqrt(                                                                                                       &
+                           &                          -4.0d0* (2.0d0/3.0d0)**(1.0d0/3.0d0)                      *self%pressureRatioCoefficient     /sqrtTerm &
+                           &                          +1.0d0/( 2.0d0       **(1.0d0/3.0d0)*3.0d0**(2.0d0/3.0d0))                                   *sqrtTerm &
+                           &                         )                                                                                                       &
+                           &                   )                                                                                                             &
+                           &             )
+                   end if
+                   self%radiusCritical=+     radiusAnalytic &
+                        &              *self%radiusDisk
                 else
-                   self%radiusCritical=self%finder%find(rootRange=[radiusInner,radiusOuter]  )
+                   ! For non-exponential disks, seek a solution numerically.
+                   if (self%radiusCriticalPrevious > 0.0d0) then
+                      self%radiusCritical=self%finder%find(rootGuess=self%radiusCriticalPrevious)
+                   else
+                      self%radiusCritical=self%finder%find(rootRange=[radiusInner,radiusOuter],rootRangeValues=[rootValueInner,rootValueOuter])
+                   end if
                 end if
                 self%radiusCriticalPrevious=self%radiusCritical
                 allocate(blitz2006Intervals(2,2))
                 allocate(intervalIsAnalytic(  2))
-                if (self%assumeExponentialDisk.and.self%useTabulation) then
+                if (self%isExponentialDisk.and.self%useTabulation) then
                    allocate(integralsAnalytic (  2))
                    intervalIsAnalytic =.true.
                    integralsAnalytic  =[                                                                                                                                                                             &
@@ -609,8 +695,7 @@ contains
            &                             ) 
       return
     end subroutine computeCoefficients
-    
-    
+
   end function blitz2006Intervals
 
   double precision function blitz2006IntegralFullyMolecular(self,coefficientNormalization,coefficientFactorBoost,radiusInner,radiusOuter)
@@ -661,14 +746,15 @@ contains
     !!}
     implicit none
     class           (starFormationRateSurfaceDensityDisksBlitz2006), intent(inout) :: self
-    double precision                                               , intent(in   ) :: radiusInner                              , radiusOuter                          , &
-         &                                                                            coefficientNormalization                 , coefficientFactorBoost               , &
+    double precision                                               , intent(in   ) :: radiusInner                              , radiusOuter                             , &
+         &                                                                            coefficientNormalization                 , coefficientFactorBoost                  , &
          &                                                                            coefficientFactorBoostStellar
-    double precision                                               , parameter     :: coefficientFactorBoostStellarLarge=1.0d+4, radiusScaleFreeTiny           =1.0d-3
+    double precision                                               , parameter     :: coefficientFactorBoostStellarLarge=1.0d+4, radiusScaleFreeTiny              =1.0d-3
+    double precision                                               , parameter     :: coefficientFactorBoostTiny        =1.0d-6, coefficientFactorBoostStellarTiny=1.0d-6
     double precision                                               , save          :: coefficientFactorBoost_                  , coefficientFactorBoostStellar_
     !$omp threadprivate(coefficientFactorBoost_,coefficientFactorBoostStellar_)
     integer                                                                        :: i
-    double precision                                                               :: multiplier                               , radiusScaleFree                      , &
+    double precision                                                               :: multiplier                               , radiusScaleFree                         , &
          &                                                                            radiusScaleFreeInner                     , radiusScaleFreeOuter
     
     ! Compute scale free radii.
@@ -801,7 +887,6 @@ contains
       implicit none
       double precision                , intent(in   ) :: radiusScaleFree
       double precision                , parameter     :: toleranceRelative                    =1.0d-6
-      double precision                , parameter     :: coefficientFactorBoostTiny           =1.0d-6, coefficientFactorBoostStellarTiny           =1.0d-6
       integer                         , parameter     :: pointsPerDecadeFactorBoost           =30    , pointsPerDecadeFactorBoostStellar           =30    , &
            &                                             pointsPerDecadeRadius                =30
       integer                                         :: countFactorBoost                            , countFactorBoostStellar                            , &
@@ -826,9 +911,9 @@ contains
       logical                                         :: haveLock
       !$omp threadprivate(message,file,fileLock)
       
-      ! Read table if we do not have it.
+      ! If our table is insufficient (or does not yet exist), attempt to read the table from file.
       haveLock=.false.
-      if (.not.self%tableInitialized) then
+      if (tableIsInsufficient()) then
          call Directory_Make(char(File_Path(char(self%filenameTable))))
          call File_Lock(char(self%filenameTable),fileLock,lockIsShared=.false.)
          haveLock=.true.
@@ -856,28 +941,8 @@ contains
             self%tableInitialized=.true.
          end if
       end if
-      ! Recompute table if it has insufficient range.
-      if     (                                                                                 &
-           &   (                                                                               &
-           &     coefficientFactorBoost            < self%coefficientFactorBoostMinimum        &
-           &    .and.                                                                          &
-           &     coefficientFactorBoostTiny        < self%coefficientFactorBoostMinimum        &
-           &   )                                                                               &
-           &  .or.                                                                             &
-           &     coefficientFactorBoost            > self%coefficientFactorBoostMaximum        &
-           &  .or.                                                                             &
-           &   (                                                                               &
-           &     coefficientFactorBoostStellar     < self%coefficientFactorBoostStellarMinimum &
-           &    .and.                                                                          &
-           &     coefficientFactorBoostStellarTiny < self%coefficientFactorBoostStellarMinimum &
-           &   )                                                                               &
-           &  .or.                                                                             &
-           &     coefficientFactorBoostStellar     > self%coefficientFactorBoostStellarMaximum &
-           &  .or.                                                                             &
-           &     radiusScaleFree                   < self%radiusScaleFreeMinimum               &
-           &  .or.                                                                             &
-           &     radiusScaleFree                   > self%radiusScaleFreeMaximum               &
-           & ) then
+      ! Having read the table from file (if it exists), check again to see if it is sufficient. If it is not, we must retabulate.
+      if (tableIsInsufficient()) then
          ! Obtain a file lock if we don't already have one.
          if (.not.haveLock) then
             call File_Lock(char(self%filenameTable),fileLock,lockIsShared=.false.)
@@ -1006,31 +1071,61 @@ contains
             hhi=      +hi
          end if
          do jj=0,1
-               if (jj == 0) then
-                  hhj=+1.0d0-hj
+            if (jj == 0) then
+               hhj=+1.0d0-hj
+            else
+               hhj=      +hj
+            end if
+            do kk=0,1
+               if (kk == 0) then
+                  hhk=+1.0d0-hk
                else
-                  hhj=      +hj
+                  hhk=      +hk
                end if
-               do kk=0,1
-                  if (kk == 0) then
-                     hhk=+1.0d0-hk
-                  else
-                     hhk=      +hk
-                  end if
-                  integral=+integral                                             &
-                       &   +self%integralPartiallyMolecularTable(i+ii,j+jj,k+kk) &
-                       &   *                                      hhi            &
-                       &   *                                           hhj       &
-                       &   *                                                hhk
-               end do
+               integral=+integral                                             &
+                    &   +self%integralPartiallyMolecularTable(i+ii,j+jj,k+kk) &
+                    &   *                                      hhi            &
+                    &   *                                           hhj       &
+                    &   *                                                hhk
             end do
          end do
-         integralAnalyticPartiallyMolecularGeneric=+integralAnalyticPartiallyMolecularGeneric &
-              &                                    +exp(integral)                             &
-              &                                    *coefficientNormalization
+      end do
+      integralAnalyticPartiallyMolecularGeneric=+integralAnalyticPartiallyMolecularGeneric &
+           &                                    +exp(integral)                             &
+           &                                    *coefficientNormalization
       return
     end function integralAnalyticPartiallyMolecularGeneric
-   
+    
+    logical function tableIsInsufficient()
+      !!{
+      Determine if the current table is insufficient for our purposes.
+      !!}
+      implicit none
+      
+      tableIsInsufficient=                                    .not. self%tableInitialized                     &
+           &              .or.                                                                                &
+           &               (                                                                                  &
+           &                 coefficientFactorBoost            <    self%coefficientFactorBoostMinimum        &
+           &                .and.                                                                             &
+           &                 coefficientFactorBoostTiny        <    self%coefficientFactorBoostMinimum        &
+           &               )                                                                                  &
+           &              .or.                                                                                &
+           &                 coefficientFactorBoost            >    self%coefficientFactorBoostMaximum        &
+           &              .or.                                                                                &
+           &               (                                                                                  &
+           &                 coefficientFactorBoostStellar     <    self%coefficientFactorBoostStellarMinimum &
+           &                .and.                                                                             &
+           &                 coefficientFactorBoostStellarTiny <    self%coefficientFactorBoostStellarMinimum &
+           &               )                                                                                  &
+           &              .or.                                                                                &
+           &                 coefficientFactorBoostStellar     >    self%coefficientFactorBoostStellarMaximum &
+           &              .or.                                                                                &
+           &                 radiusScaleFree                   <    self%radiusScaleFreeMinimum               &
+           &              .or.                                                                                &
+           &                 radiusScaleFree                   >    self%radiusScaleFreeMaximum
+      return
+    end function tableIsInsufficient
+    
     double precision function integrand(radiusScaleFree)
       !!{
       Integrand for the partially molecular case.
@@ -1068,17 +1163,6 @@ contains
     return
   end function blitz2006CriticalDensityRoot
 
-  double precision function blitz2006CriticalDensityExponentialRoot(radius)
-    !!{
-    Root function used in finding the radius in a disk where the pressure ratio exceeds the critical ratio.
-    !!}
-    implicit none
-    double precision, intent(in   ) :: radius
-
-    blitz2006CriticalDensityExponentialRoot=self_%pressureRatioExponential(node_,radius)-1.0d0
-    return
-  end function blitz2006CriticalDensityExponentialRoot
-
   double precision function blitz2006PressureRatio(self,node,radius,surfaceDensityGas) result(pressureRatio)
     !!{
     Root function used in finding the radius in a disk where the pressure ratio exceeds the critical ratio.
@@ -1086,16 +1170,25 @@ contains
     use :: Numerical_Constants_Math        , only : Pi
     use :: Numerical_Constants_Astronomical, only : gravitationalConstantGalacticus
     use :: Galactic_Structure_Options      , only : componentTypeDisk              , coordinateSystemCylindrical, massTypeGaseous, massTypeStellar
+    use :: Mass_Distributions              , only : massDistributionClass
+    use :: Coordinates, only : coordinateCylindrical, assignment(=)
     implicit none
     class           (starFormationRateSurfaceDensityDisksBlitz2006), intent(inout)           :: self
     type            (treeNode                                     ), intent(inout)           :: node
     double precision                                               , intent(in   )           :: radius
     double precision                                               , intent(  out), optional :: surfaceDensityGas
+    class           (massDistributionClass                        ), pointer                 :: massDistribution_
+    type            (coordinateCylindrical                        )                          :: coordinates
     double precision                                                                         :: surfaceDensityGas_, surfaceDensityStellar, &
          &                                                                                      factorBoostStellar
 
     ! Get gas surface density.
-    surfaceDensityGas_=self%galacticStructure_%surfaceDensity(node,[radius,0.0d0,0.0d0],coordinateSystem=coordinateSystemCylindrical,componentType=componentTypeDisk,massType=massTypeGaseous)
+    coordinates        =  [radius,0.0d0,0.0d0]
+    massDistribution_  => node             %massDistribution(componentType=componentTypeDisk,massType=massTypeGaseous)
+    surfaceDensityGas_ =  massDistribution_%surfaceDensity  (              coordinates                               )
+    !![
+    <objectDestructor name="massDistribution_"/>
+    !!]
     if (present(surfaceDensityGas)) surfaceDensityGas=surfaceDensityGas_
     ! If the radius is less than the critical radius the pressure radius is above 1 by definition, so simply pin it to that value.
     if (radius <= self%radiusCritical) then
@@ -1111,7 +1204,11 @@ contains
             &        /self%pressureCharacteristic
        if (pressureRatio > 0.0d0 .and. pressureRatio < 1.0d0) then
           ! Compute the stellar boost factor.
-          surfaceDensityStellar=+self%galacticStructure_%surfaceDensity(node,[radius,0.0d0,0.0d0],coordinateSystem=coordinateSystemCylindrical,componentType=componentTypeDisk,massType=massTypeStellar) 
+          massDistribution_     =>  node             %massDistribution(componentType=componentTypeDisk,massType=massTypeStellar)
+          surfaceDensityStellar =  +massDistribution_%surfaceDensity  (              coordinates                               )
+          !![
+	  <objectDestructor name="massDistribution_"/>
+          !!]
           factorBoostStellar   =+1.0d0                                 &
                &                +self%velocityDispersionDiskGas        &
                &                /surfaceDensityGas_                    &
@@ -1128,24 +1225,3 @@ contains
     end if
     return
   end function blitz2006PressureRatio
-  
-  double precision function blitz2006PressureRatioExponential(self,node,radius) result(pressureRatio)
-    !!{
-    Root function used in finding the radius in a disk where the pressure ratio exceeds the critical ratio.
-    !!}
-    implicit none
-    class           (starFormationRateSurfaceDensityDisksBlitz2006), intent(inout) :: self
-    type            (treeNode                                     ), intent(inout) :: node
-    double precision                                               , intent(in   ) :: radius
-    double precision                                                               :: factorBoostStellar
-    
-    ! Compute the pressure ratio that Blitz & Rosolowsky (2006) use to compute the molecular fraction.
-    pressureRatio     =+self%pressureRatioCoefficient      &
-         &             *exp(-2.0d0*radius/self%radiusDisk)
-    factorBoostStellar=+1.0d0                              &
-         &             +self%factorBoostStellarCoefficient &
-         &             *exp(+0.5d0*radius/self%radiusDisk)
-    pressureRatio     =+pressureRatio                      &
-         &             *factorBoostStellar
-    return
-  end function blitz2006PressureRatioExponential  

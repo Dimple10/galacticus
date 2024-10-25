@@ -1,5 +1,5 @@
 !! Copyright 2009, 2010, 2011, 2012, 2013, 2014, 2015, 2016, 2017, 2018,
-!!           2019, 2020, 2021, 2022, 2023
+!!           2019, 2020, 2021, 2022, 2023, 2024
 !!    Andrew Benson <abenson@carnegiescience.edu>
 !!
 !! This file is part of Galacticus.
@@ -84,8 +84,10 @@ contains
     !!{
     Compute the window function for the survey.
     !!}
+#ifdef FFTW3AVAIL
     use            :: FFTW3        , only : fftw_plan_dft_3d       , FFTW_FORWARD       , FFTW_ESTIMATE, fftw_execute_dft, &
          &                                  fftw_destroy_plan
+#endif
     use            :: Error        , only : Error_Report
     use, intrinsic :: ISO_C_Binding, only : c_double_complex       , c_ptr
     use            :: Meshes       , only : Meshes_Apply_Point     , cloudTypeTriangular

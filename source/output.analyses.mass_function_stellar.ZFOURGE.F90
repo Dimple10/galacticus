@@ -1,5 +1,5 @@
 !! Copyright 2009, 2010, 2011, 2012, 2013, 2014, 2015, 2016, 2017, 2018,
-!!           2019, 2020, 2021, 2022, 2023
+!!           2019, 2020, 2021, 2022, 2023, 2024
 !!    Andrew Benson <abenson@carnegiescience.edu>
 !!
 !! This file is part of Galacticus.
@@ -78,7 +78,6 @@ contains
     Constructor for the ``massFunctionStellarZFOURGE'' output analysis class which takes a parameter set as input.
     !!}
     use :: Gravitational_Lensing, only : gravitationalLensingClass
-    use :: Galactic_Structure   , only : galacticStructureClass
     use :: Input_Parameters     , only : inputParameter           , inputParameters
     implicit none
     type            (outputAnalysisMassFunctionStellarZFOURGE)                              :: self
@@ -86,7 +85,6 @@ contains
     class           (cosmologyFunctionsClass                 ), pointer                     :: cosmologyFunctions_
     class           (outputTimesClass                        ), pointer                     :: outputTimes_
     class           (gravitationalLensingClass               ), pointer                     :: gravitationalLensing_
-    class           (galacticStructureClass                  ), pointer                     :: galacticStructure_
     double precision                                          , allocatable  , dimension(:) :: randomErrorPolynomialCoefficient , systematicErrorPolynomialCoefficient
     integer                                                                                 :: covarianceBinomialBinsPerDecade  , redshiftInterval
     double precision                                                                        :: covarianceBinomialMassHaloMinimum, covarianceBinomialMassHaloMaximum   , &
@@ -170,21 +168,19 @@ contains
     <objectBuilder class="cosmologyFunctions"   name="cosmologyFunctions_"   source="parameters"/>
     <objectBuilder class="outputTimes"          name="outputTimes_"          source="parameters"/>
     <objectBuilder class="gravitationalLensing" name="gravitationalLensing_" source="parameters"/>
-    <objectBuilder class="galacticStructure"    name="galacticStructure_"    source="parameters"/>
     !!]
     ! Build the object.
-    self=outputAnalysisMassFunctionStellarZFOURGE(cosmologyFunctions_,gravitationalLensing_,outputTimes_,galacticStructure_,redshiftInterval,randomErrorMinimum,randomErrorMaximum,randomErrorPolynomialCoefficient,systematicErrorPolynomialCoefficient,covarianceBinomialBinsPerDecade,covarianceBinomialMassHaloMinimum,covarianceBinomialMassHaloMaximum,sizeSourceLensing)
+    self=outputAnalysisMassFunctionStellarZFOURGE(cosmologyFunctions_,gravitationalLensing_,outputTimes_,redshiftInterval,randomErrorMinimum,randomErrorMaximum,randomErrorPolynomialCoefficient,systematicErrorPolynomialCoefficient,covarianceBinomialBinsPerDecade,covarianceBinomialMassHaloMinimum,covarianceBinomialMassHaloMaximum,sizeSourceLensing)
     !![
     <inputParametersValidate source="parameters"/>
     <objectDestructor name="cosmologyFunctions_"  />
     <objectDestructor name="outputTimes_"         />
     <objectDestructor name="gravitationalLensing_"/>
-    <objectDestructor name="galacticStructure_"   />
     !!]
     return
   end function massFunctionStellarZFOURGEConstructorParameters
 
-  function massFunctionStellarZFOURGEConstructorInternal(cosmologyFunctions_,gravitationalLensing_,outputTimes_,galacticStructure_,redshiftInterval,randomErrorMinimum,randomErrorMaximum,randomErrorPolynomialCoefficient,systematicErrorPolynomialCoefficient,covarianceBinomialBinsPerDecade,covarianceBinomialMassHaloMinimum,covarianceBinomialMassHaloMaximum,sizeSourceLensing) result (self)
+  function massFunctionStellarZFOURGEConstructorInternal(cosmologyFunctions_,gravitationalLensing_,outputTimes_,redshiftInterval,randomErrorMinimum,randomErrorMaximum,randomErrorPolynomialCoefficient,systematicErrorPolynomialCoefficient,covarianceBinomialBinsPerDecade,covarianceBinomialMassHaloMinimum,covarianceBinomialMassHaloMaximum,sizeSourceLensing) result (self)
     !!{
     Constructor for the ``massFunctionStellarZFOURGE'' output analysis class for internal use.
     !!}
@@ -204,7 +200,6 @@ contains
     class           (cosmologyFunctionsClass                            ), intent(in   ), target       :: cosmologyFunctions_
     class           (outputTimesClass                                   ), intent(inout), target       :: outputTimes_
     class           (gravitationalLensingClass                          ), intent(in   ), target       :: gravitationalLensing_
-    class           (galacticStructureClass                             ), intent(in   ), target       :: galacticStructure_
     integer                                                              , intent(in   )               :: redshiftInterval
     double precision                                                     , intent(in   )               :: randomErrorMinimum                                         , randomErrorMaximum                  , &
          &                                                                                                sizeSourceLensing
@@ -223,6 +218,7 @@ contains
     double precision                                                     , parameter                   :: errorPolynomialZeroPoint                            =11.3d+0
     type            (varying_string                                     )                              :: fileName
     double precision                                                                                   :: massThreshold
+    character       (len=4                                              )                              :: redshiftLabelLow                                            , redshiftLabelHigh
     !![
     <constructorAssign variables="redshiftInterval, randomErrorPolynomialCoefficient, systematicErrorPolynomialCoefficient, randomErrorMinimum, randomErrorMaximum, sizeSourceLensing, *gravitationalLensing_"/>
     !!]
@@ -253,29 +249,45 @@ contains
     ! Determine the data file and mass threshold to use.
     select case (redshiftInterval)
     case (0)
-       fileName     ='Stellar_Mass_Function_ZFOURGE_2014_z0.20_0.50.hdf5'
-       massThreshold=10.0d0**7.00d0
+       fileName         ='Stellar_Mass_Function_ZFOURGE_2014_z0.20_0.50.hdf5'
+       massThreshold    =10.0d0**7.00d0
+       redshiftLabelLow ='0.20'
+       redshiftLabelHigh='0.50'
     case (1)
-       fileName     ='Stellar_Mass_Function_ZFOURGE_2014_z0.50_0.75.hdf5'
-       massThreshold=10.0d0**7.25d0
+       fileName         ='Stellar_Mass_Function_ZFOURGE_2014_z0.50_0.75.hdf5'
+       massThreshold    =10.0d0**7.25d0
+       redshiftLabelLow ='0.50'
+       redshiftLabelHigh='0.75'
     case (2)
-       fileName     ='Stellar_Mass_Function_ZFOURGE_2014_z0.75_1.00.hdf5'
-       massThreshold=10.0d0**7.50d0
+       fileName         ='Stellar_Mass_Function_ZFOURGE_2014_z0.75_1.00.hdf5'
+       massThreshold    =10.0d0**7.50d0
+       redshiftLabelLow ='0.75'
+       redshiftLabelHigh='1.00'
     case (3)
-       fileName     ='Stellar_Mass_Function_ZFOURGE_2014_z1.00_1.25.hdf5'
-       massThreshold=10.0d0**7.75d0
+       fileName         ='Stellar_Mass_Function_ZFOURGE_2014_z1.00_1.25.hdf5'
+       massThreshold    =10.0d0**7.75d0
+       redshiftLabelLow ='1.00'
+       redshiftLabelHigh='1.25'
     case (4)
-       fileName     ='Stellar_Mass_Function_ZFOURGE_2014_z1.25_1.50.hdf5'
-       massThreshold=10.0d0**7.75d0
+       fileName         ='Stellar_Mass_Function_ZFOURGE_2014_z1.25_1.50.hdf5'
+       massThreshold    =10.0d0**7.75d0
+       redshiftLabelLow ='1.25'
+       redshiftLabelHigh='1.50'
     case (5)
-       fileName     ='Stellar_Mass_Function_ZFOURGE_2014_z1.50_2.00.hdf5'
-       massThreshold=10.0d0**8.00d0
+       fileName         ='Stellar_Mass_Function_ZFOURGE_2014_z1.50_2.00.hdf5'
+       massThreshold    =10.0d0**8.00d0
+       redshiftLabelLow ='1.50'
+       redshiftLabelHigh='2.00'
     case (6)
-       fileName     ='Stellar_Mass_Function_ZFOURGE_2014_z2.00_2.50.hdf5'
-       massThreshold=10.0d0**8.25d0
+       fileName         ='Stellar_Mass_Function_ZFOURGE_2014_z2.00_2.50.hdf5'
+       massThreshold    =10.0d0**8.25d0
+       redshiftLabelLow ='2.00'
+       redshiftLabelHigh='2.50'
     case (7)
-       fileName     ='Stellar_Mass_Function_ZFOURGE_2014_z2.50_3.00.hdf5'
-       massThreshold=10.0d0**8.50d0
+       fileName         ='Stellar_Mass_Function_ZFOURGE_2014_z2.50_3.00.hdf5'
+       massThreshold    =10.0d0**8.50d0
+       redshiftLabelLow ='2.50'
+       redshiftLabelHigh='3.00'
     case default
        call Error_Report('0 ≤ redshiftInterval ≤ 7 is required'//{introspection:location})
     end select
@@ -338,22 +350,21 @@ contains
     </referenceConstruct>
     !!]
     ! Build the object.
-    self%outputAnalysisMassFunctionStellar=                                                                                        &
-         & outputAnalysisMassFunctionStellar(                                                                                      &
-         &                                   var_str('Tomczak2014ZFOURGEz')//redshiftInterval                                    , &
-         &                                   var_str('Stellar mass function for the Tomczak et al. (2014) ZFOURGE analysis')     , &
-         &                                   char(inputPath(pathTypeDataStatic)//'/observations/massFunctionsStellar/'//fileName), &
-         &                                   galacticFilter_                                                                     , &
-         &                                   surveyGeometry_                                                                     , &
-         &                                   cosmologyFunctions_                                                                 , &
-         &                                   cosmologyFunctionsData                                                              , &
-         &                                   outputAnalysisPropertyOperator_                                                     , &
-         &                                   outputAnalysisDistributionOperator_                                                 , &
-         &                                   outputTimes_                                                                        , &
-         &                                   galacticStructure_                                                                  , &
-         &                                   covarianceBinomialBinsPerDecade                                                     , &
-         &                                   covarianceBinomialMassHaloMinimum                                                   , &
-         &                                   covarianceBinomialMassHaloMaximum                                                     &
+    self%outputAnalysisMassFunctionStellar=                                                                                                                              &
+         & outputAnalysisMassFunctionStellar(                                                                                                                            &
+         &                                   var_str('Tomczak2014ZFOURGEz')//redshiftInterval                                                                          , &
+         &                                   var_str('$')//redshiftLabelLow//' < z < '//redshiftLabelHigh//'$ stellar mass function from ZFOURGE (Tomczak et al. 2014)', &
+         &                                   char(inputPath(pathTypeDataStatic)//'/observations/massFunctionsStellar/'//fileName)                                      , &
+         &                                   galacticFilter_                                                                                                           , &
+         &                                   surveyGeometry_                                                                                                           , &
+         &                                   cosmologyFunctions_                                                                                                       , &
+         &                                   cosmologyFunctionsData                                                                                                    , &
+         &                                   outputAnalysisPropertyOperator_                                                                                           , &
+         &                                   outputAnalysisDistributionOperator_                                                                                       , &
+         &                                   outputTimes_                                                                                                              , &
+         &                                   covarianceBinomialBinsPerDecade                                                                                           , &
+         &                                   covarianceBinomialMassHaloMinimum                                                                                         , &
+         &                                   covarianceBinomialMassHaloMaximum                                                                                           &
          &                                  )
     ! Clean up.
     !![
@@ -361,6 +372,7 @@ contains
     <objectDestructor name="galacticFilter_"                                     />
     <objectDestructor name="cosmologyParametersData"                             />
     <objectDestructor name="cosmologyFunctionsData"                              />
+    <objectDestructor name="outputAnalysisPropertyOperator_"                     />
     <objectDestructor name="outputAnalysisDistributionOperator_"                 />
     <objectDestructor name="outputAnalysisDistributionOperatorGrvtnlLnsng_"      />
     <objectDestructor name="outputAnalysisDistributionOperatorRandomErrorPlynml_"/>
@@ -377,7 +389,7 @@ contains
     type(outputAnalysisMassFunctionStellarZFOURGE), intent(inout) :: self
 
     !![
-    <objectDestructor name="self%galacticStructure_"/>
+    <objectDestructor name="self%gravitationalLensing_"/>
     !!]
     return
   end subroutine massFunctionStellarZFOURGEDestructor

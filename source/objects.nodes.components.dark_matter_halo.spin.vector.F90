@@ -1,5 +1,5 @@
 !! Copyright 2009, 2010, 2011, 2012, 2013, 2014, 2015, 2016, 2017, 2018,
-!!           2019, 2020, 2021, 2022, 2023
+!!           2019, 2020, 2021, 2022, 2023, 2024
 !!    Andrew Benson <abenson@carnegiescience.edu>
 !!
 !! This file is part of Galacticus.
@@ -160,7 +160,7 @@ contains
     select type (spin)
     class is (nodeComponentSpinVector)
        ! Set scale for spin.
-       call spin%angularMomentumVectorScale([1.0d0,1.0d0,1.0d0]*max(spin%angularMomentum(),spinMinimum*Dark_Matter_Halo_Angular_Momentum_Scale(node,darkMatterHaloScale_=darkMatterHaloScale_,useBullockDefinition=.true.)))
+       call spin%angularMomentumVectorScale([1.0d0,1.0d0,1.0d0]*max(spin%angularMomentum(),spinMinimum*Dark_Matter_Halo_Angular_Momentum_Scale(node,darkMatterHaloScale_,useBullockDefinition=.true.)))
     end select
     return
   end subroutine Node_Component_Halo_Angular_Momentum_Vector_Scale_Set

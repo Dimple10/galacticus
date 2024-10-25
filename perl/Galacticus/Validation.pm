@@ -12,9 +12,43 @@ use PDL::IO::HDF5;
 use Git;
 
 sub extract {
-    my $fileName = shift();
-    my $name     = shift();
-    my $suffix   = shift();
+    # Extract a likelihood measure from a given model for all analyses in that model. The likelihood measure we choose is -logℒ,
+    # where we assume that ℒ is "unnormalized" - that is, for a normal distribution it is
+    #
+    #  ∏ᵢ exp(-½(x-xᵢ)²/σᵢ²)
+    #
+    # and not
+    #
+    #  ∑ᵢ exp(-½(x-xᵢ)²/σᵢ²)/√[2πσᵢ²]
+    #
+    # Then,
+    #
+    #  -logℒ = ∑ᵢ ½(x-xᵢ)²/σᵢ²
+    #
+    # and the derivative of this with respect to model predictions is
+    #
+    #  ∂(-logℒ)/∂x = (x-xᵢ)/σᵢ².
+    #
+    # Then a fractional change in the offset of the model from the data of Δ(x-xᵢ)/(x-xᵢ) results in a change in our metric of
+    #
+    #  Δ(-logℒ) = ∑ᵢ (x-xᵢ)²/σᵢ² Δ(x-xᵢ)/(x-xᵢ)
+    #
+    # If that fractional change is the same, Δf, for all points, i, then
+    #
+    #  Δ(-logℒ) = Δf ∑ᵢ (x-xᵢ)²/σᵢ² = 2 Δf (-logℒ),
+    #
+    # or
+    #
+    #  Δ(-logℒ)/(-logℒ) = Δf ∑ᵢ (x-xᵢ)²/σᵢ² = 2 Δf.
+    #
+    # Therefore a fractional shift in the model relative to the data results in a corresponding fractional shift in our
+    # metric. This allows us to use a percentage change threshold in this metric as a warning for a significant shift in the
+    # model even when the model is not a good match to the data (i.e. when the likelihood is low and can change hugely due to
+    # even small shifts in the model).
+    my $fileName          = shift();
+    my $name              = shift();
+    my $suffix            = shift();
+    my $parameterFileName = shift();
     my @likelihoods;
     my @results;
     my $model    = new PDL::IO::HDF5($fileName);
@@ -39,7 +73,7 @@ sub extract {
 	    @likelihoods,
 	    {
 		name  => $name." - Likelihood - ".$analysisName,
-		unit  => "-logℒ"                                                 ,
+		unit  => "-logℒ"                              ,
 		value => abs($logLikelihood->sclr())
 	    }
 	    );
@@ -71,20 +105,20 @@ sub extract {
 		if ( grep {$_ eq $dataset->{'name'}} keys(%{$attributes}) ) {
 		    (my $analysisDatasetName) = $analysisGroup->attrGet($dataset->{'name'});
 		    unless ( grep {$_ eq $analysisDatasetName} $analysisGroup->datasets() ) {
-			print "Analysis: ".$analysisName."\n";
-			print "Generic name: ".$dataset->{'name'}."\n";
-			print "Actual name: ".$analysisDatasetName."\n";
+			print "Analysis: '".$analysisName."'\n";
+			print "Generic name: '".$dataset->{'name'}."'\n";
+			print "Actual name: '".$analysisDatasetName."'\n";
 			print "Available datasets:\n";
-			print join("\n",map {"\t".$_} $analysisGroup->datasets())."\n";
+			print join("\n",map {"\t'".$_."'"} $analysisGroup->datasets())."\n";
 			die("failed to find dataset");
 		    }
 		    $data->{$dataset->{'name'}} = $analysisGroup->dataset($analysisDatasetName)->get();
 		    unless ( defined($data->{$dataset->{'name'}}) ) {
-			print "Analysis: ".$analysisName."\n";
-			print "Generic name: ".$dataset->{'name'}."\n";
-			print "Actual name: ".$analysisDatasetName."\n";
+			print "Analysis: '".$analysisName."'\n";
+			print "Generic name: '".$dataset->{'name'}."'\n";
+			print "Actual name: '".$analysisDatasetName."'\n";
 			print "Available datasets:\n";
-			print join("\n",map {"\t".$_} $analysisGroup->datasets())."\n";
+			print join("\n",map {"\t'".$_} $analysisGroup->datasets())."'\n";
 			system("h5dump -A -g analyses/".$analysisName." ".$fileName);
 			die("failed to read dataset");
 		    }
@@ -149,8 +183,9 @@ sub extract {
 	my $output;
 	$output =
 	{
-	    repoUrl => "https://github.com/galacticusorg/galacticus",
-	    commit =>
+	    repoUrl       => "https://github.com/galacticusorg/galacticus",
+	    parameterFile => $parameterFileName,
+	    commit        =>
 	    {
 		author =>
 		{

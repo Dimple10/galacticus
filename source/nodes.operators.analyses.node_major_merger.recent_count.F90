@@ -1,5 +1,5 @@
 !! Copyright 2009, 2010, 2011, 2012, 2013, 2014, 2015, 2016, 2017, 2018,
-!!           2019, 2020, 2021, 2022, 2023
+!!           2019, 2020, 2021, 2022, 2023, 2024
 !!    Andrew Benson <abenson@carnegiescience.edu>
 !!
 !! This file is part of Galacticus.
@@ -144,8 +144,8 @@ contains
     double precision                                        , intent(in   )         :: intervalRecent     , massRatioMajor
     type            (enumerationIntervalTypeType           ), intent(in   )         :: intervalType
     logical                                                 , intent(in   )         :: intervalFromInfall
-    class  (outputTimesClass                               ), intent(in   ), target :: outputTimes_
-    class  (darkMatterHaloScaleClass                       ), intent(in   ), target :: darkMatterHaloScale_
+    class           (outputTimesClass                      ), intent(in   ), target :: outputTimes_
+    class           (darkMatterHaloScaleClass              ), intent(in   ), target :: darkMatterHaloScale_
     !![
     <constructorAssign variables="massRatioMajor, intervalRecent, intervalType, intervalFromInfall, *outputTimes_, *darkMatterHaloScale_"/>
     !!]
@@ -176,7 +176,7 @@ contains
     !!}
     use :: Galacticus_Nodes, only : nodeComponentBasic
     implicit none
-    class(nodeOperatorNodeMajorMergerRecentCount), intent(inout)          :: self
+    class(nodeOperatorNodeMajorMergerRecentCount), intent(inout), target  :: self
     type (treeNode                              ), intent(inout), target  :: node
     class(nodeComponentBasic                    )               , pointer :: basic
 

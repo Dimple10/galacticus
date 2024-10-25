@@ -1,5 +1,5 @@
 !! Copyright 2009, 2010, 2011, 2012, 2013, 2014, 2015, 2016, 2017, 2018,
-!!           2019, 2020, 2021, 2022, 2023
+!!           2019, 2020, 2021, 2022, 2023, 2024
 !!    Andrew Benson <abenson@carnegiescience.edu>
 !!
 !! This file is part of Galacticus.
@@ -77,15 +77,13 @@ contains
     !!{
     Constructor for the ``massFunctionStellarUKIDSSUDS'' output analysis class which takes a parameter set as input.
     !!}
-    use :: Input_Parameters  , only : inputParameter        , inputParameters
-    use :: Galactic_Structure, only : galacticStructureClass
+    use :: Input_Parameters, only : inputParameter, inputParameters
     implicit none
     type            (outputAnalysisMassFunctionStellarUKIDSSUDS)                              :: self
     type            (inputParameters                           ), intent(inout)               :: parameters
     class           (cosmologyFunctionsClass                   ), pointer                     :: cosmologyFunctions_
     class           (outputTimesClass                          ), pointer                     :: outputTimes_
     class           (gravitationalLensingClass                 ), pointer                     :: gravitationalLensing_
-    class           (galacticStructureClass                    ), pointer                     :: galacticStructure_
     double precision                                            , allocatable  , dimension(:) :: randomErrorPolynomialCoefficient , systematicErrorPolynomialCoefficient
     integer                                                                                   :: covarianceBinomialBinsPerDecade  , redshiftInterval
     double precision                                                                          :: covarianceBinomialMassHaloMinimum, covarianceBinomialMassHaloMaximum   , &
@@ -169,21 +167,19 @@ contains
     <objectBuilder class="cosmologyFunctions"   name="cosmologyFunctions_"   source="parameters"/>
     <objectBuilder class="outputTimes"          name="outputTimes_"          source="parameters"/>
     <objectBuilder class="gravitationalLensing" name="gravitationalLensing_" source="parameters"/>
-    <objectBuilder class="galacticStructure"    name="galacticStructure_"    source="parameters"/>
     !!]
     ! Build the object.
-    self=outputAnalysisMassFunctionStellarUKIDSSUDS(cosmologyFunctions_,gravitationalLensing_,outputTimes_,galacticStructure_,redshiftInterval,randomErrorMinimum,randomErrorMaximum,randomErrorPolynomialCoefficient,systematicErrorPolynomialCoefficient,covarianceBinomialBinsPerDecade,covarianceBinomialMassHaloMinimum,covarianceBinomialMassHaloMaximum,sizeSourceLensing)
+    self=outputAnalysisMassFunctionStellarUKIDSSUDS(cosmologyFunctions_,gravitationalLensing_,outputTimes_,redshiftInterval,randomErrorMinimum,randomErrorMaximum,randomErrorPolynomialCoefficient,systematicErrorPolynomialCoefficient,covarianceBinomialBinsPerDecade,covarianceBinomialMassHaloMinimum,covarianceBinomialMassHaloMaximum,sizeSourceLensing)
     !![
     <inputParametersValidate source="parameters"/>
     <objectDestructor name="cosmologyFunctions_"  />
     <objectDestructor name="outputTimes_"         />
     <objectDestructor name="gravitationalLensing_"/>
-    <objectDestructor name="galacticStructure_"   />
     !!]
     return
   end function massFunctionStellarUKIDSSUDSConstructorParameters
 
-  function massFunctionStellarUKIDSSUDSConstructorInternal(cosmologyFunctions_,gravitationalLensing_,outputTimes_,galacticStructure_,redshiftInterval,randomErrorMinimum,randomErrorMaximum,randomErrorPolynomialCoefficient,systematicErrorPolynomialCoefficient,covarianceBinomialBinsPerDecade,covarianceBinomialMassHaloMinimum,covarianceBinomialMassHaloMaximum,sizeSourceLensing) result (self)
+  function massFunctionStellarUKIDSSUDSConstructorInternal(cosmologyFunctions_,gravitationalLensing_,outputTimes_,redshiftInterval,randomErrorMinimum,randomErrorMaximum,randomErrorPolynomialCoefficient,systematicErrorPolynomialCoefficient,covarianceBinomialBinsPerDecade,covarianceBinomialMassHaloMinimum,covarianceBinomialMassHaloMaximum,sizeSourceLensing) result (self)
     !!{
     Constructor for the ``massFunctionStellarUKIDSSUDS'' output analysis class for internal use.
     !!}
@@ -203,7 +199,6 @@ contains
     class           (cosmologyFunctionsClass                            ), intent(in   ), target       :: cosmologyFunctions_
     class           (outputTimesClass                                   ), intent(inout), target       :: outputTimes_
     class           (gravitationalLensingClass                          ), intent(in   ), target       :: gravitationalLensing_
-    class           (galacticStructureClass                             ), intent(in   ), target       :: galacticStructure_
     integer                                                              , intent(in   )               :: redshiftInterval
     double precision                                                     , intent(in   )               :: randomErrorMinimum                                         , randomErrorMaximum                  , &
          &                                                                                                sizeSourceLensing
@@ -334,7 +329,6 @@ contains
          &                                   outputAnalysisPropertyOperator_                                                     , &
          &                                   outputAnalysisDistributionOperator_                                                 , &
          &                                   outputTimes_                                                                        , &
-         &                                   galacticStructure_                                                                  , &
          &                                   covarianceBinomialBinsPerDecade                                                     , &
          &                                   covarianceBinomialMassHaloMinimum                                                   , &
          &                                   covarianceBinomialMassHaloMaximum                                                     &
@@ -345,6 +339,7 @@ contains
     <objectDestructor name="galacticFilter_"                                     />
     <objectDestructor name="cosmologyParametersData"                             />
     <objectDestructor name="cosmologyFunctionsData"                              />
+    <objectDestructor name="outputAnalysisPropertyOperator_"                     />
     <objectDestructor name="outputAnalysisDistributionOperator_"                 />
     <objectDestructor name="outputAnalysisDistributionOperatorGrvtnlLnsng_"      />
     <objectDestructor name="outputAnalysisDistributionOperatorRandomErrorPlynml_"/>
@@ -361,7 +356,7 @@ contains
     type(outputAnalysisMassFunctionStellarUKIDSSUDS), intent(inout) :: self
 
     !![
-    <objectDestructor name="self%galacticStructure_"/>
+    <objectDestructor name="self%gravitationalLensing_"/>
     !!]
     return
   end subroutine massFunctionStellarUKIDSSUDSDestructor

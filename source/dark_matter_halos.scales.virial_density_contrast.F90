@@ -1,5 +1,5 @@
 !! Copyright 2009, 2010, 2011, 2012, 2013, 2014, 2015, 2016, 2017, 2018,
-!!           2019, 2020, 2021, 2022, 2023
+!!           2019, 2020, 2021, 2022, 2023, 2024
 !!    Andrew Benson <abenson@carnegiescience.edu>
 !!
 !! This file is part of Galacticus.
@@ -93,26 +93,24 @@
 
 contains
 
-  recursive function virialDensityContrastDefinitionParameters(parameters,recursiveConstruct,recursiveSelf) result(self)
+  recursive function virialDensityContrastDefinitionParameters(parameters) result(self)
     !!{
     Constructor for the {\normalfont \ttfamily virialDensityContrastDefinition} dark matter halo scales class which takes a parameter set as input.
     !!}
     use :: Input_Parameters, only : inputParameter, inputParameters
     implicit none
-    type   (darkMatterHaloScaleVirialDensityContrastDefinition), target                  :: self
-    type   (inputParameters                                   ), intent(inout)           :: parameters
-    logical                                                    , intent(in   ), optional :: recursiveConstruct
-    class  (darkMatterHaloScaleClass                          ), intent(in   ), optional :: recursiveSelf
-    class  (cosmologyParametersClass                          ), pointer                 :: cosmologyParameters_
-    class  (cosmologyFunctionsClass                           ), pointer                 :: cosmologyFunctions_
-    class  (virialDensityContrastClass                        ), pointer                 :: virialDensityContrast_
+    type   (darkMatterHaloScaleVirialDensityContrastDefinition), target        :: self
+    type   (inputParameters                                   ), intent(inout) :: parameters
+    class  (cosmologyParametersClass                          ), pointer       :: cosmologyParameters_
+    class  (cosmologyFunctionsClass                           ), pointer       :: cosmologyFunctions_
+    class  (virialDensityContrastClass                        ), pointer       :: virialDensityContrast_
 
     !![
     <objectBuilder class="cosmologyParameters"   name="cosmologyParameters_"   source="parameters"/>
     <objectBuilder class="cosmologyFunctions"    name="cosmologyFunctions_"    source="parameters"/>
     <objectBuilder class="virialDensityContrast" name="virialDensityContrast_" source="parameters"/>
     !!]
-    self=darkMatterHaloScaleVirialDensityContrastDefinition(cosmologyParameters_,cosmologyFunctions_,virialDensityContrast_,recursiveConstruct,recursiveSelf)
+    self=darkMatterHaloScaleVirialDensityContrastDefinition(cosmologyParameters_,cosmologyFunctions_,virialDensityContrast_)
     !![
     <inputParametersValidate source="parameters"/>
     <objectDestructor name="cosmologyParameters_"  />
@@ -122,20 +120,17 @@ contains
     return
   end function virialDensityContrastDefinitionParameters
 
-  recursive function virialDensityContrastDefinitionInternal(cosmologyParameters_,cosmologyFunctions_,virialDensityContrast_,recursiveConstruct,recursiveSelf) result(self)
+  recursive function virialDensityContrastDefinitionInternal(cosmologyParameters_,cosmologyFunctions_,virialDensityContrast_) result(self)
     !!{
     Default constructor for the {\normalfont \ttfamily virialDensityContrastDefinition} dark matter halo scales class.
     !!}
     use :: Error, only : Error_Report
     implicit none
-    type   (darkMatterHaloScaleVirialDensityContrastDefinition)                                  :: self
-    class  (cosmologyParametersClass                          ), intent(in   ), target           :: cosmologyParameters_
-    class  (cosmologyFunctionsClass                           ), intent(in   ), target           :: cosmologyFunctions_
-    class  (virialDensityContrastClass                        ), intent(in   ), target           :: virialDensityContrast_
-    logical                                                    , intent(in   )        , optional :: recursiveConstruct
-    class  (darkMatterHaloScaleClass                          ), intent(in   ), target, optional :: recursiveSelf
+    type   (darkMatterHaloScaleVirialDensityContrastDefinition)                        :: self
+    class  (cosmologyParametersClass                          ), intent(in   ), target :: cosmologyParameters_
+    class  (cosmologyFunctionsClass                           ), intent(in   ), target :: cosmologyFunctions_
+    class  (virialDensityContrastClass                        ), intent(in   ), target :: virialDensityContrast_
     !![
-    <optionalArgument name="recursiveConstruct" defaultsTo=".false." />
     <constructorAssign variables="*cosmologyParameters_, *cosmologyFunctions_, *virialDensityContrast_"/>
     !!]
 
@@ -148,17 +143,8 @@ contains
     self%densityMeanTimeMinimum    =-1.0d0
     self%timePrevious              =-1.0d0
     self%massPrevious              =-1.0d0
-    self%isRecursive               =recursiveConstruct_
-    if (recursiveConstruct_) then
-       if (.not.present(recursiveSelf)) call Error_Report('recursiveSelf not present'//{introspection:location})
-       select type (recursiveSelf)
-       class is (darkMatterHaloScaleVirialDensityContrastDefinition)
-          self%recursiveSelf => recursiveSelf
-       class default
-          call Error_Report('recursiveSelf is of incorrect class'//{introspection:location})
-       end select
-    end if
-    self%parentDeferred=.false.
+    self%isRecursive               =.false.
+    self%parentDeferred            =.false.
     return
   end function virialDensityContrastDefinitionInternal
 
@@ -192,19 +178,22 @@ contains
     return
   end subroutine virialDensityContrastDefinitionDestructor
 
-  subroutine virialDensityContrastDefinitionCalculationReset(self,node)
+  subroutine virialDensityContrastDefinitionCalculationReset(self,node,uniqueID)
     !!{
     Reset the halo scales calculation.
     !!}
+    use :: Kind_Numbers, only : kind_int8
     implicit none
-    class(darkMatterHaloScaleVirialDensityContrastDefinition), intent(inout) :: self
-    type (treeNode                                          ), intent(inout) :: node
+    class  (darkMatterHaloScaleVirialDensityContrastDefinition), intent(inout) :: self
+    type   (treeNode                                          ), intent(inout) :: node
+    integer(kind_int8                                         ), intent(in   ) :: uniqueID
+    !$GLC attributes unused :: node
 
     self%radiusVirialComputed      =.false.
     self%temperatureVirialComputed =.false.
     self%velocityVirialComputed    =.false.
     self%timescaleDynamicalComputed=.false.
-    self%lastUniqueID              =node%uniqueID()
+    self%lastUniqueID              =uniqueID
     return
   end subroutine virialDensityContrastDefinitionCalculationReset
 
@@ -224,7 +213,7 @@ contains
        return
     end if
     ! Check if node differs from previous one for which we performed calculations.
-    if (node%uniqueID() /= self%lastUniqueID) call self%calculationReset(node)
+    if (node%uniqueID() /= self%lastUniqueID) call self%calculationReset(node,node%uniqueID())
     ! Check if halo dynamical timescale is already computed. Compute and store if not.
     if (.not.self%timescaleDynamicalComputed) then
        self%timescaleDynamicalComputed= .true.
@@ -254,7 +243,7 @@ contains
        return
     end if
     ! Check if node differs from previous one for which we performed calculations.
-    if (node%uniqueID() /= self%lastUniqueID) call self%calculationReset(node)
+    if (node%uniqueID() /= self%lastUniqueID) call self%calculationReset(node,node%uniqueID())
     ! Check if virial velocity is already computed. Compute and store if not.
     if (.not.self%velocityVirialComputed) then
        ! Get the basic component.
@@ -317,7 +306,7 @@ contains
        return
     end if
     ! Check if node differs from previous one for which we performed calculations.
-    if (node%uniqueID() /= self%lastUniqueID) call self%calculationReset(node)
+    if (node%uniqueID() /= self%lastUniqueID) call self%calculationReset(node,node%uniqueID())
     ! Check if virial temperature is already computed. Compute and store if not.
     if (.not.self%temperatureVirialComputed) then
        self%temperatureVirialComputed=.true.
@@ -347,7 +336,7 @@ contains
        return
     end if
     ! Check if node differs from previous one for which we performed calculations.
-    if (node%uniqueID() /= self%lastUniqueID) call self%calculationReset(node)
+    if (node%uniqueID() /= self%lastUniqueID) call self%calculationReset(node,node%uniqueID())
     ! Check if virial radius is already computed. Compute and store if not.
     if (.not.self%radiusVirialComputed) then
        ! Get the basic component.
@@ -553,8 +542,8 @@ contains
     use :: String_Handling   , only : operator(//)
 #endif
     implicit none
-    class(darkMatterHaloScaleVirialDensityContrastDefinition), intent(inout) :: self
-    class(darkMatterHaloScaleClass                          ), intent(inout) :: destination
+    class(darkMatterHaloScaleVirialDensityContrastDefinition), intent(inout), target :: self
+    class(darkMatterHaloScaleClass                          ), intent(inout)         :: destination
 
     call self%darkMatterHaloScaleClass%deepCopy(destination)
     select type (destination)

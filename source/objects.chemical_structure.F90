@@ -1,5 +1,5 @@
 !! Copyright 2009, 2010, 2011, 2012, 2013, 2014, 2015, 2016, 2017, 2018,
-!!           2019, 2020, 2021, 2022, 2023
+!!           2019, 2020, 2021, 2022, 2023, 2024
 !!    Andrew Benson <abenson@carnegiescience.edu>
 !!
 !! This file is part of Galacticus.
@@ -97,17 +97,19 @@ contains
     use :: Error             , only : Error_Report
     use :: Input_Paths       , only : inputPath                   , pathTypeDataStatic
     use :: IO_XML            , only : XML_Get_Elements_By_Tag_Name, xmlNodeList       , XML_Parse
-    use :: ISO_Varying_String, only : char                        , assignment(=)
+    use :: ISO_Varying_String, only : char                        , assignment(=)     , varying_string
     implicit none
-    type     (Node       ), pointer                   :: doc     , atom    , bond        , chemical, element
-    type     (xmlNodeList), allocatable, dimension(:) :: atomList, bondList, chemicalList, list
-    integer                                           :: iAtom   , iBond   , iChemical   , ioErr   , jAtom
-    character(len=128    )                            :: name
+    type     (Node          ), pointer                   :: doc     , atom    , bond        , chemical, element
+    type     (xmlNodeList   ), allocatable, dimension(:) :: atomList, bondList, chemicalList, list
+    integer                                              :: iAtom   , iBond   , iChemical   , ioErr   , jAtom
+    character(len=128       )                            :: name
+    type     (varying_string)                           :: fileName
 
     ! Check if the chemical database is initialized.
     if (.not.chemicalDatabaseInitialized) then
+       fileName=char(inputPath(pathTypeDataStatic))//'abundances/Chemical_Database.cml'
        !$omp critical (FoX_DOM_Access)
-       doc => XML_Parse(char(inputPath(pathTypeDataStatic))//'abundances/Chemical_Database.cml',iostat=ioErr)
+       doc => XML_Parse(char(fileName),iostat=ioErr)
        if (ioErr /= 0) call Error_Report('Unable to find chemical database file'//{introspection:location})
        ! Get a list of all chemicals.
        call XML_Get_Elements_By_Tag_Name(doc,"chemical",chemicalList)

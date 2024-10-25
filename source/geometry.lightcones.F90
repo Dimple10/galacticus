@@ -1,5 +1,5 @@
 !! Copyright 2009, 2010, 2011, 2012, 2013, 2014, 2015, 2016, 2017, 2018,
-!!           2019, 2020, 2021, 2022, 2023
+!!           2019, 2020, 2021, 2022, 2023, 2024
 !!    Andrew Benson <abenson@carnegiescience.edu>
 !!
 !! This file is part of Galacticus.
@@ -34,7 +34,17 @@ module Geometry_Lightcones
    <name>geometryLightcone</name>
    <descriptiveName>Lightcone Geometries</descriptiveName>
    <description>Class providing geometries of lightcones.</description>
-   <default>square</default>
+   <default>null</default>
+   <method name="timeMinimum" >
+    <description>Returns the minimum time in the lightcone.</description>
+    <type>double precision</type>
+    <pass>yes</pass>
+   </method>
+   <method name="timeMaximum" >
+    <description>Returns the maximum time in the lightcone.</description>
+    <type>double precision</type>
+    <pass>yes</pass>
+   </method>
    <method name="isInLightcone" >
     <description>Returns true if the provided node lies within the lightcone.</description>
     <type>logical</type>
@@ -72,8 +82,9 @@ module Geometry_Lightcones
     <description>Returns the next time in the interval from the current node time to {\normalfont \ttfamily timeEnd} at which any replicant of this node will cross the lightcone. If no crossing occurs during this interval a very large value is returned instead.</description>
     <type>double precision</type>
     <pass>yes</pass>
-    <argument>type            (treeNode), intent(inout) :: node   </argument>
-    <argument>double precision          , intent(in   ) :: timeEnd</argument>
+    <argument>type            (treeNode), intent(inout)                                      :: node                  </argument>
+    <argument>double precision          , intent(in   )                                      :: timeStart    , timeEnd</argument>
+    <argument>double precision          , intent(inout), dimension(:), allocatable, optional :: timesCrossing         </argument>
    </method>
    <method name="positionLightconeCrossing" >
     <description>Returns the position of the node at the time of lightcone crossing---which must have been previously identified via the {\normalfont \ttfamily timeLightconeCrossing} method.</description>

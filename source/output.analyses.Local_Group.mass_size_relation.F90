@@ -1,5 +1,5 @@
 !! Copyright 2009, 2010, 2011, 2012, 2013, 2014, 2015, 2016, 2017, 2018,
-!!           2019, 2020, 2021, 2022, 2023
+!!           2019, 2020, 2021, 2022, 2023, 2024
 !!    Andrew Benson <abenson@carnegiescience.edu>
 !!
 !! This file is part of Galacticus.
@@ -34,7 +34,6 @@
      private
      class           (outputAnalysisClass        ), pointer                     :: outputAnalysis_                          => null()
      class           (outputTimesClass           ), pointer                     :: outputTimes_                             => null()
-     class           (galacticStructureClass     ), pointer                     :: galacticStructure_                       => null()
      double precision                             , allocatable  , dimension(:) :: randomErrorPolynomialCoefficient                  , systematicErrorPolynomialCoefficient, &
           &                                                                        sizeSystematicErrorPolynomialCoefficient
      integer                                                                    :: covarianceBinomialBinsPerDecade
@@ -64,7 +63,6 @@ contains
     Constructor for the ``localGroupMassSizeRelation'' output analysis class which takes a parameter set as input.
     !!}
     use :: Input_Parameters            , only : inputParameter               , inputParameters
-    use :: Galactic_Structure          , only : galacticStructureClass
     use :: Output_Times                , only : outputTimes                  , outputTimesClass
     use :: Galactic_Filters            , only : enumerationPositionTypeEncode
     use :: Models_Likelihoods_Constants, only : logImprobable
@@ -72,7 +70,6 @@ contains
     type            (outputAnalysisLocalGroupMassSizeRelation)                              :: self
     type            (inputParameters                         ), intent(inout)               :: parameters
     class           (outputTimesClass                        ), pointer                     :: outputTimes_
-    class           (galacticStructureClass                  ), pointer                     :: galacticStructure_
     double precision                                          , allocatable  , dimension(:) :: randomErrorPolynomialCoefficient        , systematicErrorPolynomialCoefficient, &
          &                                                                                     sizeSystematicErrorPolynomialCoefficient
     integer                                                                                 :: covarianceBinomialBinsPerDecade
@@ -148,9 +145,8 @@ contains
       <description>The type of position to use in survey geometry filters.</description>
     </inputParameter>
     <objectBuilder class="outputTimes"       name="outputTimes_"       source="parameters"/>
-    <objectBuilder class="galacticStructure" name="galacticStructure_" source="parameters"/>
     !!]
-    self=outputAnalysisLocalGroupMassSizeRelation(outputTimes_,galacticStructure_,enumerationPositionTypeEncode(positionType,includesPrefix=.false.),randomErrorMinimum,randomErrorMaximum,randomErrorPolynomialCoefficient,systematicErrorPolynomialCoefficient,sizeSystematicErrorPolynomialCoefficient,covarianceBinomialBinsPerDecade,covarianceBinomialMassHaloMinimum,covarianceBinomialMassHaloMaximum)
+    self=outputAnalysisLocalGroupMassSizeRelation(outputTimes_,enumerationPositionTypeEncode(positionType,includesPrefix=.false.),randomErrorMinimum,randomErrorMaximum,randomErrorPolynomialCoefficient,systematicErrorPolynomialCoefficient,sizeSystematicErrorPolynomialCoefficient,covarianceBinomialBinsPerDecade,covarianceBinomialMassHaloMinimum,covarianceBinomialMassHaloMaximum)
     !![
     <inputParametersValidate source="parameters"/>
     <objectDestructor name="outputTimes_"/>
@@ -158,12 +154,12 @@ contains
     return
   end function localGroupMassSizeRelationConstructorParameters
 
-  function localGroupMassSizeRelationConstructorInternal(outputTimes_,galacticStructure_,positionType,randomErrorMinimum,randomErrorMaximum,randomErrorPolynomialCoefficient,systematicErrorPolynomialCoefficient,sizeSystematicErrorPolynomialCoefficient,covarianceBinomialBinsPerDecade,covarianceBinomialMassHaloMinimum,covarianceBinomialMassHaloMaximum) result (self)
+  function localGroupMassSizeRelationConstructorInternal(outputTimes_,positionType,randomErrorMinimum,randomErrorMaximum,randomErrorPolynomialCoefficient,systematicErrorPolynomialCoefficient,sizeSystematicErrorPolynomialCoefficient,covarianceBinomialBinsPerDecade,covarianceBinomialMassHaloMinimum,covarianceBinomialMassHaloMaximum) result (self)
     !!{
     Constructor for the ``localGroupMassSizeRelation'' output analysis class for internal use.
     !!}
     use :: Galactic_Filters                        , only : filterList                                          , galacticFilterAll                         , galacticFilterHaloNotIsolated         , galacticFilterHostMassRange                    , &
-          &                                                 galacticFilterSurveyGeometry                        , enumerationPositionTypeType
+          &                                                 galacticFilterSurveyGeometry                        , galacticFilterHighPass                    , enumerationPositionTypeType
     use :: Geometry_Surveys                        , only : surveyGeometryFullSky
     use :: Interface_Local_Group_DB                , only : comparisonEquals                                    , comparisonLessThan                        , localGroupDB                          , setOperatorIntersection                        , &
           &                                                 setOperatorRelativeComplement                       , setOperatorUnion                          , attributeUncertainty
@@ -187,7 +183,6 @@ contains
          &                                                                                                     sizeSystematicErrorPolynomialCoefficient
     type            (enumerationPositionTypeType                           ), intent(in   )                 :: positionType
     class           (outputTimesClass                                      ), intent(inout), target         :: outputTimes_
-    class           (galacticStructureClass                                ), intent(in   ), target         :: galacticStructure_
     type            (nodePropertyExtractorMassStellar                      )               , pointer        :: nodePropertyExtractor_
     type            (nodePropertyExtractorRadiusHalfMassStellar            )               , pointer        :: outputAnalysisWeightPropertyExtractor_
     type            (outputAnalysisPropertyOperatorSystmtcPolynomial       )               , pointer        :: outputAnalysisPropertyOperatorSystmtcPolynomial_           , outputAnalysisWeightPropertyOperatorSystmtcPolynomial_
@@ -200,6 +195,7 @@ contains
     type            (galacticFilterHaloNotIsolated                         )               , pointer        :: galacticFilterHaloNotIsolated_
     type            (galacticFilterHostMassRange                           )               , pointer        :: galacticFilterHostMassRange_
     type            (galacticFilterSurveyGeometry                          )               , pointer        :: galacticFilterSurveyGeometry_
+    type            (galacticFilterHighPass                                )               , pointer        :: galacticFilterHighPass_
     type            (galacticFilterAll                                     )               , pointer        :: galacticFilter_
     type            (filterList                                            )               , pointer        :: filters_
     type            (propertyOperatorList                                  )               , pointer        :: operators_                                                  , weightPropertyOperators_
@@ -218,14 +214,15 @@ contains
          &                                                                                                     sizeUndefined                                   =-3.0d+0
     integer         (c_size_t                                              ), parameter                     :: binCount                                        = 7_c_size_t, bufferCountMinimum                                   = 5_c_size_t
     double precision                                                        , parameter                     :: massMinimum                                     =+1.0d+3    , massMaximum                                          = 1.00d9    , &
-         &                                                                                                     radiusOuter                                     =+3.0d-1    , sizeUncertaintyDefault                               = 0.25d0
+         &                                                                                                     radiusOuter                                     =+3.0d-1    , sizeUncertaintyDefault                               = 0.25d0    , &
+         &                                                                                                     radiusHalfMassMinimum                           =+1.0d-9
     logical                                                                 , parameter                     :: likelihoodNormalize                             =.false.
     integer         (c_size_t                                              )                                :: i                                                           , j                                                                , &
          &                                                                                                     bufferCount                                                 , binCountNonZero
     type            (localGroupDB                                          )                                :: localGroupDB_
     double precision                                                                                        :: massesWidthBin
     !![
-    <constructorAssign variables="*outputTimes_, *galacticStructure_, randomErrorPolynomialCoefficient, systematicErrorPolynomialCoefficient, sizeSystematicErrorPolynomialCoefficient, covarianceBinomialBinsPerDecade, covarianceBinomialMassHaloMinimum, covarianceBinomialMassHaloMaximum, randomErrorMinimum, randomErrorMaximum, positionType"/>
+    <constructorAssign variables="*outputTimes_, randomErrorPolynomialCoefficient, systematicErrorPolynomialCoefficient, sizeSystematicErrorPolynomialCoefficient, covarianceBinomialBinsPerDecade, covarianceBinomialMassHaloMinimum, covarianceBinomialMassHaloMaximum, randomErrorMinimum, randomErrorMaximum, positionType"/>
     !!]
     
     ! Construct mass bins.
@@ -310,12 +307,12 @@ contains
     ! Create a stellar mass property extractor.
     allocate(nodePropertyExtractor_                                )
     !![
-    <referenceConstruct object="nodePropertyExtractor_"                                 constructor="nodePropertyExtractorMassStellar               (galacticStructure_                                                   )"/>
+    <referenceConstruct object="nodePropertyExtractor_"                                 constructor="nodePropertyExtractorMassStellar               (                                                                     )"/>
     !!]
     ! Create a stellar metallicity weight property extractor.
     allocate(outputAnalysisWeightPropertyExtractor_                )
     !![
-    <referenceConstruct object="outputAnalysisWeightPropertyExtractor_"                 constructor="nodePropertyExtractorRadiusHalfMassStellar     (galacticStructure_                                                   )"/>
+    <referenceConstruct object="outputAnalysisWeightPropertyExtractor_"                 constructor="nodePropertyExtractorRadiusHalfMassStellar     (                                                                     )"/>
     !!]
     ! Build a size weight property operator.
     allocate(outputAnalysisWeightPropertyOperatorSystmtcPolynomial_)
@@ -394,20 +391,33 @@ contains
     !![
     <referenceConstruct object="galacticFilterHostMassRange_">
      <constructor>
-      galacticFilterHostMassRange(                      &amp;
-        &amp;                     massMinimum =1.00d12, &amp;
-        &amp;                     massMaximum =2.00d12, &amp;
-        &amp;                     useFinalHost=.true.   &amp;
+      galacticFilterHostMassRange(                                                               &amp;
+        &amp;                     massMinimum           =1.00d12                               , &amp;
+        &amp;                     massMaximum           =2.00d12                               , &amp;
+        &amp;                     useFinalHost          =.true.                                  &amp;
         &amp;                    )
      </constructor>
     </referenceConstruct>
     !!]
-    allocate(filters_          )
-    allocate(filters_%next     )
-    allocate(filters_%next%next)
-    filters_          %filter_ => galacticFilterHaloNotIsolated_ 
-    filters_%next     %filter_ => galacticFilterHostMassRange_
-    filters_%next%next%filter_ => galacticFilterSurveyGeometry_
+    allocate(galacticFilterHighPass_       )
+    !![
+    <referenceConstruct object="galacticFilterHighPass_"     >
+     <constructor>
+      galacticFilterHighPass     (                                                               &amp;
+        &amp;                     threshold             =radiusHalfMassMinimum                 , &amp;
+        &amp;                     nodePropertyExtractor_=outputAnalysisWeightPropertyExtractor_  &amp;
+        &amp;                    )
+     </constructor>
+    </referenceConstruct>
+    !!]
+    allocate(filters_               )
+    allocate(filters_%next          )
+    allocate(filters_%next%next     )
+    allocate(filters_%next%next%next)
+    filters_               %filter_ => galacticFilterHaloNotIsolated_ 
+    filters_%next          %filter_ => galacticFilterHostMassRange_
+    filters_%next%next     %filter_ => galacticFilterSurveyGeometry_
+    filters_%next%next%next%filter_ => galacticFilterHighPass_
     allocate(galacticFilter_)
     !![
     <referenceConstruct object="galacticFilter_" constructor="galacticFilterAll(filters_)"/>
@@ -487,6 +497,8 @@ contains
     <objectDestructor name="outputAnalysisDistributionOperator_"                   />
     <objectDestructor name="galacticFilterHaloNotIsolated_"                        />
     <objectDestructor name="galacticFilterHostMassRange_"                          />
+    <objectDestructor name="galacticFilterHighPass_"                               />
+    <objectDestructor name="galacticFilterSurveyGeometry_"                         />
     <objectDestructor name="galacticFilter_"                                       />
     <objectDestructor name="surveyGeometry_"                                       />
     !!]
@@ -504,9 +516,8 @@ contains
     type(outputAnalysisLocalGroupMassSizeRelation), intent(inout) :: self
 
     !![
-    <objectDestructor name="self%outputAnalysis_"   />
-    <objectDestructor name="self%outputTimes_"      />
-    <objectDestructor name="self%galacticStructure_"/>
+    <objectDestructor name="self%outputAnalysis_"/>
+    <objectDestructor name="self%outputTimes_"   />
     !!]
     return
   end subroutine localGroupMassSizeRelationDestructor
@@ -542,14 +553,15 @@ contains
     return
   end subroutine localGroupMassSizeRelationReduce
 
-  subroutine localGroupMassSizeRelationFinalize(self)
+  subroutine localGroupMassSizeRelationFinalize(self,groupName)
     !!{
     Implement a {\normalfont \ttfamily localGroupMassSizeRelation} output analysis finalization.
     !!}
     implicit none
-    class(outputAnalysisLocalGroupMassSizeRelation), intent(inout) :: self
+    class(outputAnalysisLocalGroupMassSizeRelation), intent(inout)           :: self
+    type (varying_string                          ), intent(in   ), optional :: groupName
 
-    call self%outputAnalysis_%finalize()
+    call self%outputAnalysis_%finalize(groupName)
     return
   end subroutine localGroupMassSizeRelationFinalize
 

@@ -1,5 +1,5 @@
 !! Copyright 2009, 2010, 2011, 2012, 2013, 2014, 2015, 2016, 2017, 2018,
-!!           2019, 2020, 2021, 2022, 2023
+!!           2019, 2020, 2021, 2022, 2023, 2024
 !!    Andrew Benson <abenson@carnegiescience.edu>
 !!
 !! This file is part of Galacticus.
@@ -53,7 +53,7 @@
     described \href{https://github.com/galacticusorg/galacticus/wiki/Merger-Tree-File-Format}{here}. An example of how to
     construct such a file can be found in the {\normalfont \ttfamily tests/nBodyMergerTrees} folder. In that folder, the
     {\normalfont \ttfamily getMillenniumTrees.pl} script will retrieve a sample of merger trees from the
-    \href{http://gavo.mpa-garching.mpg.de/Millennium/}{Millennium Simulation database} and use the {\normalfont \ttfamily
+    \href{https://virgodb.dur.ac.uk:8443/Millennium/}{Millennium Simulation database} and use the {\normalfont \ttfamily
     Merger\_Tree\_File\_Maker.exe} code supplied with \glc\ to convert these into an HDF5 file suitable for reading into \glc. The
     {\normalfont \ttfamily getMillenniumTrees.pl} script requires you to have a username and password to access the Millennium
     Simulation database\footnote{If you do not have a username and password for the Millennium Simulation database you can request

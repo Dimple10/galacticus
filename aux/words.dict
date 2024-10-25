@@ -33,6 +33,10 @@
 ψ
 ω
 Å
+0ᵗʰ
+1ˢᵗ
+2ⁿᵈ
+3ʳᵈ
 1d
 2MASS
 2d
@@ -69,7 +73,7 @@ Buser
 CAMB
 CCD
 CDF
-CGM
+CGM/A
 CIE
 CMB
 CPUs
@@ -119,6 +123,7 @@ Granato
 Grubb
 Gunawardhana
 Harald
+hdf5Access
 Hearin
 Heger
 Hogg
@@ -152,6 +157,7 @@ Kummer
 Lagrangian
 Lahav
 Laplacian
+Latin
 Leitherer
 Levenshtein
 Linder
@@ -192,6 +198,7 @@ Patej
 Peebles
 Peng
 Pfaff
+Plummer
 Quadri
 Refregier
 Renzini
@@ -264,6 +271,7 @@ al
 allocatable
 allocator
 analyses
+analytical
 angularly
 anisotropic
 anisotropies
@@ -273,6 +281,9 @@ apocentric
 appendable
 arborist
 arcsecond
+arcseconds
+arcminute
+arcminutes
 asymptotes
 axion
 backtrace
@@ -303,10 +314,12 @@ cdm
 cflags
 chabrier
 changeset
+checkpointing
 christoph
 chunked
 chunking
 circum
+circumgalactic
 circumnuclear
 cladistic
 collisional
@@ -336,6 +349,8 @@ cuspy
 cylindrically
 dataset
 datasets
+dataspace
+dataspaces
 deallocate
 deallocated
 deallocation
@@ -558,6 +573,7 @@ particulation
 passwordFrom
 passwordfrom
 pbs
+pc
 perger
 periapsis
 pericenter
@@ -654,11 +670,13 @@ sanes
 scalarize
 scalarizes
 scalelengths
+scaler
 scalings
 sendmail
 sersic
 sexagesimal
 shakura
+sidm
 sightline
 sigmoid
 sinusoid
@@ -675,6 +693,7 @@ steradian
 steradians
 stochastically
 storable
+subclasses
 subdirectory
 subfile
 subforests
@@ -721,6 +740,7 @@ unbootstrapped
 unbuffered
 unclustered
 uncommented
+uncontracted
 undersampling
 unevaluated
 unevolved

@@ -1,5 +1,5 @@
 !! Copyright 2009, 2010, 2011, 2012, 2013, 2014, 2015, 2016, 2017, 2018,
-!!           2019, 2020, 2021, 2022, 2023
+!!           2019, 2020, 2021, 2022, 2023, 2024
 !!    Andrew Benson <abenson@carnegiescience.edu>
 !!
 !! This file is part of Galacticus.
@@ -27,8 +27,8 @@ module Error
   !!}
   use, intrinsic :: ISO_C_Binding     , only : c_int
   use            :: ISO_Varying_String, only : varying_string
-  use            :: Interface_GSL     , only : GSL_Failure   , GSL_Success , GSL_eDom, GSL_eRange, &
-          &                                    GSL_eUndrFlw  , GSL_eZeroDiv
+  use            :: Interface_GSL     , only : GSL_Failure   , GSL_Success , GSL_eDom    , GSL_eRange  , &
+          &                                    GSL_eUndrFlw  , GSL_eZeroDiv, GSL_eMaxIter, GSL_eRound
   implicit none
   private
   public :: Error_Report               , Error_Handler_Register    , &
@@ -55,13 +55,16 @@ module Error
 
   ! Public error codes. Where relevant these copy GSL error codes, otherwise values above 1024
   ! are used so as not to conflict with GSL error codes.
-  integer, parameter, public :: errorStatusSuccess     =GSL_Success  ! Success.
-  integer, parameter, public :: errorStatusFail        =GSL_Failure  ! Generic failure.
-  integer, parameter, public :: errorStatusInputDomain =GSL_eDom     ! Input domain error.
-  integer, parameter, public :: errorStatusOutOfRange  =GSL_eRange   ! Output range error.
-  integer, parameter, public :: errorStatusDivideByZero=GSL_eZeroDiv ! Divide by zero.
-  integer, parameter, public :: errorStatusUnderflow   =GSL_eUndrFlw ! Floating point underflow.
-  integer, parameter, public :: errorStatusXCPU        =1025         ! CPU time limit exceeded.
+  integer, parameter, public :: errorStatusSuccess      =GSL_Success  ! Success.
+  integer, parameter, public :: errorStatusFail         =GSL_Failure  ! Generic failure.
+  integer, parameter, public :: errorStatusInputDomain  =GSL_eDom     ! Input domain error.
+  integer, parameter, public :: errorStatusRound        =GSL_eRound   ! Rounding error.
+  integer, parameter, public :: errorStatusOutOfRange   =GSL_eRange   ! Output range error.
+  integer, parameter, public :: errorStatusDivideByZero =GSL_eZeroDiv ! Divide by zero.
+  integer, parameter, public :: errorStatusUnderflow    =GSL_eUndrFlw ! Floating point underflow.
+  integer, parameter, public :: errorStatusMaxIterations=GSL_eMaxIter ! Maximum iterations exceeded.
+  integer, parameter, public :: errorStatusXCPU         =1025         ! CPU time limit exceeded.
+  integer, parameter, public :: errorStatusNotExist     =1026         ! Entity does not exist.
 
   ! Time to wait after errors under MPI.
   integer                    :: errorWaitTime          =86400
@@ -100,42 +103,55 @@ contains
     !!{
     Display an error message.
     !!}
-#ifndef UNCLEANEXIT
-    use    :: HDF5_Access  , only : hdf5Access
+    use   , intrinsic :: ISO_Fortran_Env   , only : error_unit        , output_unit
+#ifdef USEMPI
+    use               :: MPI               , only : MPI_Comm_Rank     , MPI_Comm_World
 #endif
-#ifndef UNCLEANEXIT
-    use    :: HDF5         , only : H5Close_F
-#endif
-    !$ use :: OMP_Lib      , only : OMP_Get_Thread_Num, OMP_In_Parallel
-    use    :: Display      , only : displayBold       , displayRed     , displayReset
-    use    :: System_Output, only : stdOutIsATTY
+    !$ use            :: OMP_Lib           , only : OMP_Get_Thread_Num, OMP_In_Parallel
+    use               :: Display           , only : displayBold       , displayRed     , displayReset
+    use               :: System_Output     , only : stdOutIsATTY
+    use               :: ISO_Varying_String, only : char
     implicit none
-    character(len=*), intent(in   ) :: message
-    integer                         :: error
+    character(len=*  ), intent(in   ) :: message
+#ifdef USEMPI
+    integer                           :: mpiRank , error
+    character(len=128)                :: hostName
+    logical                           :: flag
+#endif
 
     if (stdOutIsATTY()) then
-       write (0,'(a)') displayRed()//displayBold()//'Fatal error:'//displayReset()
+       write (error_unit,'(a)') displayRed()//displayBold()//'Fatal error:'//displayReset()
     else
-       write (0,'(a)')                              'Fatal error:'
+       write (error_unit,'(a)')                              'Fatal error:'
     end if
-    write (0,'(a)') trim(message)
+    write (error_unit,'(a)') trim(message)
     !$ if (omp_in_parallel()) then
-    !$    write (0,*) " => Error occurred in thread ",omp_get_thread_num()
+    !$    write (error_unit,*) " => Error occurred in thread ",omp_get_thread_num()
     !$ else
-    !$    write (0,*) " => Error occurred in master thread"
+    !$    write (error_unit,*) " => Error occurred in master thread"
     !$ end if
-    call BackTrace             ( )
-    call Warn_Review( )
-    call Flush                 (0)
+    write (error_unit,*) " => Command line was: ",char(commandLine())
+    call BackTrace  (           )
+    call Warn_Review(           )
+    call Flush      (output_unit)
+    call Flush      ( error_unit)
 #ifdef UNCLEANEXIT
     call Exit(1)
 #else
-    !$ if (.not.hdf5Access%ownedByThread()) &
-    !$      & call hdf5Access%set  (     )
-    call           H5Close_F       (error)
-    call           H5Close_C       (     )
-    !$ call        hdf5Access%unset(     )
-    call           Abort           (     )
+    call closeHDF5()
+#ifdef USEMPI
+    call MPI_Initialized(flag,error)
+    if (flag) then
+       call MPI_Comm_Rank(MPI_Comm_World,mpiRank,error)
+       call hostnm(hostName)
+       write (error_unit,*) " => Error occurred in MPI process ",mpiRank,"; PID ",getPID(),"; host ",trim(hostName)
+       write (error_unit,'(a,i8,a)') " => Sleeping for ",errorWaitTime,"s to allow for attachment of debugger"
+       call Flush(output_unit)
+       call Flush( error_unit)
+       call Sleep(errorWaitTime)
+    end if
+#endif
+    call  Abort()
 #endif
     return
   end subroutine Error_Report_Char
@@ -191,16 +207,17 @@ contains
     !!{
     Review any warning messages emitted during the run.
     !!}
-    use :: ISO_Varying_String, only : char
+    use, intrinsic :: ISO_Fortran_Env   , only : error_unit, output_unit
+    use            :: ISO_Varying_String, only : char
     implicit none
     type(warning), pointer :: warning_
 
     !$omp critical (Warn)
     if (warningsFound) then
-       write (0,*) " => The following warnings were issued:"
+       write (error_unit,*) " => The following warnings were issued:"
        warning_ => warningList
        do while (associated(warning_))
-          write (0,*) char(warning_%message)
+          write (error_unit,*) char(warning_%message)
           warning_ => warning_%next
        end do
     end if
@@ -234,46 +251,39 @@ contains
     !!{
     Handle {\normalfont \ttfamily SIGINT} signals, by flushing all data and then aborting.
     !!}
-#ifndef UNCLEANEXIT
-    use    :: HDF5_Access  , only : hdf5Access
-#endif
-#ifndef UNCLEANEXIT
-    use    :: HDF5         , only : H5Close_F
-#endif
+    use   , intrinsic :: ISO_Fortran_Env   , only : error_unit        , output_unit
 #ifdef USEMPI
-    use    :: MPI          , only : MPI_Comm_Rank     , MPI_Comm_World
+    use               :: MPI_F08           , only : MPI_Comm_Rank     , MPI_Comm_World
 #endif
-    !$ use :: OMP_Lib      , only : OMP_Get_Thread_Num, OMP_In_Parallel
-    use    :: Display      , only : displayBold       , displayRed     , displayReset
-    use    :: System_Output, only : stdOutIsATTY
+    !$ use            :: OMP_Lib           , only : OMP_Get_Thread_Num, OMP_In_Parallel
+    use               :: Display           , only : displayBold       , displayRed     , displayReset
+    use               :: System_Output     , only : stdOutIsATTY
+    use               :: ISO_Varying_String, only : char
     implicit none
-    integer            :: error
 #ifdef USEMPI
-    integer            :: mpiRank
+    integer            :: mpiRank , error
     character(len=128) :: hostName
     logical            :: flag
 #endif
 
     if (stdOutIsATTY()) then
-       write (0,*) displayRed()//displayBold()//'Galacticus was interrupted - will try to flush data before exiting.'//displayReset()
+       write (error_unit,*) displayRed()//displayBold()//'Galacticus was interrupted - will try to flush data before exiting.'//displayReset()
     else
-       write (0,*)                              'Galacticus was interrupted - will try to flush data before exiting.'
+       write (error_unit,*)                              'Galacticus was interrupted - will try to flush data before exiting.'
     end if
     !$ if (omp_in_parallel()) then
-    !$    write (0,*) " => Error occurred in thread ",omp_get_thread_num()
+    !$    write (error_unit,*) " => Error occurred in thread ",omp_get_thread_num()
     !$ else
-    !$    write (0,*) " => Error occurred in master thread"
+    !$    write (error_unit,*) " => Error occurred in master thread"
     !$ end if
+    write (error_unit,*) " => Command line was: ",char(commandLine())
 #ifndef UNCLEANEXIT
-    !$ if (.not.hdf5Access%ownedByThread()) &
-    !$      & call hdf5Access%set  (     )
-    call           H5Close_F       (error)
-    call           H5Close_C       (     )
-    !$ call        hdf5Access%unset(     )
+    call closeHDF5()
 #endif
-    call Warn_Review( )
-    call BackTrace  ( )
-    call Flush      (0)
+    call BackTrace  (           )
+    call Warn_Review(           )
+    call Flush      (output_unit)
+    call Flush      ( error_unit)
 #ifdef UNCLEANEXIT
     call Exit(1)
 #else
@@ -282,9 +292,10 @@ contains
     if (flag) then
        call MPI_Comm_Rank(MPI_Comm_World,mpiRank,error)
        call hostnm(hostName)
-       write (0,*) " => Error occurred in MPI process ",mpiRank,"; PID ",getPID(),"; host ",trim(hostName)
-       write (0,'(a,i8,a)') " => Sleeping for ",errorWaitTime,"s to allow for attachment of debugger"
-       call Flush(0)
+       write (error_unit,*) " => Error occurred in MPI process ",mpiRank,"; PID ",getPID(),"; host ",trim(hostName)
+       write (error_unit,'(a,i8,a)') " => Sleeping for ",errorWaitTime,"s to allow for attachment of debugger"
+       call Flush(output_unit)
+       call Flush( error_unit)
        call Sleep(errorWaitTime)
     end if
 #endif
@@ -297,46 +308,39 @@ contains
     !!{
     Handle {\normalfont \ttfamily SIGSEGV} signals, by flushing all data and then aborting.
     !!}
-#ifndef UNCLEANEXIT
-    use    :: HDF5_Access  , only : hdf5Access
-#endif
-#ifndef UNCLEANEXIT
-    use    :: HDF5         , only : H5Close_F
-#endif
+    use   , intrinsic :: ISO_Fortran_Env   , only : error_unit        , output_unit
 #ifdef USEMPI
-    use    :: MPI          , only : MPI_Comm_Rank     , MPI_Comm_World
+    use               :: MPI_F08           , only : MPI_Comm_Rank     , MPI_Comm_World
 #endif
-    !$ use :: OMP_Lib      , only : OMP_Get_Thread_Num, OMP_In_Parallel
-    use    :: Display      , only : displayBold       , displayRed     , displayReset
-    use    :: System_Output, only : stdOutIsATTY
+    !$ use            :: OMP_Lib           , only : OMP_Get_Thread_Num, OMP_In_Parallel
+    use               :: Display           , only : displayBold       , displayRed     , displayReset
+    use               :: System_Output     , only : stdOutIsATTY
+    use               :: ISO_Varying_String, only : char
     implicit none
-    integer            :: error
 #ifdef USEMPI
-    integer            :: mpiRank
+    integer            :: mpiRank , error
     character(len=128) :: hostName
     logical            :: flag
 #endif
 
     if (stdOutIsATTY()) then
-       write (0,*) displayRed()//displayBold()//'Galacticus experienced a segfault - will try to flush data before exiting.'//displayReset()
+       write (error_unit,*) displayRed()//displayBold()//'Galacticus experienced a segfault - will try to flush data before exiting.'//displayReset()
     else
-       write (0,*)                              'Galacticus experienced a segfault - will try to flush data before exiting.'
+       write (error_unit,*)                              'Galacticus experienced a segfault - will try to flush data before exiting.'
     end if
     !$ if (omp_in_parallel()) then
-    !$    write (0,*) " => Error occurred in thread ",omp_get_thread_num()
+    !$    write (error_unit,*) " => Error occurred in thread ",omp_get_thread_num()
     !$ else
-    !$    write (0,*) " => Error occurred in master thread"
+    !$    write (error_unit,*) " => Error occurred in master thread"
     !$ end if
+    write (error_unit,*) " => Command line was: ",char(commandLine())
 #ifndef UNCLEANEXIT
-    !$ if (.not.hdf5Access%ownedByThread()) &
-    !$      & call hdf5Access%set  (     )
-    call           H5Close_F       (error)
-    call           H5Close_C       (     )
-    !$ call        hdf5Access%unset(     )
+    call closeHDF5()
 #endif
-    call Warn_Review( )
-    call BackTrace  ( )
-    call Flush      (0)
+    call BackTrace  (           )
+    call Warn_Review(           )
+    call Flush      (output_unit)
+    call Flush      ( error_unit)
 #ifdef UNCLEANEXIT
     call Exit(1)
 #else
@@ -345,9 +349,10 @@ contains
     if (flag) then
        call MPI_Comm_Rank(MPI_Comm_World,mpiRank,error)
        call hostnm(hostName)
-       write (0,*) " => Error occurred in MPI process ",mpiRank,"; PID ",getPID(),"; host ",trim(hostName)
-       write (0,'(a,i8,a)') " => Sleeping for ",errorWaitTime,"s to allow for attachment of debugger"
-       call Flush(0)
+       write (error_unit,*) " => Error occurred in MPI process ",mpiRank,"; PID ",getPID(),"; host ",trim(hostName)
+       write (error_unit,'(a,i8,a)') " => Sleeping for ",errorWaitTime,"s to allow for attachment of debugger"
+       call Flush(output_unit)
+       call Flush( error_unit)
        call Sleep(errorWaitTime)
     end if
 #endif
@@ -360,46 +365,39 @@ contains
     !!{
     Handle {\normalfont \ttfamily SIGFPE} signals, by flushing all data and then aborting.
     !!}
-#ifndef UNCLEANEXIT
-    use    :: HDF5_Access  , only : hdf5Access
-#endif
-#ifndef UNCLEANEXIT
-    use    :: HDF5         , only : H5Close_F
-#endif
+    use   , intrinsic :: ISO_Fortran_Env   , only : error_unit        , output_unit
 #ifdef USEMPI
-    use    :: MPI          , only : MPI_Comm_Rank     , MPI_Comm_World
+    use               :: MPI_F08           , only : MPI_Comm_Rank     , MPI_Comm_World
 #endif
-    !$ use :: OMP_Lib      , only : OMP_Get_Thread_Num, OMP_In_Parallel
-    use    :: Display      , only : displayBold       , displayRed     , displayReset
-    use    :: System_Output, only : stdOutIsATTY
+    !$ use            :: OMP_Lib           , only : OMP_Get_Thread_Num, OMP_In_Parallel
+    use               :: Display           , only : displayBold       , displayRed     , displayReset
+    use               :: System_Output     , only : stdOutIsATTY
+    use               :: ISO_Varying_String, only : char
     implicit none
-    integer            :: error
 #ifdef USEMPI
-    integer            :: mpiRank
+    integer            :: mpiRank , error
     character(len=128) :: hostName
     logical            :: flag
 #endif
 
     if (stdOutIsATTY()) then
-       write (0,*) displayRed()//displayBold()//'Galacticus experienced a floating point exception - will try to flush data before exiting.'//displayReset()
+       write (error_unit,*) displayRed()//displayBold()//'Galacticus experienced a floating point exception - will try to flush data before exiting.'//displayReset()
     else
-       write (0,*)                              'Galacticus experienced a floating point exception - will try to flush data before exiting.'
+       write (error_unit,*)                              'Galacticus experienced a floating point exception - will try to flush data before exiting.'
     end if
     !$ if (omp_in_parallel()) then
-    !$    write (0,*) " => Error occurred in thread ",omp_get_thread_num()
+    !$    write (error_unit,*) " => Error occurred in thread ",omp_get_thread_num()
     !$ else
-    !$    write (0,*) " => Error occurred in master thread"
+    !$    write (error_unit,*) " => Error occurred in master thread"
     !$ end if
+    write (error_unit,*) " => Command line was: ",char(commandLine())
 #ifndef UNCLEANEXIT
-    !$ if (.not.hdf5Access%ownedByThread()) &
-    !$      & call hdf5Access%set  (     )
-    call           H5Close_F       (error)
-    call           H5Close_C       (     )
-    !$ call        hdf5Access%unset(     )
+    call closeHDF5()
 #endif
-    call Warn_Review( )
-    call BackTrace  ( )
-    call Flush      (0)
+    call BackTrace  (           )
+    call Warn_Review(           )
+    call Flush      (output_unit)
+    call Flush      ( error_unit)
 #ifdef UNCLEANEXIT
     call Exit(1)
 #else
@@ -408,9 +406,10 @@ contains
     if (flag) then
        call MPI_Comm_Rank(MPI_Comm_World,mpiRank,error)
        call hostnm(hostName)
-       write (0,*) " => Error occurred in MPI process ",mpiRank,"; PID ",getPID(),"; host ",trim(hostName)
-       write (0,'(a,i8,a)') " => Sleeping for ",errorWaitTime,"s to allow for attachment of debugger"
-       call Flush(0)
+       write (error_unit,*) " => Error occurred in MPI process ",mpiRank,"; PID ",getPID(),"; host ",trim(hostName)
+       write (error_unit,'(a,i8,a)') " => Sleeping for ",errorWaitTime,"s to allow for attachment of debugger"
+       call Flush(output_unit)
+       call Flush( error_unit)
        call Sleep(errorWaitTime)
     end if
 #endif
@@ -423,46 +422,39 @@ contains
     !!{
     Handle {\normalfont \ttfamily SIGBUS} signals, by flushing all data and then aborting.
     !!}
-#ifndef UNCLEANEXIT
-    use    :: HDF5_Access  , only : hdf5Access
-#endif
-#ifndef UNCLEANEXIT
-    use    :: HDF5         , only : H5Close_F
-#endif
+    use   , intrinsic :: ISO_Fortran_Env   , only : error_unit        , output_unit
 #ifdef USEMPI
-    use    :: MPI          , only : MPI_Comm_Rank     , MPI_Comm_World
+    use               :: MPI_F08           , only : MPI_Comm_Rank     , MPI_Comm_World
 #endif
-    !$ use :: OMP_Lib      , only : OMP_Get_Thread_Num, OMP_In_Parallel
-    use    :: Display      , only : displayBold       , displayRed     , displayReset
-    use    :: System_Output, only : stdOutIsATTY
+    !$ use            :: OMP_Lib           , only : OMP_Get_Thread_Num, OMP_In_Parallel
+    use               :: Display           , only : displayBold       , displayRed     , displayReset
+    use               :: System_Output     , only : stdOutIsATTY
+    use               :: ISO_Varying_String, only : char
     implicit none
-    integer            :: error
 #ifdef USEMPI
-    integer            :: mpiRank
+    integer            :: mpiRank , error
     character(len=128) :: hostName
     logical            :: flag
 #endif
 
     if (stdOutIsATTY()) then
-       write (0,*) displayRed()//displayBold()//'Galacticus experienced a bus error - will try to flush data before exiting.'//displayReset()
+       write (error_unit,*) displayRed()//displayBold()//'Galacticus experienced a bus error - will try to flush data before exiting.'//displayReset()
     else
-       write (0,*)                              'Galacticus experienced a bus error - will try to flush data before exiting.'
+       write (error_unit,*)                              'Galacticus experienced a bus error - will try to flush data before exiting.'
     end if
     !$ if (omp_in_parallel()) then
-    !$    write (0,*) " => Error occurred in thread ",omp_get_thread_num()
+    !$    write (error_unit,*) " => Error occurred in thread ",omp_get_thread_num()
     !$ else
-    !$    write (0,*) " => Error occurred in master thread"
+    !$    write (error_unit,*) " => Error occurred in master thread"
     !$ end if
+    write (error_unit,*) " => Command line was: ",char(commandLine())
 #ifndef UNCLEANEXIT
-    !$ if (.not.hdf5Access%ownedByThread()) &
-    !$      & call hdf5Access%set  (     )
-    call           H5Close_F       (error)
-    call           H5Close_C       (     )
-    !$ call        hdf5Access%unset(     )
+    call closeHDF5()
 #endif
-    call Warn_Review( )
-    call BackTrace  ( )
-    call Flush      (0)
+    call BackTrace  (           )
+    call Warn_Review(           )
+    call Flush      (output_unit)
+    call Flush      ( error_unit)
 #ifdef UNCLEANEXIT
     call Exit(1)
 #else
@@ -471,9 +463,10 @@ contains
     if (flag) then
        call MPI_Comm_Rank(MPI_Comm_World,mpiRank,error)
        call hostnm(hostName)
-       write (0,*) " => Error occurred in MPI process ",mpiRank,"; PID ",getPID(),"; host ",trim(hostName)
-       write (0,'(a,i8,a)') " => Sleeping for ",errorWaitTime,"s to allow for attachment of debugger"
-       call Flush(0)
+       write (error_unit,*) " => Error occurred in MPI process ",mpiRank,"; PID ",getPID(),"; host ",trim(hostName)
+       write (error_unit,'(a,i8,a)') " => Sleeping for ",errorWaitTime,"s to allow for attachment of debugger"
+       call Flush(output_unit)
+       call Flush( error_unit)
        call Sleep(errorWaitTime)
     end if
 #endif
@@ -486,46 +479,39 @@ contains
     !!{
     Handle {\normalfont \ttfamily SIGILL} signals, by flushing all data and then aborting.
     !!}
-#ifndef UNCLEANEXIT
-    use    :: HDF5_Access  , only : hdf5Access
-#endif
-#ifndef UNCLEANEXIT
-    use    :: HDF5         , only : H5Close_F
-#endif
+    use   , intrinsic :: ISO_Fortran_Env   , only : error_unit        , output_unit
 #ifdef USEMPI
-    use    :: MPI          , only : MPI_Comm_Rank     , MPI_Comm_World
+    use               :: MPI_F08           , only : MPI_Comm_Rank     , MPI_Comm_World
 #endif
-    !$ use :: OMP_Lib      , only : OMP_Get_Thread_Num, OMP_In_Parallel
-    use    :: Display      , only : displayBold       , displayRed     , displayReset
-    use    :: System_Output, only : stdOutIsATTY
+    !$ use            :: OMP_Lib           , only : OMP_Get_Thread_Num, OMP_In_Parallel
+    use               :: Display           , only : displayBold       , displayRed     , displayReset
+    use               :: System_Output     , only : stdOutIsATTY
+    use               :: ISO_Varying_String, only : char
     implicit none
-    integer            :: error
 #ifdef USEMPI
-    integer            :: mpiRank
+    integer            :: mpiRank , error
     character(len=128) :: hostName
     logical            :: flag
 #endif
 
     if (stdOutIsATTY()) then
-       write (0,*) displayRed()//displayBold()//'Galacticus experienced an illegal instruction - will try to flush data before exiting.'//displayReset()
+       write (error_unit,*) displayRed()//displayBold()//'Galacticus experienced an illegal instruction - will try to flush data before exiting.'//displayReset()
     else
-       write (0,*)                              'Galacticus experienced an illegal instruction - will try to flush data before exiting.'
+       write (error_unit,*)                              'Galacticus experienced an illegal instruction - will try to flush data before exiting.'
     end if
     !$ if (omp_in_parallel()) then
-    !$    write (0,*) " => Error occurred in thread ",omp_get_thread_num()
+    !$    write (error_unit,*) " => Error occurred in thread ",omp_get_thread_num()
     !$ else
-    !$    write (0,*) " => Error occurred in master thread"
+    !$    write (error_unit,*) " => Error occurred in master thread"
     !$ end if
+    write (error_unit,*) " => Command line was: ",char(commandLine())
 #ifndef UNCLEANEXIT
-    !$ if (.not.hdf5Access%ownedByThread()) &
-    !$      & call hdf5Access%set  (     )
-    call           H5Close_F       (error)
-    call           H5Close_C       (     )
-    !$ call        hdf5Access%unset(     )
+    call closeHDF5()
 #endif
-    call Warn_Review( )
-    call BackTrace  ( )
-    call Flush      (0)
+    call BackTrace  (           )
+    call Warn_Review(           )
+    call Flush      (output_unit)
+    call Flush      ( error_unit)
 #ifdef UNCLEANEXIT
     call Exit(1)
 #else
@@ -534,9 +520,10 @@ contains
     if (flag) then
        call MPI_Comm_Rank(MPI_Comm_World,mpiRank,error)
        call hostnm(hostName)
-       write (0,*) " => Error occurred in MPI process ",mpiRank,"; PID ",getPID(),"; host ",trim(hostName)
-       write (0,'(a,i8,a)') " => Sleeping for ",errorWaitTime,"s to allow for attachment of debugger"
-       call Flush(0)
+       write (error_unit,*) " => Error occurred in MPI process ",mpiRank,"; PID ",getPID(),"; host ",trim(hostName)
+       write (error_unit,'(a,i8,a)') " => Sleeping for ",errorWaitTime,"s to allow for attachment of debugger"
+       call Flush(output_unit)
+       call Flush( error_unit)
        call Sleep(errorWaitTime)
     end if
 #endif
@@ -549,29 +536,20 @@ contains
     !!{
     Handle {\normalfont \ttfamily SIGXCPU} signals, by flushing all data and then aborting.
     !!}
-#ifndef UNCLEANEXIT
-    use :: HDF5_Access  , only : hdf5Access
-#endif
-#ifndef UNCLEANEXIT
-    use :: HDF5         , only : H5Close_F
-#endif
-    use :: Display      , only : displayBold , displayRed, displayReset
-    use :: System_Output, only : stdOutIsATTY
+    use, intrinsic :: ISO_Fortran_Env, only : error_unit  , output_unit
+    use            :: Display        , only : displayBold , displayRed , displayReset
+    use            :: System_Output  , only : stdOutIsATTY
     implicit none
-    integer :: error
 
     if (stdOutIsATTY()) then
-       write (0,*) displayRed()//displayBold()//'Galacticus exceeded available CPU time - will try to flush data before exiting.'//displayReset()
+       write (error_unit,*) displayRed()//displayBold()//'Galacticus exceeded available CPU time - will try to flush data before exiting.'//displayReset()
     else
-       write (0,*)                              'Galacticus exceeded available CPU time - will try to flush data before exiting.'
+       write (error_unit,*)                              'Galacticus exceeded available CPU time - will try to flush data before exiting.'
     end if
-    call Flush(0)
+    call Flush(output_unit)
+    call Flush( error_unit)
 #ifndef UNCLEANEXIT
-    !$ if (.not.hdf5Access%ownedByThread()) &
-    !$      & call hdf5Access%set  (     )
-    call           H5Close_F       (error)
-    call           H5Close_C       (     )
-    !$ call        hdf5Access%unset(     )
+    call closeHDF5()
 #endif
     call Exit(errorStatusXCPU)
     return
@@ -581,16 +559,11 @@ contains
     !!{
     Handle errors from the GSL library, by flushing all data and then aborting.
     !!}
-#ifndef UNCLEANEXIT
-    use               :: HDF5_Access       , only : hdf5Access
-#endif
-#ifndef UNCLEANEXIT
-    use               :: HDF5              , only : H5Close_F
-#endif
+    use   , intrinsic :: ISO_Fortran_Env   , only : error_unit         , output_unit
     use   , intrinsic :: ISO_C_Binding     , only : c_char
     use               :: ISO_Varying_String, only : char
 #ifdef USEMPI
-    use               :: MPI               , only : MPI_Comm_Rank      , MPI_Comm_World , MPI_Initialized
+    use               :: MPI_F08           , only : MPI_Comm_Rank      , MPI_Comm_World , MPI_Initialized
 #endif
     !$ use            :: OMP_Lib           , only : OMP_Get_Thread_Num , OMP_In_Parallel
     use               :: Display           , only : displayBold        , displayRed     , displayReset
@@ -598,36 +571,33 @@ contains
     use               :: System_Output     , only : stdOutIsATTY
     character(c_char), dimension(*) :: file       , reason
     integer  (c_int ), value        :: errorNumber, line
-    integer                         :: error
 #ifdef USEMPI
-    integer                         :: mpiRank
+    integer                         :: mpiRank    , error
     character(len=128)              :: hostName
     logical                         :: flag
 #endif
 
     if (abortOnErrorGSL) then
        if (stdOutIsATTY()) then
-          write (0,*) displayRed()//displayBold()//'Galacticus experienced an error in the GSL library - will try to flush data before exiting.'//displayReset()
+          write (error_unit,*) displayRed()//displayBold()//'Galacticus experienced an error in the GSL library - will try to flush data before exiting.'//displayReset()
        else
-          write (0,*)                              'Galacticus experienced an error in the GSL library - will try to flush data before exiting.'
+          write (error_unit,*)                              'Galacticus experienced an error in the GSL library - will try to flush data before exiting.'
        end if
-       write (0,*) ' => Error occurred in ',char(String_C_to_Fortran(file  )),' at line ',line
-       write (0,*) ' => Reason was: '      ,char(String_C_to_Fortran(reason))
+       write (error_unit,*) ' => Error occurred in ',char(String_C_to_Fortran(file  )),' at line ',line
+       write (error_unit,*) ' => Reason was: '      ,char(String_C_to_Fortran(reason))
        !$ if (omp_in_parallel()) then
-       !$    write (0,*) " => Error occurred in thread ",omp_get_thread_num()
+       !$    write (error_unit,*) " => Error occurred in thread ",omp_get_thread_num()
        !$ else
-       !$    write (0,*) " => Error occurred in master thread"
+       !$    write (error_unit,*) " => Error occurred in master thread"
        !$ end if
+       write (error_unit,*) " => Command line was: ",char(commandLine())
 #ifndef UNCLEANEXIT
-       !$ if (.not.hdf5Access%ownedByThread()) &
-       !$      & call hdf5Access%set  (     )
-       call           H5Close_F       (error)
-       call           H5Close_C       (     )
-       !$ call        hdf5Access%unset(     )
+       call closeHDF5()
 #endif
-       call Warn_Review( )
-       call BackTrace  ( )
-       call Flush      (0)
+       call BackTrace  (           )
+       call Warn_Review(           )
+       call Flush      (output_unit)
+       call Flush      ( error_unit)
 #ifdef UNCLEANEXIT
        call Exit(1)
 #else
@@ -636,9 +606,10 @@ contains
        if (flag) then
           call MPI_Comm_Rank(MPI_Comm_World,mpiRank,error)
           call hostnm(hostName)
-          write (0,*) " => Error occurred in MPI process ",mpiRank,"; PID ",getPID(),"; host ",trim(hostName)
-          write (0,'(a,i8,a)') " => Sleeping for ",errorWaitTime,"s to allow for attachment of debugger"
-          call Flush(0)
+          write (error_unit,*) " => Error occurred in MPI process ",mpiRank,"; PID ",getPID(),"; host ",trim(hostName)
+          write (error_unit,'(a,i8,a)') " => Sleeping for ",errorWaitTime,"s to allow for attachment of debugger"
+          call Flush(output_unit)
+          call Flush( error_unit)
           call Sleep(errorWaitTime)
        end if
 #endif
@@ -729,4 +700,62 @@ contains
     return
   end subroutine Error_Wait_Set
 
+#ifndef UNCLEANEXIT
+  subroutine closeHDF5()
+    !!{
+    Close HDF5 functionality on error.
+    !!}
+    use :: HDF5         , only : H5Close_F
+    use :: HDF5_Access  , only : hdf5Access, hdf5AccessInitialized
+    implicit none
+    integer :: error
+    
+    !$ if (hdf5AccessInitialized) then
+    !$    if (.not.hdf5Access%ownedByThread()) &
+    !$      & call hdf5Access%set  (     )
+    call           H5Close_F       (error)
+    call           H5Close_C       (     )
+    !$    if (hdf5AccessInitialized      ) &
+    !$      & call hdf5Access%unset(     )
+    !$ end if
+    return
+  end subroutine closeHDF5
+#endif
+
+  function commandLine()
+    !!{
+    Return the command line used to run this model.
+    !!}
+    use :: ISO_Varying_String, only : varying_string, assignment(=), operator(//)
+    implicit none
+    type   (varying_string) :: commandLine
+    integer                 :: length     , statusLength, &
+         &                     i          , statusGet
+
+    commandLine=""
+    do i=0,1
+       call Get_Command_Argument(i,length=length,status=statusLength)
+       if (i > 0) commandLine=commandLine//" "
+       commandLine=commandLine//commandLineArgumentUnlimited(i,length,statusGet)
+       if (statusLength /= 0 .or. statusGet /= 0) then
+          commandLine="????????"
+          return
+       end if
+    end do
+    return
+  end function commandLine
+
+  function commandLineArgumentUnlimited(number,length,status) result(argument)
+    !!{
+    Get a command line argument of unlimited length.
+    !!}
+    implicit none
+    integer              , intent(in   ) :: number  , length
+    integer              , intent(  out) :: status
+    character(len=length)                :: argument
+
+    call Get_Command_Argument(number,value=argument,status=status)
+    return
+  end function commandLineArgumentUnlimited
+  
 end module Error

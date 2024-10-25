@@ -1,5 +1,5 @@
 !! Copyright 2009, 2010, 2011, 2012, 2013, 2014, 2015, 2016, 2017, 2018,
-!!           2019, 2020, 2021, 2022, 2023
+!!           2019, 2020, 2021, 2022, 2023, 2024
 !!    Andrew Benson <abenson@carnegiescience.edu>
 !!
 !! This file is part of Galacticus.
@@ -35,43 +35,33 @@ module Dependencies
   
 contains
 
-  function dependencyVersion(dependency)
+  function dependencyVersion(dependency,majorOnly)
     !!{
     Return the version number to use for a named dependency.
     !!}
     use :: Error             , only : Error_Report
-    use :: Input_Paths       , only : inputPath     , pathTypeExec
-    use :: ISO_Varying_String, only : varying_string, trim        , assignment(=), char
+    use :: ISO_Varying_String, only : varying_string, index, extract, var_str
     implicit none
-    type     (varying_string)                :: dependencyVersion
-    character(len=*         ), intent(in   ) :: dependency
-    integer                                  :: fileUnit
-    character(len=256       )                :: line             , dependency_
-    type     (varying_string)                :: version_
-    integer                                  :: indexSeparator   , status
-
+    type     (varying_string)                          :: dependencyVersion
+    character(len=*         ), intent(in   )           :: dependency
+    logical                  , intent(in   ), optional :: majorOnly
+    !![
+    <optionalArgument name="majorOnly" defaultsTo=".false."/>
+    !!]
+    
     !$omp critical(dependenciesInitialize)
     if (.not.initialized) then
-       call dependencies_%initialize()
-       open(newUnit=fileUnit,file=char(inputPath(pathTypeExec))//'aux/dependencies.yml',status='old',form='formatted',iostat=status)
-       do while (status == 0)
-          read (fileUnit,'(a)',iostat=status) line
-          if (status /= 0) exit
-          indexSeparator=index(line,":")
-          if (indexSeparator == 0) then
-             call Error_Report('badly-formed YAML'//{introspection:location})
-          else
-             dependency_=line(1:indexSeparator-1 )
-             version_   =line(  indexSeparator+2:)
-             call dependencies_%set(trim(dependency_),trim(version_))
-          end if
-       end do
-       close(fileUnit)
+       call dependencies_%initialize()       
+       !![
+       <dependenciesInitialize/>
+       !!]
        initialized=.true.
     end if
     !$omp end critical(dependenciesInitialize)
     if (dependencies_%exists(trim(dependency))) then
        dependencyVersion=dependencies_%value(trim(dependency))
+       if (majorOnly_ .and. index(dependencyVersion,".") > 1) &
+            & dependencyVersion=extract(dependencyVersion,1,index(dependencyVersion,".")-1)
     else
        call Error_Report('dependency not found'//{introspection:location})
     end if

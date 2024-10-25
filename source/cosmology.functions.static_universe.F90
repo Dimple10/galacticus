@@ -1,5 +1,5 @@
 !! Copyright 2009, 2010, 2011, 2012, 2013, 2014, 2015, 2016, 2017, 2018,
-!!           2019, 2020, 2021, 2022, 2023
+!!           2019, 2020, 2021, 2022, 2023, 2024
 !!    Andrew Benson <abenson@carnegiescience.edu>
 !!
 !! This file is part of Galacticus.
@@ -441,17 +441,22 @@ contains
     return
   end function staticUniverseDistanceLuminosity
 
-  double precision function staticUniverseDistanceAngular(self,time)
+  double precision function staticUniverseDistanceAngular(self,time,timeOrigin)
     !!{
     Returns the angular diameter distance to cosmological time {\normalfont \ttfamily time}.
     !!}
     use :: Error, only : Error_Report
     implicit none
-    class           (cosmologyFunctionsStaticUniverse), intent(inout) :: self
-    double precision                                  , intent(in   ) :: time
+    class           (cosmologyFunctionsStaticUniverse), intent(inout)           :: self
+    double precision                                  , intent(in   )           :: time
+    double precision                                  , intent(in   ), optional :: timeOrigin
 
-    ! Compute the angular diameter distance.
     staticUniverseDistanceAngular=self%distanceComoving(time)
+    if (present(timeOrigin)) then
+       if (timeOrigin < time) call Error_Report('expected timeOrigin ≥ time'//{introspection:location})
+       staticUniverseDistanceAngular=+staticUniverseDistanceAngular     &
+            &                        -self%distanceComoving(timeOrigin)
+    end if
     return
   end function staticUniverseDistanceAngular
 
@@ -503,7 +508,7 @@ contains
     !!}
     implicit none
     class           (cosmologyFunctionsStaticUniverse), intent(inout)           :: self
-    double precision                                , intent(in   ), optional :: expansionFactor, time
+    double precision                                  , intent(in   ), optional :: expansionFactor, time
     !$GLC attributes unused :: self, time, expansionFactor
 
     staticUniverseEquationOfStateDarkEnergy=-1.0d0

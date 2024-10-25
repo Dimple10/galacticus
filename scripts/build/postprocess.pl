@@ -122,13 +122,14 @@ while ( my $line = <STDIN> ) {
 	    last
 		if ( $_->{'lineOriginal'} > $lineOriginal );
 	    $source     = $_->{'source'};
-	    my $lineNumber;
+	    my $lineDescriptor;
 	    if ( $source =~ m/\(\)$/ ) {
-		$lineNumber = "meta";
+		$lineDescriptor = "auto-generated code (no line number)";
 	    } else {
-		$lineNumber = $lineOriginal-$_->{'lineOriginal'}+$_->{'line'};
+		my $lineNumber = $lineOriginal-$_->{'lineOriginal'}+$_->{'line'};
+		$lineDescriptor = "line ".$lineNumber;
 	    }
-    	    $line = $source.":".$lineNumber.":".$flag."\n";
+    	    $line = $source."; ".$lineDescriptor." [preprocessed line ".$lineOriginal."]; code ".$flag."\n";
 	}
 	print $buffer
 	    if ( $buffer );
@@ -201,9 +202,9 @@ while ( my $line = <STDIN> ) {
 	    if (  exists($interoperableVariables->{lc($inProcedure)}->{lc($variableName)}) );
     }
     # Handle uninitialized variable attributes.
-    if ( $line =~ /Warning: ['‘]([a-zA-Z0-9_]+)[a-zA-Z0-9_\.\[\]]*['’] may be used uninitialized( in this function)?? \[\-Wmaybe\-uninitialized\]/ ) {
+    if ( $line =~ /Warning: ['‘](\(\*)??([a-zA-Z0-9_]+)[a-zA-Z0-9_\.\[\]\s\{\}\):]*['’] may be used uninitialized( in this function)?? \[\-Wmaybe\-uninitialized\]/ ) {
 	$dropBuffer = 1
-	    if ( exists($initializedVariables{lc($1)}) );
+	    if ( exists($initializedVariables{lc($2)}) );
     }
     if ( $line =~ /Warning: ['‘]([a-zA-Z0-9_]+)[a-zA-Z0-9_\.\[\]]*['’] is used uninitialized( in this function)?? \[\-Wuninitialized\]/ ) {
 	$dropBuffer = 1

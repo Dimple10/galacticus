@@ -1,5 +1,5 @@
 !! Copyright 2009, 2010, 2011, 2012, 2013, 2014, 2015, 2016, 2017, 2018,
-!!           2019, 2020, 2021, 2022, 2023
+!!           2019, 2020, 2021, 2022, 2023, 2024
 !!    Andrew Benson <abenson@carnegiescience.edu>
 !!
 !! This file is part of Galacticus.
@@ -189,7 +189,7 @@ contains
     return
   end subroutine simpleSolvePreDeriativeHook
 
-  subroutine simpleSolve(self,node)
+  subroutine simpleSolve(self,node,plausibilityOnly)
     !!{
     Solve for the structure of galactic components.
     !!}
@@ -208,14 +208,18 @@ contains
     </include>
     !!]
     implicit none
-    class           (galacticStructureSolverSimple), intent(inout)         :: self
-    type            (treeNode                     ), intent(inout), target :: node
-    logical                                        , parameter             :: specificAngularMomentumRequired=.true.
-    procedure       (solverGet                    ), pointer               :: radiusGet                             , velocityGet
-    procedure       (solverSet                    ), pointer               :: radiusSet                             , velocitySet
-    type            (treeNode                     ), pointer               :: haloNode
-    logical                                                                :: componentActive
-    double precision                                                       :: specificAngularMomentum
+    class           (galacticStructureSolverSimple), intent(inout)           :: self
+    type            (treeNode                     ), intent(inout), target   :: node
+    logical                                        , intent(in   ), optional :: plausibilityOnly
+    logical                                        , parameter               :: specificAngularMomentumRequired=.true.
+    procedure       (solverGet                    ), pointer                 :: radiusGet                             , velocityGet
+    procedure       (solverSet                    ), pointer                 :: radiusSet                             , velocitySet
+    type            (treeNode                     ), pointer                 :: haloNode
+    logical                                                                  :: componentActive
+    double precision                                                         :: specificAngularMomentum
+    !![
+    <optionalArgument name="plausibilityOnly" defaultsTo=".false."/>
+    !!]
 
     ! Check that the galaxy is physical plausible. In this simple solver, we don't act on this.
     node%isPhysicallyPlausible=.true.
@@ -228,7 +232,7 @@ contains
     !![
     </include>
     !!]
-    if (node%isPhysicallyPlausible) then
+    if (node%isPhysicallyPlausible .and. .not.plausibilityOnly_) then
        ! Determine which node to use for halo properties.
        if (self%useFormationHalo) then
           if (.not.associated(node%formationNode)) call Error_Report('no formation node exists'//{introspection:location})
@@ -256,23 +260,29 @@ contains
       !!{
       Solve for the equilibrium radius of the given component.
       !!}
+      use :: Mass_Distributions, only : massDistributionClass
       implicit none
-      type            (treeNode ), intent(inout)          :: node
-      double precision           , intent(in   )          :: specificAngularMomentum
-      procedure       (solverGet), intent(in   ), pointer :: radiusGet              , velocityGet
-      procedure       (solverSet), intent(in   ), pointer :: radiusSet              , velocitySet
-      double precision                                    :: radius                 , velocity
+      type            (treeNode             ), intent(inout)          :: node
+      double precision                       , intent(in   )          :: specificAngularMomentum
+      procedure       (solverGet            ), intent(in   ), pointer :: radiusGet              , velocityGet
+      procedure       (solverSet            ), intent(in   ), pointer :: radiusSet              , velocitySet
+      class           (massDistributionClass)               , pointer :: massDistribution_
+      double precision                                                :: radius                 , velocity
       !$GLC attributes unused :: radiusGet, velocityGet
 
       ! Return immediately if the specific angular momentum is zero.
       if (specificAngularMomentum <= 0.0d0) return
+      massDistribution_ => self%darkMatterProfileDMO_%get(haloNode)
       ! Find the radius in the dark matter profile with the required specific angular momentum
-      radius=self%darkMatterProfileDMO_%radiusFromSpecificAngularMomentum(haloNode,specificAngularMomentum)
+      radius  =massDistribution_%radiusFromSpecificAngularMomentum(specificAngularMomentum)
       ! Find the velocity at this radius.
-      velocity=self%darkMatterProfileDMO_%circularVelocity(haloNode,radius)
+      velocity=massDistribution_%rotationCurve                    (radius                 )
       ! Set the component size to new radius and velocity.
       call radiusSet  (node,radius  )
       call velocitySet(node,velocity)
+      !![
+      <objectDestructor name="massDistribution_"/>
+      !!]
       return
     end subroutine radiusSolve
 

@@ -1,5 +1,5 @@
 !! Copyright 2009, 2010, 2011, 2012, 2013, 2014, 2015, 2016, 2017, 2018,
-!!           2019, 2020, 2021, 2022, 2023
+!!           2019, 2020, 2021, 2022, 2023, 2024
 !!    Andrew Benson <abenson@carnegiescience.edu>
 !!
 !! This file is part of Galacticus.
@@ -26,13 +26,17 @@ module Output_HDF5_Open
   Handles opening of the \glc\ output file.
   !!}
   use :: ISO_Varying_String, only : varying_string
+  use :: Error             , only : errorStatusSuccess
   implicit none
   private
-  public :: Output_HDF5_Open_File, Output_HDF5_Close_File
+  public :: Output_HDF5_Open_File, Output_HDF5_Close_File, Output_HDF5_Completion_Status
 
   ! Output file name.
-  type(varying_string) :: outputFileName, outputScratchFileName
+  type   (varying_string) :: outputFileName                     , outputScratchFileName
 
+  ! Completion status.
+  integer                 :: statusCompletion=errorStatusSuccess
+ 
 contains
 
   subroutine Output_HDF5_Open_File(parameters)
@@ -45,7 +49,7 @@ contains
     use :: HDF5_Access       , only : hdf5Access
     use :: IO_HDF5           , only : IO_HDF5_Set_Defaults
     use :: ISO_Varying_String, only : var_str             , char                , operator(//)        , extract               , &
-         &                            len                 , operator(==)
+         &                            len                 , operator(==)        , adjustl             , trim
     use :: Input_Parameters  , only : inputParameters     , inputParameter
 #ifdef USEMPI
     use :: MPI_Utilities     , only : mpiSelf
@@ -63,6 +67,7 @@ contains
     integer(hsize_t        )                :: chunkSize
     integer                                 :: sieveBufferSize
     integer(size_t         )                :: cacheElementsCount, cacheSizeBytes
+    type   (varying_string )                :: outputFileName_   , outputScratchFileName_
 #ifdef USEMPI
     type   (varying_string )                :: fileNamePrefix
 #endif
@@ -71,13 +76,15 @@ contains
        !![
        <inputParameter>
          <name>outputFileName</name>
+         <variable>outputFileName_</variable>
          <defaultValue>var_str('galacticus.hdf5')</defaultValue>
          <description>The name of the file to which \glc\ results will be written.</description>
          <source>parameters</source>
        </inputParameter>
        <inputParameter>
          <name>outputScratchFileName</name>
-         <defaultValue>outputFileName</defaultValue>
+         <variable>outputScratchFileName_</variable>
+         <defaultValue>outputFileName_</defaultValue>
          <description>The name of the file to which \glc\ results will be written temporarily during runs.</description>
          <source>parameters</source>
        </inputParameter>
@@ -116,6 +123,9 @@ contains
        </inputParameter>
        !!]
        hdf5CacheSizeBytes=cacheSizeBytes
+       ! Remove leadimg and trailing spaces.
+       outputFileName       =trim(adjustl(outputFileName_       ))
+       outputScratchFileName=trim(adjustl(outputScratchFileName_))
        ! Modify the file name on a per-process basis if running under MPI.
 #ifdef USEMPI
        if (extract(outputFileName       ,len(outputFileName       )-4,len(outputFileName       )) == ".hdf5") then
@@ -216,7 +226,7 @@ contains
           !!]
           ! Close the file.
           !$ call hdf5Access%set()
-          call outputFile%writeAttribute(1,"galacticusCompleted")
+          call outputFile%writeAttribute(statusCompletion,"statusCompletion")
           call outputFile%close()
           !$ call hdf5Access%unset()
           ! Move the scratch file to the final file if necessary.
@@ -229,4 +239,15 @@ contains
     return
   end subroutine Output_HDF5_Close_File
 
+  subroutine Output_HDF5_Completion_Status(status)
+    !!{
+    Set the completion status.
+    !!}
+    implicit none
+    integer, intent(in   ) :: status
+
+    statusCompletion=status
+    return
+  end subroutine Output_HDF5_Completion_Status
+  
 end module Output_HDF5_Open

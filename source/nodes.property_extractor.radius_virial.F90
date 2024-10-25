@@ -1,5 +1,5 @@
 !! Copyright 2009, 2010, 2011, 2012, 2013, 2014, 2015, 2016, 2017, 2018,
-!!           2019, 2020, 2021, 2022, 2023
+!!           2019, 2020, 2021, 2022, 2023, 2024
 !!    Andrew Benson <abenson@carnegiescience.edu>
 !!
 !! This file is part of Galacticus.
@@ -40,10 +40,10 @@ Contains a module which implements a virial radius output analysis property extr
      radius).
      !!}
      private
-     class  (darkMatterProfileDMOClass ), pointer :: darkMatterProfileDMO_  => null()
      class  (virialDensityContrastClass), pointer :: virialDensityContrast_ => null(), virialDensityContrastDefinition_ => null()
      class  (cosmologyParametersClass  ), pointer :: cosmologyParameters_   => null()
      class  (cosmologyFunctionsClass   ), pointer :: cosmologyFunctions_    => null()
+     class  (darkMatterProfileDMOClass ), pointer :: darkMatterProfileDMO_  => null()
      logical                                      :: useLastIsolatedTime
    contains
      final     ::                radiusVirialDestructor
@@ -110,8 +110,8 @@ contains
     type   (nodePropertyExtractorRadiusVirial)                        :: self
     class  (cosmologyParametersClass         ), intent(in   ), target :: cosmologyParameters_
     class  (cosmologyFunctionsClass          ), intent(in   ), target :: cosmologyFunctions_
-    class  (virialDensityContrastClass       ), intent(in   ), target :: virialDensityContrast_, virialDensityContrastDefinition_
     class  (darkMatterProfileDMOClass        ), intent(in   ), target :: darkMatterProfileDMO_
+    class  (virialDensityContrastClass       ), intent(in   ), target :: virialDensityContrast_, virialDensityContrastDefinition_
     logical                                   , intent(in   )         :: useLastIsolatedTime
     !![
     <constructorAssign variables="useLastIsolatedTime, *cosmologyFunctions_, *cosmologyParameters_, *darkMatterProfileDMO_, *virialDensityContrast_, *virialDensityContrastDefinition_"/>
@@ -129,9 +129,9 @@ contains
 
     !![
     <objectDestructor name="self%cosmologyFunctions_"             />
+    <objectDestructor name="self%darkMatterProfileDMO_"           />
     <objectDestructor name="self%virialDensityContrast_"          />
     <objectDestructor name="self%cosmologyParameters_"            />
-    <objectDestructor name="self%darkMatterProfileDMO_"           />
     <objectDestructor name="self%virialDensityContrastDefinition_"/>
     !!]
     return
@@ -144,7 +144,7 @@ contains
     use :: Dark_Matter_Profile_Mass_Definitions, only : Dark_Matter_Profile_Mass_Definition
     use :: Galacticus_Nodes                    , only : nodeComponentBasic                 , treeNode
     implicit none
-    class           (nodePropertyExtractorRadiusVirial), intent(inout)           :: self
+    class           (nodePropertyExtractorRadiusVirial), intent(inout), target   :: self
     type            (treeNode                         ), intent(inout), target   :: node
     type            (multiCounter                     ), intent(inout), optional :: instance
     class           (nodeComponentBasic               ), pointer                 :: basic
@@ -163,8 +163,8 @@ contains
          &                                            radius                =     radiusVirialExtract                                               , &
          &                                            cosmologyParameters_  =self%cosmologyParameters_                                              , &
          &                                            cosmologyFunctions_   =self%cosmologyFunctions_                                               , &
-         &                                            darkMatterProfileDMO_ =self%darkMatterProfileDMO_                                             , &
          &                                            virialDensityContrast_=self%virialDensityContrast_                                            , &
+         &                                            darkMatterProfileDMO_ =self%darkMatterProfileDMO_                                             , &
          &                                            useLastIsolatedTime   =self%useLastIsolatedTime                                                 &
          &                                           )
     return

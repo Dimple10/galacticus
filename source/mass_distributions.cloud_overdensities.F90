@@ -1,5 +1,5 @@
 !! Copyright 2009, 2010, 2011, 2012, 2013, 2014, 2015, 2016, 2017, 2018,
-!!           2019, 2020, 2021, 2022, 2023
+!!           2019, 2020, 2021, 2022, 2023, 2024
 !!    Andrew Benson <abenson@carnegiescience.edu>
 !!
 !! This file is part of Galacticus.
@@ -210,25 +210,19 @@ contains
     return
   end subroutine cloudOverdensitiesDestructor
 
-  double precision function cloudOverdensitiesDensity(self,coordinates,componentType,massType)
+  double precision function cloudOverdensitiesDensity(self,coordinates)
     !!{
     Return the density at the specified {\normalfont \ttfamily coordinates} in a cloud overdensities mass distribution.
     !!}
     use :: Coordinates  , only : assignment(=), coordinateCartesian
     implicit none
-    class           (massDistributionCloudOverdensities), intent(inout)           :: self
-    class           (coordinate                        ), intent(in   )           :: coordinates
-    type            (enumerationComponentTypeType      ), intent(in   ), optional :: componentType
-    type            (enumerationMassTypeType           ), intent(in   ), optional :: massType
-    type            (coordinateCartesian               )                          :: position
-    double precision                                    , dimension(3)            :: positionComponents
-    double precision                                                              :: densityContrast
-    integer                                                                       :: neighborCount
+    class           (massDistributionCloudOverdensities), intent(inout) :: self
+    class           (coordinate                        ), intent(in   ) :: coordinates
+    type            (coordinateCartesian               )                :: position
+    double precision                                    , dimension(3)  :: positionComponents
+    double precision                                                    :: densityContrast
+    integer                                                             :: neighborCount
     
-    if (.not.self%matches(componentType,massType)) then
-       cloudOverdensitiesDensity=0.0d0
-       return
-    end if
     ! Extract the position.
     position          =coordinates
     positionComponents=position

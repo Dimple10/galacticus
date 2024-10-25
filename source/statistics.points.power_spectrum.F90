@@ -1,5 +1,5 @@
 !! Copyright 2009, 2010, 2011, 2012, 2013, 2014, 2015, 2016, 2017, 2018,
-!!           2019, 2020, 2021, 2022, 2023
+!!           2019, 2020, 2021, 2022, 2023, 2024
 !!    Andrew Benson <abenson@carnegiescience.edu>
 !!
 !! This file is part of Galacticus.
@@ -35,8 +35,11 @@ contains
     Compute the power spectrum from a set of points in a periodic cube.
     !!}
     use            :: Display                 , only : displayMessage
-    use            :: FFTW3                   , only : FFTW_ESTIMATE     , FFTW_FORWARD        , FFTW_Wavenumber, fftw_destroy_plan, &
-          &                                            fftw_execute_dft  , fftw_plan_dft_3d
+    use            :: FFTW3                   , only : FFTW_Wavenumber
+#ifdef FFTW3AVAIL
+    use            :: FFTW3                   , only : FFTW_ESTIMATE     , FFTW_FORWARD        , fftw_destroy_plan, fftw_execute_dft, &
+          &                                            fftw_plan_dft_3d
+#endif
     use            :: Error                   , only : Error_Report
     use, intrinsic :: ISO_C_Binding           , only : c_double_complex  , c_ptr
     use            :: ISO_Varying_String      , only : varying_string

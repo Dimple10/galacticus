@@ -1,5 +1,5 @@
 !! Copyright 2009, 2010, 2011, 2012, 2013, 2014, 2015, 2016, 2017, 2018,
-!!           2019, 2020, 2021, 2022, 2023
+!!           2019, 2020, 2021, 2022, 2023, 2024
 !!    Andrew Benson <abenson@carnegiescience.edu>
 !!
 !! This file is part of Galacticus.
@@ -31,67 +31,22 @@ Contains a module which implements a star formation histories class which record
     [timeStep]} between the time at which each galaxy formed and the final output time, and at most of size
     {\normalfont \ttfamily [timeStepFine]} in the period {\normalfont \ttfamily
     [timeFine]} prior to each output time (all times specified in Gyr). The allows fine binning of recent
-    star formation just prior to each output. Usually, the metallicity binning is arranged logarithmically in metallicity with
-    {\normalfont \ttfamily [countMetallicities]} bins between {\normalfont \ttfamily
-    [metallicityMinimum]} and {\normalfont \ttfamily [metallicityMaximum]} (specified
-    in Solar units). Note that the metallicity associated with each bin is the minimum metallicity for that bin (the maximum
-    being the metallicity value associated with the next bin, except for the final bin which extends to infinite
-    metallicity). If {\normalfont \ttfamily [countMetallicities]}$=0$ is set, then the star formation history
-    is not split by metallicity (i.e. a single metallicity bin encompassing all metallicities from zero to infinity is
-    used). Alternatively, specific metallicity bin boundaries can be set via the {\normalfont \ttfamily
-    [metallicityBoundaries]} parameter---a final boundary corresponding to infinity is always added
+    star formation just prior to each output.
+
+    The time associated with each bin is the maximum time for which star formation will be accumulated to the bin, with the
+    minimum time corresponding to the value associated with the previous bin (or $t=0$ for the first bin).
+
+    The metallicity binning is arranged logarithmically in metallicity with {\normalfont \ttfamily [countMetallicities]} bins
+    between {\normalfont \ttfamily [metallicityMinimum]} and {\normalfont \ttfamily [metallicityMaximum]} (specified in Solar
+    units). The metallicity bins are arranged logarithmically in metallicity with {\normalfont \ttfamily [countMetallicities]}
+    bins between {\normalfont \ttfamily [metallicityMinimum]} and {\normalfont \ttfamily [metallicityMaximum]} (specified in Solar
+    units). Note that the metallicity associated with each bin is the maximum metallicity for that bin, with the minimum
+    metallicity corresponding to the value associated with the previous bin (or zero metallicity for the first bin). Note that a
+    final bin, extending to infinite metallicity, is always added automatically. If {\normalfont \ttfamily
+    [countMetallicities]}$=0$ is set, then the star formation history is not split by metallicity (i.e. a single metallicity bin
+    encompassing all metallicities from zero to infinity is used). Alternatively, specific metallicity bin boundaries can be set
+    via the {\normalfont \ttfamily [metallicityBoundaries]} parameter---a final boundary corresponding to infinity is always added
     automatically.
-  
-    Star formation histories are output as follows:
-    \begin{verbatim}
-    HDF5 "galacticus.hdf5" {
-    GROUP "starFormationHistories" {
-       COMMENT "Star formation history data."
-       DATASET "metallicities" {
-        COMMENT "Metallicities at which star formation histories are tabulated"
-          DATATYPE  H5T_IEEE_F64LE
-          DATASPACE  SIMPLE { ( [countMetallicities] ) / ( [countMetallicities] ) }
-       }
-       GROUP "Output1" {
-          COMMENT "Star formation histories for all trees at each out"
-          GROUP "mergerTree1" {
-             COMMENT "Star formation histories for each tree."
-             DATASET "diskSFH&lt;nodeID&gt;" {
-             COMMENT "Star formation history stellar masses of the disk "
-                DATATYPE  H5T_IEEE_F64LE
-                DATASPACE  SIMPLE { }
-             }
-             DATASET "diskTime&lt;nodeID&gt;" {
-             COMMENT "Star formation history times of the disk component"
-                DATATYPE  H5T_IEEE_F64LE
-                DATASPACE  SIMPLE { }
-             }
-             DATASET "spheroidSFH&lt;nodeID&gt;" {
-             COMMENT "Star formation history stellar masses of the spher"
-                DATATYPE  H5T_IEEE_F64LE
-                DATASPACE  SIMPLE { }
-             }
-             DATASET "spheroidTime&lt;nodeID&gt;" {
-             COMMENT "Star formation history times of the spheroid compo"
-                DATATYPE  H5T_IEEE_F64LE
-                DATASPACE  SIMPLE { }
-             }
-          }
-          GROUP "mergerTree2" {
-          .
-          .
-          .
-          }
-       }
-       GROUP "Output1" {
-       .
-       .
-       .
-       }
-    }
-    }
-    \end{verbatim}
-    where {\normalfont \ttfamily nodeID} is the index of the relevant node. 
    </description>
   </starFormationHistory>
   !!]
@@ -116,10 +71,12 @@ Contains a module which implements a star formation histories class which record
      final     ::                          metallicitySplitDestructor
      procedure :: create                => metallicitySplitCreate
      procedure :: rate                  => metallicitySplitRate
-     procedure :: output                => metallicitySplitOutput
+     procedure :: update                => metallicitySplitUpdate
      procedure :: scales                => metallicitySplitScales
      procedure :: make                  => metallicitySplitMake
      procedure :: metallicityBoundaries => metallicitySplitMetallicityBoundaries
+     procedure :: rangeIsSufficient     => metallicitySplitRangeIsSufficient
+     procedure :: extend                => metallicitySplitExtend
   end type starFormationHistoryMetallicitySplit
 
   interface starFormationHistoryMetallicitySplit
@@ -299,23 +256,25 @@ contains
     return
   end subroutine metallicitySplitDestructor
 
-  subroutine metallicitySplitCreate(self,node,historyStarFormation,timeBegin)
+  subroutine metallicitySplitCreate(self,node,historyStarFormation,timeBegin,timeEnd)
     !!{
     Create the history required for storing star formation history.
     !!}
     use :: Galacticus_Nodes, only : nodeComponentBasic, treeNode
     implicit none
-    class           (starFormationHistoryMetallicitySplit), intent(inout) :: self
-    type            (treeNode                            ), intent(inout) :: node
-    type            (history                             ), intent(inout) :: historyStarFormation
-    double precision                                      , intent(in   ) :: timeBegin
-    class           (nodeComponentBasic                  ), pointer       :: basic
-    double precision                                                      :: timeBeginActual     , timeEnd
-
+    class           (starFormationHistoryMetallicitySplit), intent(inout)           :: self
+    type            (treeNode                            ), intent(inout), target   :: node
+    type            (history                             ), intent(inout)           :: historyStarFormation
+    double precision                                      , intent(in   )           :: timeBegin
+    double precision                                      , intent(in   ), optional :: timeEnd
+    class           (nodeComponentBasic                  ), pointer                 :: basic
+    double precision                                                                :: timeBeginActual     , timeEnd_
+    !$GLC attributes unused :: timeEnd
+    
     basic           => node%basic()
     timeBeginActual =  min(timeBegin,basic%time())
-    timeEnd         =  self%outputTimes_%timeNext(basic%time())
-    call self%make(historyStarFormation,timeBeginActual,timeEnd)
+    timeEnd_        =  self%outputTimes_%timeNext(basic%time())
+    call self%make(historyStarFormation,timeBeginActual,timeEnd_)
     return
   end subroutine metallicitySplitCreate
 
@@ -361,58 +320,22 @@ contains
     return
   end subroutine metallicitySplitRate
 
-  subroutine metallicitySplitOutput(self,node,nodePassesFilter,historyStarFormation,indexOutput,indexTree,componentType,treeLock)
+  subroutine metallicitySplitUpdate(self,node,indexOutput,historyStarFormation)
     !!{
     Output the star formation history for {\normalfont \ttfamily node}.
     !!}
-    use :: Output_HDF5               , only : outputFile
-    use :: Galacticus_Nodes          , only : mergerTree                    , nodeComponentBasic, treeNode
-    use :: Galactic_Structure_Options, only : enumerationComponentTypeDecode
-    use :: HDF5_Access               , only : hdf5Access
-    use :: IO_HDF5                   , only : hdf5Object
-    use :: String_Handling           , only : operator(//)
+    use :: Galacticus_Nodes, only : nodeComponentBasic
     implicit none
     class           (starFormationHistoryMetallicitySplit), intent(inout)         :: self
     type            (treeNode                            ), intent(inout), target :: node
-    logical                                               , intent(in   )         :: nodePassesFilter
     type            (history                             ), intent(inout)         :: historyStarFormation
     integer         (c_size_t                            ), intent(in   )         :: indexOutput
-    integer         (kind=kind_int8                      ), intent(in   )         :: indexTree
-    type            (enumerationComponentTypeType        ), intent(in   )         :: componentType
-    type            (ompLock                             ), intent(inout)         :: treeLock
     class           (nodeComponentBasic                  ), pointer               :: basicParent
     type            (treeNode                            ), pointer               :: nodeParent
     double precision                                                              :: timeBegin           , timeEnd
-    type            (varying_string                      )                        :: groupName
-    type            (hdf5Object                          )                        :: historyGroup        , outputGroup, &
-         &                                                                           treeGroup
     type            (history                             )                        :: newHistory
-    !$GLC attributes unused :: treeLock
 
- 
     if (.not.historyStarFormation%exists()) return
-    if (nodePassesFilter) then
-       !$ call hdf5Access%set()
-       if (.not.self%metallicityTableWritten) then
-          historyGroup=outputFile%openGroup("starFormationHistories","Star formation history data.")
-          call historyGroup%writeDataset(self%metallicityTable,"metallicities","Metallicities at which star formation histories are tabulated.")
-          call historyGroup%close       (                                                                                                      )
-          self%metallicityTableWritten=.true.
-       end if
-       historyGroup=outputFile          %openGroup("starFormationHistories","Star formation history data."                          )
-       groupName=var_str("Output"    )//indexOutput
-       outputGroup =historyGroup        %openGroup(char(groupName)         ,"Star formation histories for all trees at each output.")
-       groupName=var_str("mergerTree")//indexTree
-       treeGroup    =outputGroup        %openGroup(char(groupName)         ,"Star formation histories for each tree."               )
-       groupName=enumerationComponentTypeDecode(componentType,includePrefix=.false.)//"Time"//node%index()
-       call treeGroup%writeDataset(historyStarFormation%time,char(groupName),"Star formation history times of the "         //char(enumerationComponentTypeDecode(componentType,includePrefix=.false.))//" component.")
-       groupName=enumerationComponentTypeDecode(componentType,includePrefix=.false.)//"SFH" //node%index()
-       call treeGroup%writeDataset(historyStarFormation%data,char(groupName),"Star formation history stellar masses of the "//char(enumerationComponentTypeDecode(componentType,includePrefix=.false.))//" component.")
-       call treeGroup   %close()
-       call outputGroup %close()
-       call historyGroup%close()
-       !$ call hdf5Access%unset()
-    end if
     timeBegin=historyStarFormation%time(1)
     if (indexOutput < self%outputTimes_%count()) then
        timeEnd=self%outputTimes_%time(indexOutput+1)
@@ -430,26 +353,29 @@ contains
     historyStarFormation=newHistory
     call newHistory%destroy()
     return
-  end subroutine metallicitySplitOutput
+  end subroutine metallicitySplitUpdate
 
-  subroutine metallicitySplitScales(self,historyStarFormation,massStellar,abundancesStellar)
+  subroutine metallicitySplitScales(self,historyStarFormation,node,massStellar,massGas,abundancesStellar)
     !!{
     Set the scalings for error control on the absolute values of star formation histories.
     !!}
     implicit none
     class           (starFormationHistoryMetallicitySplit), intent(inout)               :: self
-    double precision                                      , intent(in   )               :: massStellar
+    double precision                                      , intent(in   )               :: massStellar                , massGas    
     type            (abundances                          ), intent(in   )               :: abundancesStellar
     type            (history                             ), intent(inout)               :: historyStarFormation
-    double precision                                      , parameter                   :: massStellarMinimum  =1.0d0
+    type            (treeNode                            ), intent(inout)               :: node
+    double precision                                      , parameter                   :: massMinimum          =1.0d0
     double precision                                      , allocatable  , dimension(:) :: timeSteps
     integer                                                                             :: iMetallicity
-    !$GLC attributes unused :: abundancesStellar
+    !$GLC attributes unused :: abundancesStellar, node
 
     if (.not.historyStarFormation%exists()) return
     call historyStarFormation%timeSteps(timeSteps)
     forall(iMetallicity=1:self%countMetallicities+1)
-       historyStarFormation%data(:,iMetallicity)=max(massStellar,massStellarMinimum)/timeSteps
+       historyStarFormation%data(:,iMetallicity)=+max(massStellar+massGas,massMinimum)                            &
+            &                                    *                     timeSteps                                  &
+            &                                    /historyStarFormation%time     (size(historyStarFormation%time))
     end forall
     deallocate(timeSteps)
     return
@@ -607,3 +533,37 @@ contains
     metallicitySplitMetallicityBoundaries(0:size(self%metallicityTable)-1)=self%metallicityTable(1:size(self%metallicityTable))
     return
   end function metallicitySplitMetallicityBoundaries
+
+  logical function metallicitySplitRangeIsSufficient(self,starFormationHistory,rangeHistory) result(rangeIsSufficient)
+    !!{
+    Return true if the range of this history is sufficient.
+    !!}
+    use :: Error, only : Error_Report
+    implicit none
+    class(starFormationHistoryMetallicitySplit), intent(inout) :: self
+    type (history                             ), intent(in   ) :: starFormationHistory, rangeHistory
+    !$GLC attributes unused :: self
+
+    if (.not.starFormationHistory%exists())                                             &
+         & call Error_Report(                                                           &
+         &                   'no star formation history has been created in spheroid'// &
+         &                   {introspection:location}                                   &
+         &                  )
+   rangeIsSufficient= rangeHistory%time(                      1) >= starFormationHistory%time(                              1) &
+        &            .and.                                                                                                     &
+        &             rangeHistory%time(size(rangeHistory%time)) <= starFormationHistory%time(size(starFormationHistory%time))
+   return
+  end function metallicitySplitRangeIsSufficient
+
+  subroutine metallicitySplitExtend(self,starFormationHistory,times)
+    !!{
+    Extend this history to span a sufficient range.
+    !!}
+    implicit none
+    class           (starFormationHistoryMetallicitySplit), intent(inout)               :: self
+    type            (history                             ), intent(inout)               :: starFormationHistory
+    double precision                                      , intent(in   ), dimension(:) :: times
+    
+    call starFormationHistory%extend(times=times)
+    return
+  end subroutine metallicitySplitExtend

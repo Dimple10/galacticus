@@ -1,5 +1,5 @@
 !! Copyright 2009, 2010, 2011, 2012, 2013, 2014, 2015, 2016, 2017, 2018,
-!!           2019, 2020, 2021, 2022, 2023
+!!           2019, 2020, 2021, 2022, 2023, 2024
 !!    Andrew Benson <abenson@carnegiescience.edu>
 !!
 !! This file is part of Galacticus.
@@ -21,10 +21,8 @@
   Implementation of an ``equilibrium'' solver for galactic structure.
   !!}
 
-  use :: Dark_Matter_Profiles    , only : darkMatterProfileClass
   use :: Dark_Matter_Profiles_DMO, only : darkMatterProfileDMOClass
   use :: Dark_Matter_Halo_Scales , only : darkMatterHaloScaleClass
-  use :: Galactic_Structure      , only : galacticStructureClass
 
   !![
   <galacticStructureSolver name="galacticStructureSolverEquilibrium">
@@ -40,9 +38,7 @@
           &                                                  solveForInactiveProperties          , convergenceFailureIsFatal
      double precision                                     :: solutionTolerance
      class           (darkMatterHaloScaleClass ), pointer :: darkMatterHaloScale_       => null()
-     class           (darkMatterProfileClass   ), pointer :: darkMatterProfile_         => null()
      class           (darkMatterProfileDMOClass), pointer :: darkMatterProfileDMO_      => null()
-     class           (galacticStructureClass   ), pointer :: galacticStructure_         => null()
    contains
      final     ::             equilibriumDestructor
      procedure :: solve    => equilibriumSolve
@@ -78,9 +74,7 @@ contains
     type            (galacticStructureSolverEquilibrium)                :: self
     type            (inputParameters                   ), intent(inout) :: parameters
     class           (darkMatterHaloScaleClass          ), pointer       :: darkMatterHaloScale_
-    class           (darkMatterProfileClass            ), pointer       :: darkMatterProfile_
     class           (darkMatterProfileDMOClass         ), pointer       :: darkMatterProfileDMO_
-    class           (galacticStructureClass            ), pointer       :: galacticStructure_
     logical                                                             :: useFormationHalo          , includeBaryonGravity     , &
          &                                                                 solveForInactiveProperties, convergenceFailureIsFatal
     double precision                                                    :: solutionTolerance
@@ -117,22 +111,18 @@ contains
       <source>parameters</source>
     </inputParameter>
     <objectBuilder class="darkMatterHaloScale"  name="darkMatterHaloScale_"  source="parameters"/>
-    <objectBuilder class="darkMatterProfile"    name="darkMatterProfile_"    source="parameters"/>
     <objectBuilder class="darkMatterProfileDMO" name="darkMatterProfileDMO_" source="parameters"/>
-    <objectBuilder class="galacticStructure"    name="galacticStructure_"    source="parameters"/>
     !!]
-    self=galacticStructureSolverEquilibrium(convergenceFailureIsFatal,useFormationHalo,includeBaryonGravity,solutionTolerance,solveForInactiveProperties,darkMatterHaloScale_,darkMatterProfile_,darkMatterProfileDMO_,galacticStructure_)
+    self=galacticStructureSolverEquilibrium(convergenceFailureIsFatal,useFormationHalo,includeBaryonGravity,solutionTolerance,solveForInactiveProperties,darkMatterHaloScale_,darkMatterProfileDMO_)
     !![
     <inputParametersValidate source="parameters"/>
     <objectDestructor name="darkMatterHaloScale_" />
-    <objectDestructor name="darkMatterProfile_"   />
     <objectDestructor name="darkMatterProfileDMO_"/>
-    <objectDestructor name="galacticStructure_"   />
     !!]
     return
   end function equilibriumConstructorParameters
 
-  function equilibriumConstructorInternal(convergenceFailureIsFatal,useFormationHalo,includeBaryonGravity,solutionTolerance,solveForInactiveProperties,darkMatterHaloScale_,darkMatterProfile_,darkMatterProfileDMO_,galacticStructure_) result(self)
+  function equilibriumConstructorInternal(convergenceFailureIsFatal,useFormationHalo,includeBaryonGravity,solutionTolerance,solveForInactiveProperties,darkMatterHaloScale_,darkMatterProfileDMO_) result(self)
     !!{
     Internal constructor for the {\normalfont \ttfamily equilibrium} galactic structure solver class.
     !!}
@@ -142,11 +132,9 @@ contains
          &                                                                         solveForInactiveProperties, convergenceFailureIsFatal
     double precision                                    , intent(in   )         :: solutionTolerance
     class           (darkMatterHaloScaleClass          ), intent(in   ), target :: darkMatterHaloScale_
-    class           (darkMatterProfileClass            ), intent(in   ), target :: darkMatterProfile_
     class           (darkMatterProfileDMOClass         ), intent(in   ), target :: darkMatterProfileDMO_
-    class           (galacticStructureClass            ), intent(in   ), target :: galacticStructure_
     !![
-    <constructorAssign variables="convergenceFailureIsFatal, useFormationHalo, includeBaryonGravity, solutionTolerance, solveForInactiveProperties, *darkMatterHaloScale_, *darkMatterProfile_, *darkMatterProfileDMO_, *galacticStructure_"/>
+    <constructorAssign variables="convergenceFailureIsFatal, useFormationHalo, includeBaryonGravity, solutionTolerance, solveForInactiveProperties, *darkMatterHaloScale_, *darkMatterProfileDMO_"/>
     !!]
 
     return
@@ -180,9 +168,7 @@ contains
 
     !![
     <objectDestructor name="self%darkMatterHaloScale_" />
-    <objectDestructor name="self%darkMatterProfile_"   />
     <objectDestructor name="self%darkMatterProfileDMO_"/>
-    <objectDestructor name="self%galacticStructure_"   />
     !!]
     if (  preDerivativeEvent%isAttached(self,equilibriumSolvePreDeriativeHook)) call   preDerivativeEvent%detach(self,equilibriumSolvePreDeriativeHook)
     if (     postEvolveEvent%isAttached(self,equilibriumSolveHook            )) call      postEvolveEvent%detach(self,equilibriumSolveHook            )
@@ -222,14 +208,14 @@ contains
 
     select type (self)
     type is (galacticStructureSolverEquilibrium)
-       if (propertyType /= propertyTypeInactive .or. self%solveForInactiveProperties) call self%solve(node)
+       call self%solve(node,plausibilityOnly=propertyType == propertyTypeInactive .and. .not.self%solveForInactiveProperties)
     class default
        call Error_Report('incorrect class'//{introspection:location})
     end select
     return
   end subroutine equilibriumSolvePreDeriativeHook
 
-  subroutine equilibriumSolve(self,node)
+  subroutine equilibriumSolve(self,node,plausibilityOnly)
     !!{
     Solve for the structure of galactic components.
     !!}
@@ -239,20 +225,24 @@ contains
     include 'galactic_structure.radius_solver.tasks.modules.inc'
     include 'galactic_structure.radius_solver.plausible.modules.inc'
     implicit none
-    class           (galacticStructureSolverEquilibrium), intent(inout)         :: self
-    type            (treeNode                          ), intent(inout), target :: node
-    logical                                             , parameter             :: specificAngularMomentumRequired=.true.
-    integer                                             , parameter             :: iterationMaximum               =  100
-    procedure       (solverGet                         ), pointer               :: radiusGet                             , velocityGet
-    procedure       (solverSet                         ), pointer               :: radiusSet                             , velocitySet
-    logical                                                                     :: componentActive
-    double precision                                                            :: specificAngularMomentum
-
+    class           (galacticStructureSolverEquilibrium), intent(inout)           :: self
+    type            (treeNode                          ), intent(inout), target   :: node
+    logical                                             , intent(in   ), optional :: plausibilityOnly
+    logical                                             , parameter               :: specificAngularMomentumRequired=.true.
+    integer                                             , parameter               :: iterationMaximum               =  100
+    procedure       (solverGet                         ), pointer                 :: radiusGet                             , velocityGet
+    procedure       (solverSet                         ), pointer                 :: radiusSet                             , velocitySet
+    logical                                                                       :: componentActive
+    double precision                                                              :: specificAngularMomentum
+    !![
+    <optionalArgument name="plausibilityOnly" defaultsTo=".false."/>
+    !!]
+    
     ! Check that the galaxy is physical plausible. In this equilibrium solver, we don't act on this.
     node%isPhysicallyPlausible=.true.
     node%isSolvable           =.true.
     include 'galactic_structure.radius_solver.plausible.inc'
-    if (node%isPhysicallyPlausible) then
+    if (node%isPhysicallyPlausible .and. .not.plausibilityOnly_) then
        ! Initialize the solver state.
        countIterations=0
        fitMeasure    =2.0d0*self%solutionTolerance
@@ -264,7 +254,7 @@ contains
           node_ => node
        end if
        ! Begin iteration to find a converged solution.
-       do while (countIterations <= 2 .or. ( fitMeasure > self%solutionTolerance .and. countIterations < iterationMaximum ) )
+       do while (countIterations <= 1 .or. ( fitMeasure > self%solutionTolerance .and. countIterations < iterationMaximum ) )
           countIterations      =countIterations+1
           countComponentsActive=0
           if (countIterations > 1) fitMeasure=0.0d0
@@ -300,31 +290,33 @@ contains
       Solve for the equilibrium radius of the given component.
       !!}
       use :: Display                         , only : displayVerbosity               , displayVerbositySet, verbosityLevelStandard
-      use :: Galactic_Structure_Options      , only : massTypeBaryonic               , radiusLarge
+      use :: Galactic_Structure_Options      , only : massTypeBaryonic               , radiusLarge        , massTypeDark          , componentTypeDarkHalo
+      use :: Mass_Distributions              , only : massDistributionClass
       use :: Error                           , only : Error_Report
       use :: ISO_Varying_String              , only : varying_string
       use :: Numerical_Constants_Astronomical, only : gravitationalConstantGalacticus
       use :: String_Handling                 , only : operator(//)
       implicit none
-      type            (treeNode          ), intent(inout)                     :: node
-      double precision                    , intent(in   )                     :: specificAngularMomentum
-      procedure       (solverGet         ), intent(in   ) , pointer           :: radiusGet                         , velocityGet
-      procedure       (solverSet         ), intent(in   ) , pointer           :: radiusSet                         , velocitySet
-      double precision                    , dimension(:,:), allocatable, save :: radiusHistory
+      type            (treeNode             ), intent(inout)                     :: node
+      double precision                       , intent(in   )                     :: specificAngularMomentum
+      procedure       (solverGet            ), intent(in   ) , pointer           :: radiusGet                         , velocityGet
+      procedure       (solverSet            ), intent(in   ) , pointer           :: radiusSet                         , velocitySet
+      double precision                       , dimension(:,:), allocatable, save :: radiusHistory
       !$omp threadprivate(radiusHistory)
-      double precision                    , dimension(:,:), allocatable       :: radiusHistoryTemporary
-      double precision                    , dimension(:  ), allocatable       :: radiusStoredTmp                   , velocityStoredTmp
-      integer                             , parameter                         :: storeIncrement                 =10
-      integer                             , parameter                         :: iterationsForBisectionMinimum  =10
-      integer                             , parameter                         :: activeComponentMaximumIncrement= 2
-      integer                                                                 :: activeComponentMaximumCurrent
-      character       (len=14            )                                    :: label
-      type            (varying_string    ), save                              :: message
+      double precision                       , dimension(:,:), allocatable       :: radiusHistoryTemporary
+      double precision                       , dimension(:  ), allocatable       :: radiusStoredTmp                   , velocityStoredTmp
+      class           (massDistributionClass), pointer                           :: massDistribution_
+      integer                                , parameter                         :: storeIncrement                 =10
+      integer                                , parameter                         :: iterationsForBisectionMinimum  =10
+      integer                                , parameter                         :: activeComponentMaximumIncrement= 2
+      integer                                                                    :: activeComponentMaximumCurrent
+      character       (len=14               )                                    :: label
+      type            (varying_string       ), save                              :: message
       !$omp threadprivate(message)
-      double precision                                                        :: baryonicVelocitySquared           , darkMatterMassFinal, &
-           &                                                                     darkMatterVelocitySquared         , velocity           , &
-           &                                                                     radius                            , radiusNew          , &
-           &                                                                     specificAngularMomentumMaximum
+      double precision                                                           :: baryonicVelocitySquared           , darkMatterMassFinal, &
+           &                                                                        darkMatterVelocitySquared         , velocity           , &
+           &                                                                        radius                            , radiusNew          , &
+           &                                                                        specificAngularMomentumMaximum
 
       ! Count the number of active components.
       countComponentsActive=countComponentsActive+1
@@ -339,18 +331,22 @@ contains
          radius=radiusGet(node)
          if (radius <= 0.0d0) then
             ! No previous radius was set, so make a simple estimate of sizes of all components ignoring equilibrium contraction and self-gravity.
+            massDistribution_ => self%darkMatterProfileDMO_%get(node)
             ! First check that there is a solution within a reasonable radius.
-            specificAngularMomentumMaximum=+self%darkMatterProfileDMO_%circularVelocity(node_,radiusLarge) & 
-                 &                         *                                                  radiusLarge
+            specificAngularMomentumMaximum=+massDistribution_%rotationCurve(radiusLarge) &
+                 &                         *                                radiusLarge
             if (specificAngularMomentumMaximum < specificAngularMomentum) then
                ! No solution exists even within a very large radius. Use a simple estimate of the virial radius.
                radius=self%darkMatterHaloScale_%radiusVirial                      (node_                        )
             else
-               ! Find the radius in the dark matter profile with the required specific angular momentum
-               radius=self%darkMatterProfileDMO_%radiusFromSpecificAngularMomentum(node_,specificAngularMomentum)
+               ! Find the radius in the dark matter profile with the required specific angular momentum.
+               radius=massDistribution_%radiusFromSpecificAngularMomentum(specificAngularMomentum)
             end if
             ! Find the velocity at this radius.
-            velocity=self%darkMatterProfileDMO_%circularVelocity                  (node_,radius                 )
+            velocity=massDistribution_%rotationCurve(radius)
+            !![
+            <objectDestructor name="massDistribution_"/>
+            !!]
          else
             ! A previous radius was set, so use it, and the previous circular velocity, as the initial guess.
             velocity=velocityGet(node)
@@ -378,18 +374,26 @@ contains
             radiusStored  (countComponentsActive)=radius
             velocityStored(countComponentsActive)=velocity
          end if
-       else
+      else
          ! On subsequent iterations do the full calculation providing component has non-zero specific angular momentum.
          if (specificAngularMomentum <= 0.0d0) return
          ! Get current radius of the component.
-         radius                   =radiusGet(node)
+         radius=radiusGet(node)
          ! Find the enclosed mass in the dark matter halo.
-         darkMatterMassFinal      =self%darkMatterProfile_%enclosedMass(node_,radius)
+         massDistribution_   => node             %massDistribution    (componentTypeDarkHalo,massTypeDark)
+         darkMatterMassFinal =  massDistribution_%massEnclosedBySphere(radius                            )
+         !![
+	 <objectDestructor name="massDistribution_"/>
+         !!]
          ! Compute dark matter contribution to rotation curve.
          darkMatterVelocitySquared=gravitationalConstantGalacticus*darkMatterMassFinal/radius
          ! Compute baryonic contribution to rotation curve.
          if (self%includeBaryonGravity) then
-            baryonicVelocitySquared=self%galacticStructure_%velocityRotation(node,radius,massType=massTypeBaryonic)**2
+            massDistribution_       => node             %massDistribution(massType=massTypeBaryonic)
+            baryonicVelocitySquared =  massDistribution_%rotationCurve   (         radius          )**2
+            !![
+	    <objectDestructor name="massDistribution_"/>
+	    !!]
          else
             baryonicVelocitySquared=0.0d0
          end if

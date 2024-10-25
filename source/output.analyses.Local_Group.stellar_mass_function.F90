@@ -1,5 +1,5 @@
 !! Copyright 2009, 2010, 2011, 2012, 2013, 2014, 2015, 2016, 2017, 2018,
-!!           2019, 2020, 2021, 2022, 2023
+!!           2019, 2020, 2021, 2022, 2023, 2024
 !!    Andrew Benson <abenson@carnegiescience.edu>
 !!
 !! This file is part of Galacticus.
@@ -39,7 +39,6 @@
      private
      type            (outputAnalysisVolumeFunction1D), pointer                     :: volumeFunctionSatellites          => null(), volumeFunctionCentrals => null()
      class           (outputTimesClass              ), pointer                     :: outputTimes_                      => null()
-     class           (galacticStructureClass        ), pointer                     :: galacticStructure_                => null()
      double precision                                , allocatable, dimension(:  ) :: randomErrorPolynomialCoefficient           , systematicErrorPolynomialCoefficient
      double precision                                , allocatable, dimension(:  ) :: masses                                     , massFunction                        , &
           &                                                                           massFunctionTarget
@@ -80,7 +79,6 @@ contains
     Constructor for the ``localGroupStellarMassFunction'' output analysis class which takes a parameter set as input.
     !!}
     use :: Input_Parameters            , only : inputParameter               , inputParameters
-    use :: Galactic_Structure          , only : galacticStructureClass
     use :: Output_Times                , only : outputTimes                  , outputTimesClass
     use :: Galactic_Filters            , only : enumerationPositionTypeEncode
     use :: Models_Likelihoods_Constants, only : logImprobable
@@ -88,7 +86,6 @@ contains
     type            (outputAnalysisLocalGroupStellarMassFunction)                              :: self
     type            (inputParameters                            ), intent(inout)               :: parameters
     class           (outputTimesClass                           ), pointer                     :: outputTimes_
-    class           (galacticStructureClass                     ), pointer                     :: galacticStructure_
     double precision                                             , allocatable  , dimension(:) :: randomErrorPolynomialCoefficient , systematicErrorPolynomialCoefficient
     integer                                                                                    :: covarianceBinomialBinsPerDecade
     double precision                                                                           :: covarianceBinomialMassHaloMinimum, covarianceBinomialMassHaloMaximum   , &
@@ -176,10 +173,9 @@ contains
       <defaultValue>logImprobable</defaultValue>
       <description>The log-likelihood to assign to bins where the model expectation is zero.</description>
     </inputParameter>
-    <objectBuilder class="outputTimes"       name="outputTimes_"       source="parameters"/>
-    <objectBuilder class="galacticStructure" name="galacticStructure_" source="parameters"/>
+    <objectBuilder class="outputTimes" name="outputTimes_" source="parameters"/>
     !!]
-    self=outputAnalysisLocalGroupStellarMassFunction(outputTimes_,galacticStructure_,enumerationPositionTypeEncode(positionType,includesPrefix=.false.),negativeBinomialScatterFractional,randomErrorMinimum,randomErrorMaximum,randomErrorPolynomialCoefficient,systematicErrorPolynomialCoefficient,covarianceBinomialBinsPerDecade,covarianceBinomialMassHaloMinimum,covarianceBinomialMassHaloMaximum,logLikelihoodZero)
+    self=outputAnalysisLocalGroupStellarMassFunction(outputTimes_,enumerationPositionTypeEncode(positionType,includesPrefix=.false.),negativeBinomialScatterFractional,randomErrorMinimum,randomErrorMaximum,randomErrorPolynomialCoefficient,systematicErrorPolynomialCoefficient,covarianceBinomialBinsPerDecade,covarianceBinomialMassHaloMinimum,covarianceBinomialMassHaloMaximum,logLikelihoodZero)
     !![
     <inputParametersValidate source="parameters"/>
     <objectDestructor name="outputTimes_"/>
@@ -187,7 +183,7 @@ contains
     return
   end function localGroupStellarMassFunctionConstructorParameters
 
-  function localGroupStellarMassFunctionConstructorInternal(outputTimes_,galacticStructure_,positionType,negativeBinomialScatterFractional,randomErrorMinimum,randomErrorMaximum,randomErrorPolynomialCoefficient,systematicErrorPolynomialCoefficient,covarianceBinomialBinsPerDecade,covarianceBinomialMassHaloMinimum,covarianceBinomialMassHaloMaximum,logLikelihoodZero) result (self)
+  function localGroupStellarMassFunctionConstructorInternal(outputTimes_,positionType,negativeBinomialScatterFractional,randomErrorMinimum,randomErrorMaximum,randomErrorPolynomialCoefficient,systematicErrorPolynomialCoefficient,covarianceBinomialBinsPerDecade,covarianceBinomialMassHaloMinimum,covarianceBinomialMassHaloMaximum,logLikelihoodZero) result (self)
     !!{
     Constructor for the ``localGroupStellarMassFunction'' output analysis class for internal use.
     !!}
@@ -217,7 +213,6 @@ contains
     double precision                                                     , intent(in   ), dimension(:  ) :: randomErrorPolynomialCoefficient                          , systematicErrorPolynomialCoefficient
     type            (enumerationPositionTypeType                        ), intent(in   )                 :: positionType
     class           (outputTimesClass                                   ), intent(inout), target         :: outputTimes_
-    class           (galacticStructureClass                             ), intent(in   ), target         :: galacticStructure_
     type            (nodePropertyExtractorMassStellar                   )               , pointer        :: nodePropertyExtractor_
     type            (outputAnalysisPropertyOperatorSystmtcPolynomial    )               , pointer        :: outputAnalysisPropertyOperatorSystmtcPolynomial_
     type            (outputAnalysisPropertyOperatorLog10                )               , pointer        :: outputAnalysisPropertyOperatorLog10_
@@ -251,7 +246,7 @@ contains
          &                                                                                                  bufferCountSatellites
     type            (localGroupDB                                       )                                :: localGroupDB_
     !![
-    <constructorAssign variables="*outputTimes_, *galacticStructure_, positionType, negativeBinomialScatterFractional, randomErrorMinimum, randomErrorMaximum, randomErrorPolynomialCoefficient, systematicErrorPolynomialCoefficient, covarianceBinomialBinsPerDecade, covarianceBinomialMassHaloMinimum, covarianceBinomialMassHaloMaximum, logLikelihoodZero"/>
+    <constructorAssign variables="*outputTimes_, positionType, negativeBinomialScatterFractional, randomErrorMinimum, randomErrorMaximum, randomErrorPolynomialCoefficient, systematicErrorPolynomialCoefficient, covarianceBinomialBinsPerDecade, covarianceBinomialMassHaloMinimum, covarianceBinomialMassHaloMaximum, logLikelihoodZero"/>
     !!]
 
     ! Initialize.
@@ -284,7 +279,7 @@ contains
     ! Create a stellar mass property extractor.
     allocate(nodePropertyExtractor_                )
     !![
-    <referenceConstruct object="nodePropertyExtractor_"                           constructor="nodePropertyExtractorMassStellar               (galacticStructure_                                 )"/>
+    <referenceConstruct object="nodePropertyExtractor_"                           constructor="nodePropertyExtractorMassStellar               (                                                   )"/>
     !!]
     ! Create property operators and unoperators to perform conversion to/from logarithmic mass.
     allocate(outputAnalysisPropertyOperatorLog10_            )
@@ -497,6 +492,7 @@ contains
     <objectDestructor name="galacticFilterHostMassRange_"                    />
     <objectDestructor name="galacticFilterCentrals_"                         />
     <objectDestructor name="galacticFilterSatellites_"                       />
+    <objectDestructor name="galacticFilterSurveyGeometry_"                   />
     <objectDestructor name="outputAnalysisDistributionNormalizerSatellites_" />
     <objectDestructor name="outputAnalysisDistributionNormalizerCentrals_"   />
     <objectDestructor name="surveyGeometryClassical_"                        />
@@ -522,7 +518,6 @@ contains
     <objectDestructor name="self%volumeFunctionSatellites"/>
     <objectDestructor name="self%volumeFunctionCentrals"  />
     <objectDestructor name="self%outputTimes_"            />
-    <objectDestructor name="self%galacticStructure_"      />
     !!]
     return
   end subroutine localGroupStellarMassFunctionDestructor
@@ -597,7 +592,7 @@ contains
     return
   end subroutine localGroupStellarMassFunctionFinalizeAnalysis
 
-  subroutine localGroupStellarMassFunctionFinalize(self)
+  subroutine localGroupStellarMassFunctionFinalize(self,groupName)
     !!{
     Implement a {\normalfont \ttfamily localGroupStellarMassFunction} output analysis finalization.
     !!}
@@ -606,15 +601,22 @@ contains
     use :: IO_HDF5                         , only : hdf5Object
     use :: Numerical_Constants_Astronomical, only : massSolar
     implicit none
-    class(outputAnalysisLocalGroupStellarMassFunction), intent(inout) :: self
-    type (hdf5Object                                 )                :: analysesGroup, analysisGroup, &
-         &                                                               dataset
+    class(outputAnalysisLocalGroupStellarMassFunction), intent(inout)           :: self
+    type (varying_string                             ), intent(in   ), optional :: groupName
+    type (hdf5Object                                 )               , target   :: analysesGroup, subGroup
+    type (hdf5Object                                 )               , pointer  :: inGroup
+    type (hdf5Object                                 )                          :: analysisGroup, dataset
 
     ! Finalize analysis.
     call self%finalizeAnalysis()
     !$ call hdf5Access%set()
-    analysesGroup=outputFile   %openGroup('analyses'                                                                                            )
-    analysisGroup=analysesGroup%openGroup('localGroupStellarMassFunction','Analysis of stellar mass functions of Local Group satellite galaxies')
+    analysesGroup =  outputFile   %openGroup('analyses'                         )
+    inGroup       => analysesGroup
+    if (present(groupName)) then
+       subGroup   =  analysesGroup%openGroup(char(groupName)                    )
+       inGroup    => subGroup
+    end if
+    analysisGroup=inGroup%openGroup('localGroupStellarMassFunction','Analysis of stellar mass functions of Local Group satellite galaxies')
     call analysisGroup%writeAttribute('Local Group stellar mass function','description'                                                                                  )
     call analysisGroup%writeAttribute('function1D'                       ,'type'                                                                                         )
     call analysisGroup%writeAttribute('$M_\star\,[\mathrm{M}_\odot]$'    ,'xAxisLabel'                                                                                   )
@@ -635,6 +637,8 @@ contains
     call analysisGroup%writeDataset  (self%massFunctionTarget            ,'massFunctionTarget'    ,'Satellite number per bin [observed]'                                 )
     call analysisGroup%writeAttribute(self%logLikelihood     ()          ,'logLikelihood'                                                                                )
     call analysisGroup%close         (                                                                                                                                   )
+    if (present(groupName)) &
+         & call subGroup%close       (                                                                                                                                   )
     call analysesGroup%close         (                                                                                                                                   )
     !$ call hdf5Access%unset()
     return
@@ -648,12 +652,14 @@ contains
     \protect\citealt{lu_connection_2016}]{boylan-kolchin_theres_2010}. This has been confirmed by examining the results of many
     tree realizations, although it in principal could be model-dependent.
     !!}
+    use :: Numerical_Constants_Math         , only : Pi
     use :: Statistics_Distributions_Discrete, only : distributionFunctionDiscrete1DNegativeBinomial
     implicit none
     class           (outputAnalysisLocalGroupStellarMassFunction   ), intent(inout) :: self
     type            (distributionFunctionDiscrete1DNegativeBinomial)                :: distribution
     integer                                                                         :: i
-    double precision                                                                :: negativeBinomialProbabilitySuccess
+    double precision                                                                :: negativeBinomialProbabilitySuccess, countEffective, &
+         &                                                                             variance
 
     call self%finalizeAnalysis()
     localGroupStellarMassFunctionLogLikelihood=0.0d0
@@ -669,11 +675,28 @@ contains
                &                               )
           if (negativeBinomialProbabilitySuccess >= 1.0d0) then
              if (nint(self%massFunctionTarget(i)) > 0) localGroupStellarMassFunctionLogLikelihood=+localGroupStellarMassFunctionLogLikelihood &
-                  &                                                                        +self%logLikelihoodZero
+                  &                                                                               +self%logLikelihoodZero
           else
+             ! Compute the likelihood assuming a negative binomial distribution. Note that we "de-normalize" the likelihood by
+             ! multiplying by √[2πσᵢ²] (the normalization term in the corresponding normal distribution). This is useful to allow
+             ! (-logℒ) to be used as a metric for significant shifts in the model results, without changing the relative
+             ! likelihood of models (as this de-normalization shift is a constant multiplicative factor).
+             countEffective                            = dble(max(1.0d0,self%massFunctionTarget(i)))
+             variance                                  =+       countEffective                       &
+                  &                                     *(                                           &
+                  &                                       +     1.0d0                                &
+                  &                                       +self%negativeBinomialScatterFractional**2 &
+                  &                                       *     countEffective                       &
+                  &                                      )
              distribution                              = distributionFunctionDiscrete1DNegativeBinomial                (negativeBinomialProbabilitySuccess,     self%countFailures         )
              localGroupStellarMassFunctionLogLikelihood=+localGroupStellarMassFunctionLogLikelihood                                                                                          &
-                  &                                     +distribution                                  %massLogarithmic(                                   nint(self%massFunctionTarget(i)))
+                  &                                     +distribution                                  %massLogarithmic(                                   nint(self%massFunctionTarget(i))) &
+                  &                                     +0.50d0                                                                                                                              &
+                  &                                     *log(                                                                                                                                &
+                  &                                          +2.0d0                                                                                                                          &
+                  &                                          *Pi                                                                                                                             &
+                  &                                          *variance                                                                                                                       &
+                  &                                         )
           end if
        end if
     end do

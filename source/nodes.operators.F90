@@ -1,5 +1,5 @@
 !! Copyright 2009, 2010, 2011, 2012, 2013, 2014, 2015, 2016, 2017, 2018,
-!!           2019, 2020, 2021, 2022, 2023
+!!           2019, 2020, 2021, 2022, 2023, 2024
 !!    Andrew Benson <abenson@carnegiescience.edu>
 !!
 !! This file is part of Galacticus.
@@ -18,7 +18,7 @@
 !!    along with Galacticus.  If not, see <http://www.gnu.org/licenses/>.
 
 !!{
-Contains a module which provieds a class that implements physical processes.
+Contains a module which provides a class that implements physical processes.
 !!}
 
 module Nodes_Operators
@@ -43,6 +43,7 @@ module Nodes_Operators
       </description>
       <type>void</type>
       <pass>yes</pass>
+      <selfTarget>yes</selfTarget>
       <argument>type(treeNode), intent(inout), target :: node</argument>
       <code>
 	!$GLC attributes unused :: self, node
@@ -131,7 +132,7 @@ module Nodes_Operators
       <type>void</type>
       <pass>yes</pass>
       <selfTarget>yes</selfTarget>
-      <argument>type     (treeNode     ), intent(inout)          :: node             </argument>
+      <argument>type     (treeNode     ), intent(inout), target  :: node             </argument>
       <argument>logical                 , intent(inout)          :: interrupt        </argument>
       <argument>procedure(interruptTask), intent(inout), pointer :: functionInterrupt</argument>
       <argument>integer                 , intent(in   )          :: propertyType     </argument>
@@ -139,7 +140,7 @@ module Nodes_Operators
 	!$GLC attributes unused :: self, node, interrupt, functionInterrupt, propertyType
       </code>
     </method>
-     <method name="differentialEvolutionSolveAnalytics" >
+    <method name="differentialEvolutionSolveAnalytics" >
       <description>Set the values of analytically-solvable properties of a node during differential evolution.</description>
       <type>void</type>
       <pass>yes</pass>
@@ -149,7 +150,17 @@ module Nodes_Operators
 	!$GLC attributes unused :: self, node, time
       </code>
     </method>
-   <method name="differentialEvolutionStepFinalState" >
+    <method name="predeterminedSolveAnalytics" >
+      <description>Set the values of analytically-solvable pre-determined properties of a node.</description>
+      <type>void</type>
+      <pass>yes</pass>
+      <argument>type            (treeNode), intent(inout) :: node</argument>
+      <argument>double precision          , intent(in   ) :: time</argument>
+      <code>
+	!$GLC attributes unused :: self, node, time
+      </code>
+    </method>
+    <method name="differentialEvolutionStepFinalState" >
       <description>Operate on a node at the end of an ODE step.</description>
       <type>void</type>
       <pass>yes</pass>

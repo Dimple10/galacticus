@@ -1,5 +1,5 @@
 !! Copyright 2009, 2010, 2011, 2012, 2013, 2014, 2015, 2016, 2017, 2018,
-!!           2019, 2020, 2021, 2022, 2023
+!!           2019, 2020, 2021, 2022, 2023, 2024
 !!    Andrew Benson <abenson@carnegiescience.edu>
 !!
 !! This file is part of Galacticus.
@@ -39,8 +39,9 @@ Implements a stellar population spectra postprocessor class which applies a sequ
      private
      type(postprocessorList), pointer :: postprocessors => null()
    contains
-     final     ::               sequenceDestructor
-     procedure :: multiplier => sequenceMultiplier
+     final     ::                        sequenceDestructor
+     procedure :: multiplier          => sequenceMultiplier
+     procedure :: isRedshiftDependent => sequenceIsRedshiftDependent
   end type stellarPopulationSpectraPostprocessorSequence
 
   interface stellarPopulationSpectraPostprocessorSequence
@@ -145,3 +146,23 @@ contains
     end do
     return
   end function sequenceMultiplier
+
+  logical function sequenceIsRedshiftDependent(self) result(isRedshiftDependent)
+    !!{
+    Return true if the postprocessor is redshift dependent.
+    !!}
+    implicit none
+    class(stellarPopulationSpectraPostprocessorSequence), intent(inout) :: self
+    type(postprocessorList                             ), pointer       :: postprocessor_
+
+    isRedshiftDependent =  .false.
+    postprocessor_      => self%postprocessors
+    do while (associated(postprocessor_))
+       if (postprocessor_%postprocessor_%isRedshiftDependent()) then
+          isRedshiftDependent=.true.
+          return
+       end if
+       postprocessor_ => postprocessor_%next
+    end do
+    return
+  end function sequenceIsRedshiftDependent

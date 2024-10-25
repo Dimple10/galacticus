@@ -1,5 +1,5 @@
 !! Copyright 2009, 2010, 2011, 2012, 2013, 2014, 2015, 2016, 2017, 2018,
-!!           2019, 2020, 2021, 2022, 2023
+!!           2019, 2020, 2021, 2022, 2023, 2024
 !!    Andrew Benson <abenson@carnegiescience.edu>
 !!
 !! This file is part of Galacticus.
@@ -76,13 +76,14 @@ contains
     return
   end subroutine nullAnalyze
 
-  subroutine nullFinalize(self)
+  subroutine nullFinalize(self,groupName)
     !!{
     Implement a null output analysis finalization.
     !!}
     implicit none
-    class(outputAnalysisNull), intent(inout) :: self
-    !$GLC attributes unused :: self
+    class(outputAnalysisNull), intent(inout)           :: self
+    type (varying_string    ), intent(in   ), optional :: groupName
+    !$GLC attributes unused :: self, groupName
 
     return
   end subroutine nullFinalize

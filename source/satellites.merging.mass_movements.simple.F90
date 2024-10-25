@@ -1,5 +1,5 @@
 !! Copyright 2009, 2010, 2011, 2012, 2013, 2014, 2015, 2016, 2017, 2018,
-!!           2019, 2020, 2021, 2022, 2023
+!!           2019, 2020, 2021, 2022, 2023, 2024
 !!    Andrew Benson <abenson@carnegiescience.edu>
 !!
 !! This file is part of Galacticus.
@@ -21,8 +21,7 @@
   Implements a merger mass movements class which uses a simple calculation.
   !!}
 
-  use :: Kind_Numbers      , only : kind_int8
-  use :: Galactic_Structure, only : galacticStructureClass
+  use :: Kind_Numbers, only : kind_int8
 
   !![
   <mergerMassMovements name="mergerMassMovementsSimple">
@@ -45,13 +44,12 @@
      A merger mass movements class which uses a simple calculation.
      !!}
      private
-     class           (galacticStructureClass          ), pointer :: galacticStructure_        => null()
-     double precision                                            :: massRatioMajorMerger
-     type            (enumerationDestinationMergerType)          :: destinationGasMinorMerger          , destinationStarsMinorMerger
-     integer         (kind=kind_int8                  )          :: lastUniqueID
-     type            (enumerationDestinationMergerType)          :: destinationGasSatellite            , destinationStarsSatellite  , &
-          &                                                         destinationGasHost                 , destinationStarsHost
-     logical                                                     :: mergerIsMajor                      , movementsCalculated
+     double precision                                   :: massRatioMajorMerger
+     type            (enumerationDestinationMergerType) :: destinationGasMinorMerger, destinationStarsMinorMerger
+     integer         (kind=kind_int8                  ) :: lastUniqueID
+     type            (enumerationDestinationMergerType) :: destinationGasSatellite  , destinationStarsSatellite  , &
+          &                                                destinationGasHost       , destinationStarsHost
+     logical                                            :: mergerIsMajor            , movementsCalculated
    contains
      final     ::             simpleDestructor
      procedure :: autoHook => simpleAutoHook
@@ -76,7 +74,6 @@ contains
     implicit none
     type            (mergerMassMovementsSimple)                :: self
     type            (inputParameters          ), intent(inout) :: parameters
-    class           (galacticStructureClass   ), pointer       :: galacticStructure_
     double precision                                           :: massRatioMajorMerger
     type            (varying_string           )                :: destinationGasMinorMerger, destinationStarsMinorMerger
 
@@ -99,27 +96,24 @@ contains
       <description>The component to which satellite galaxy stars move to as a result of a minor merger.</description>
       <source>parameters</source>
     </inputParameter>
-    <objectBuilder class="galacticStructure" name="galacticStructure_" source="parameters"/>
     !!]
-    self=mergerMassMovementsSimple(massRatioMajorMerger,enumerationDestinationMergerEncode(char(destinationGasMinorMerger),includesPrefix=.false.),enumerationDestinationMergerEncode(char(destinationStarsMinorMerger),includesPrefix=.false.),galacticStructure_)
+    self=mergerMassMovementsSimple(massRatioMajorMerger,enumerationDestinationMergerEncode(char(destinationGasMinorMerger),includesPrefix=.false.),enumerationDestinationMergerEncode(char(destinationStarsMinorMerger),includesPrefix=.false.))
     !![
     <inputParametersValidate source="parameters"/>
-    <objectDestructor name="galacticStructure_"/>
     !!]
     return
   end function simpleConstructorParameters
 
-  function simpleConstructorInternal(massRatioMajorMerger,destinationGasMinorMerger,destinationStarsMinorMerger,galacticStructure_) result(self)
+  function simpleConstructorInternal(massRatioMajorMerger,destinationGasMinorMerger,destinationStarsMinorMerger) result(self)
     !!{
     Internal constructor for the {\normalfont \ttfamily simple} merger mass movements class.
     !!}
     implicit none
     type            (mergerMassMovementsSimple       )                        :: self
-    class           (galacticStructureClass          ), intent(in   ), target :: galacticStructure_
     double precision                                  , intent(in   )         :: massRatioMajorMerger
     type            (enumerationDestinationMergerType), intent(in   )         :: destinationGasMinorMerger, destinationStarsMinorMerger
     !![
-    <constructorAssign variables="massRatioMajorMerger, destinationGasMinorMerger, destinationStarsMinorMerger, *galacticStructure_"/>
+    <constructorAssign variables="massRatioMajorMerger, destinationGasMinorMerger, destinationStarsMinorMerger"/>
     !!]
 
     self%lastUniqueID             =-huge(0_kind_int8)
@@ -155,25 +149,25 @@ contains
 
     if (calculationResetEvent%isAttached(self,simpleCalculationReset)) call calculationResetEvent%detach(self,simpleCalculationReset)
     if (satelliteMergerEvent %isAttached(self,simpleGetHook         )) call satelliteMergerEvent %detach(self,simpleGetHook         )
-    !![
-    <objectDestructor name="self%galacticStructure_"/>
-    !!]
     return
   end subroutine simpleDestructor
 
-  subroutine simpleCalculationReset(self,node)
+  subroutine simpleCalculationReset(self,node,uniqueID)
     !!{
     Reset the dark matter profile calculation.
     !!}
-    use :: Error, only : Error_Report
+    use :: Error       , only : Error_Report
+    use :: Kind_Numbers, only : kind_int8
     implicit none
-    class(*       ), intent(inout) :: self
-    type (treeNode), intent(inout) :: node
+    class  (*        ), intent(inout) :: self
+    type   (treeNode ), intent(inout) :: node
+    integer(kind_int8), intent(in   ) :: uniqueID
+    !$GLC attributes unused :: node
 
     select type (self)
     class is (mergerMassMovementsSimple)
        self%movementsCalculated=.false.
-       self%lastUniqueID       =node%uniqueID()
+       self%lastUniqueID       =uniqueID
        class default
        call Error_Report('incorrect class'//{introspection:location})
     end select
@@ -205,28 +199,37 @@ contains
     !!{
     Determine where stars and gas move as the result of a merger event using a simple algorithm.
     !!}
-    use :: Galactic_Structure_Options, only : componentTypeDisk, componentTypeSpheroid, massTypeGalactic
+    use :: Galactic_Structure_Options, only : componentTypeDisk    , componentTypeSpheroid, massTypeGalactic
+    use :: Mass_Distributions        , only : massDistributionClass
     implicit none
     class           (mergerMassMovementsSimple       ), intent(inout)         :: self
     type            (treeNode                        ), intent(inout), target :: node
-    type            (enumerationDestinationMergerType), intent(  out)         :: destinationGasSatellite, destinationGasHost       , &
-         &                                                                       destinationStarsHost   , destinationStarsSatellite
+    type            (enumerationDestinationMergerType), intent(  out)         :: destinationGasSatellite  , destinationGasHost       , &
+         &                                                                       destinationStarsHost     , destinationStarsSatellite
     logical                                           , intent(  out)         :: mergerIsMajor
-    type            (treeNode                        ), pointer               :: nodeHost               , nodeMajor
-    double precision                                                          :: massHost               , massSatellite            , &
-         &                                                                       massSpheroid           , massDisk
+    type            (treeNode                        ), pointer               :: nodeHost                 , nodeMajor
+    class           (massDistributionClass           ), pointer               :: massDistributionSatellite, massDistributionHost     , &
+         &                                                                       massDistributionDisk     , massDistributionSpheroid
+    double precision                                                          :: massHost                 , massSatellite            , &
+         &                                                                       massSpheroid             , massDisk
     type            (enumerationDestinationMergerType)                        :: destinationDominant
 
     ! The calculation of how mass moves as a result of the merger is computed when first needed and then stored. This ensures that
     ! the results are determined by the properties of the merge target prior to any modification that will occur as node
     ! components are modified in response to the merger.
-    if (node%uniqueID() /= self%lastUniqueID) call simpleCalculationReset(self,node)
+    if (node%uniqueID() /= self%lastUniqueID) call simpleCalculationReset(self,node,node%uniqueID())
     if (.not.self%movementsCalculated) then
-       self%movementsCalculated =  .true.
-       nodeHost                 => node%mergesWith()
-       massSatellite            =  self%galacticStructure_%massEnclosed(node    ,massType=massTypeGalactic)
-       massHost                 =  self%galacticStructure_%massEnclosed(nodeHost,massType=massTypeGalactic)
-       self%mergerIsMajor       =  massSatellite > 0.0d0 .and. massHost > 0.0d0 .and. min(massSatellite,massHost) >= self%massRatioMajorMerger*max(massSatellite,massHost)
+       self%movementsCalculated  =  .true.
+       nodeHost                  => node                     %mergesWith      (                         )
+       massDistributionHost      => nodeHost                 %massDistribution(massType=massTypeGalactic)
+       massDistributionSatellite => node                     %massDistribution(massType=massTypeGalactic)
+       massSatellite             =  massDistributionSatellite%massTotal       (                         )
+       massHost                  =  massDistributionHost     %massTotal       (                         )
+       self%mergerIsMajor        =  massSatellite > 0.0d0 .and. massHost > 0.0d0 .and. min(massSatellite,massHost) >= self%massRatioMajorMerger*max(massSatellite,massHost)
+       !![
+       <objectDestructor name="massDistributionHost"     />
+       <objectDestructor name="massDistributionSatellite"/>
+       !!]
        if (self%mergerIsMajor) then
           self%destinationGasSatellite  =     destinationMergerSpheroid
           self%destinationStarsSatellite=     destinationMergerSpheroid
@@ -240,8 +243,14 @@ contains
              else
                 nodeMajor => node
              end if
-             massDisk    =self%galacticStructure_%massEnclosed(nodeMajor,massType=massTypeGalactic,componentType=componentTypeDisk    )
-             massSpheroid=self%galacticStructure_%massEnclosed(nodeMajor,massType=massTypeGalactic,componentType=componentTypeSpheroid)
+             massDistributionDisk     => nodeMajor               %massDistribution(massType=massTypeGalactic,componentType=componentTypeDisk    )
+             massDistributionSpheroid => nodeMajor               %massDistribution(massType=massTypeGalactic,componentType=componentTypeSpheroid)
+             massDisk                 =  massDistributionDisk    %massTotal       (                                                             )
+             massSpheroid             =  massDistributionSpheroid%massTotal       (                                                             )
+             !![
+	     <objectDestructor name="massDistributionDisk"    />
+	     <objectDestructor name="massDistributionSpheroid"/>
+	     !!]
              if (massDisk > massSpheroid) then
                 destinationDominant=destinationMergerDisk
              else
@@ -249,12 +258,12 @@ contains
              end if
           end if
           if (self%destinationGasMinorMerger   == destinationMergerDominant) then
-             self%destinationGasSatellite  =destinationDominant
+             self%destinationGasSatellite  =     destinationDominant
           else
              self%destinationGasSatellite  =self%destinationGasMinorMerger
           end if
           if (self%destinationStarsMinorMerger == destinationMergerDominant) then
-             self%destinationStarsSatellite=destinationDominant
+             self%destinationStarsSatellite=     destinationDominant
           else
              self%destinationStarsSatellite=self%destinationStarsMinorMerger
           end if

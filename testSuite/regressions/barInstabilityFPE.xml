@@ -2,7 +2,7 @@
 <!-- Model which triggered a floating point exception in the Efstathiou et al. disk instability class -->
 <parameters>
   <formatVersion>2</formatVersion>
-  <version>0.9.4</version>
+  <lastModified revision="165490f4968c699f7e5bb73ef60bcb7e626f51e6"/>
   <!-- Task and work control -->
   <task value="evolveForests">
     <walltimeMaximum value="-1"/> 
@@ -163,7 +163,7 @@
     <nodePropertyExtractor value="darkMatterProfileScaleRadius"/>
     <nodePropertyExtractor value="indicesTree"/>
     <nodePropertyExtractor value="nodeIndices"/>
-    <nodePropertyExtractor value="radiusHalfMass"/>
+    <nodePropertyExtractor value="radiusHalfMassStellar"/>
     <!--nodePropertyExtractor value="velocityDispersion">
       <radiusSpecifiers value="stellarMassFraction{0.5}:all:stellar:lineOfSight:1.0"/>
     </nodePropertyExtractor-->
@@ -419,7 +419,6 @@
     <timeStepMinimum value="0.01"/>
     <countTimeStepsMaximum value="390"/>
     <countMetallicities value="0"/>
-    <countOutputBuffer value="100"/>
   </starFormationHistory>
   
   <!-- Numerical tolerances -->

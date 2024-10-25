@@ -1,5 +1,5 @@
 !! Copyright 2009, 2010, 2011, 2012, 2013, 2014, 2015, 2016, 2017, 2018,
-!!           2019, 2020, 2021, 2022, 2023
+!!           2019, 2020, 2021, 2022, 2023, 2024
 !!    Andrew Benson <abenson@carnegiescience.edu>
 !!
 !! This file is part of Galacticus.
@@ -22,7 +22,7 @@
   !!}
   
   !$ use :: OMP_Lib, only : omp_lock_kind
-  use :: Tables , only : table1DLogarithmicLinear
+  use    :: Tables , only : table1DLogarithmicLinear
 
   !![
   <massDistribution name="massDistributionExponentialDisk">
@@ -67,25 +67,30 @@
        <method description="Interpolate in the tabulated gravitational acceleration and/or tidal tensor due to the disk."  method="accelerationInterpolate"          />
      </methods>
      !!]
-     final     ::                                      exponentialDiskDestructor
-     procedure :: tabulate                          => exponentialDiskTabulate
-     procedure :: besselFactorRotationCurve         => exponentialDiskBesselFactorRotationCurve
-     procedure :: besselFactorRotationCurveGradient => exponentialDiskBesselFactorRotationCurveGradient
-     procedure :: besselFactorPotential             => exponentialDiskBesselFactorPotential
-     procedure :: density                           => exponentialDiskDensity
-     procedure :: densitySphericalAverage           => exponentialDiskDensitySphericalAverage
-     procedure :: surfaceDensity                    => exponentialDiskSurfaceDensity
-     procedure :: massEnclosedBySphere              => exponentialDiskMassEnclosedBySphere
-     procedure :: potential                         => exponentialDiskPotential
-     procedure :: rotationCurve                     => exponentialDiskRotationCurve
-     procedure :: rotationCurveGradient             => exponentialDiskRotationCurveGradient
-     procedure :: radiusHalfMass                    => exponentialDiskRadiusHalfMass
-     procedure :: surfaceDensityRadialMoment        => exponentialDiskSurfaceDensityRadialMoment
-     procedure :: acceleration                      => exponentialDiskAcceleration
-     procedure :: tidalTensor                       => exponentialDiskTidalTensor
-     procedure :: accelerationTabulate              => exponentialDiskAccelerationTabulate
-     procedure :: accelerationInterpolate           => exponentialDiskAccelerationInterpolate
-     procedure :: positionSample                    => exponentialDiskPositionSample
+     final     ::                                            exponentialDiskDestructor
+     procedure :: tabulate                                => exponentialDiskTabulate
+     procedure :: besselFactorRotationCurve               => exponentialDiskBesselFactorRotationCurve
+     procedure :: besselFactorRotationCurveGradient       => exponentialDiskBesselFactorRotationCurveGradient
+     procedure :: besselFactorPotential                   => exponentialDiskBesselFactorPotential
+     procedure :: assumeMonotonicDecreasingSurfaceDensity => exponentialDiskAssumeMonotonicDecreasingSurfaceDensity
+     procedure :: massTotal                               => exponentialDiskMassTotal
+     procedure :: density                                 => exponentialDiskDensity
+     procedure :: densityGradientRadial                   => exponentialDensityGradientRadial
+     procedure :: densitySphericalAverage                 => exponentialDiskDensitySphericalAverage
+     procedure :: surfaceDensity                          => exponentialDiskSurfaceDensity
+     procedure :: massEnclosedBySphere                    => exponentialDiskMassEnclosedBySphere
+     procedure :: radiusEnclosingSurfaceDensity           => exponentialDiskRadiusEnclosingSurfaceDensity
+     procedure :: potentialIsAnalytic                     => exponentialDiskPotentialIsAnalytic
+     procedure :: potential                               => exponentialDiskPotential
+     procedure :: rotationCurve                           => exponentialDiskRotationCurve
+     procedure :: rotationCurveGradient                   => exponentialDiskRotationCurveGradient
+     procedure :: radiusHalfMass                          => exponentialDiskRadiusHalfMass
+     procedure :: surfaceDensityRadialMoment              => exponentialDiskSurfaceDensityRadialMoment
+     procedure :: acceleration                            => exponentialDiskAcceleration
+     procedure :: tidalTensor                             => exponentialDiskTidalTensor
+     procedure :: accelerationTabulate                    => exponentialDiskAccelerationTabulate
+     procedure :: accelerationInterpolate                 => exponentialDiskAccelerationInterpolate
+     procedure :: positionSample                          => exponentialDiskPositionSample
   end type massDistributionExponentialDisk
 
   interface massDistributionExponentialDisk
@@ -299,45 +304,55 @@ contains
     return
   end subroutine exponentialDiskTabulate
 
-  double precision function exponentialDiskRadiusHalfMass(self,componentType,massType)
+  logical function exponentialDiskAssumeMonotonicDecreasingSurfaceDensity(self) result(assumeMonotonicDecreasingSurfaceDensity)
+    !!{
+    Return true indicating that this distribution has a monotonically-decreasing surface density.
+    !!}
+    implicit none
+    class(massDistributionExponentialDisk), intent(inout) :: self
+
+    assumeMonotonicDecreasingSurfaceDensity=.true.
+    return
+  end function exponentialDiskAssumeMonotonicDecreasingSurfaceDensity
+
+  double precision function exponentialDiskMassTotal(self)
+    !!{
+    Return the total mass in an exponential disk distribution.
+    !!}
+    implicit none
+    class(massDistributionExponentialDisk), intent(inout) :: self
+
+    exponentialDiskMassTotal=self%mass
+    return
+  end function exponentialDiskMassTotal
+
+  double precision function exponentialDiskRadiusHalfMass(self)
     !!{
     Return the half-mass radius in an exponential disk mass distribution.
     !!}
     implicit none
-    class           (massDistributionExponentialDisk), intent(inout)           :: self
-    type            (enumerationComponentTypeType   ), intent(in   ), optional :: componentType
-    type            (enumerationMassTypeType        ), intent(in   ), optional :: massType
-    double precision                                 , parameter               :: radiusHalfMassToScaleRadius=1.678346990d0
+    class           (massDistributionExponentialDisk), intent(inout) :: self
+    double precision                                 , parameter     :: radiusHalfMassToScaleRadius=1.678346990d0
 
-    if (.not.self%matches(componentType,massType)) then
-       exponentialDiskRadiusHalfMass=0.0d0
-       return
-    end if
     exponentialDiskRadiusHalfMass=+radiusHalfMassToScaleRadius &
          &                        *self%scaleRadius
     return
   end function exponentialDiskRadiusHalfMass
 
-  double precision function exponentialDiskDensity(self,coordinates,componentType,massType)
+  double precision function exponentialDiskDensity(self,coordinates)
     !!{
     Return the density at the specified {\normalfont \ttfamily coordinates} in an exponential disk mass distribution.
     !!}
     use :: Coordinates, only : assignment(=), coordinateCylindrical
     use :: Error      , only : Error_Report
     implicit none
-    class           (massDistributionExponentialDisk), intent(inout)           :: self
-    class           (coordinate                     ), intent(in   )           :: coordinates
-    type            (enumerationComponentTypeType   ), intent(in   ), optional :: componentType
-    type            (enumerationMassTypeType        ), intent(in   ), optional :: massType
-    type            (coordinateCylindrical          )                          :: position
-    double precision                                 , parameter               :: coshArgumentMaximum=50.0d0
-    double precision                                                           :: r                         , z, &
-         &                                                                        coshTerm
+    class           (massDistributionExponentialDisk), intent(inout) :: self
+    class           (coordinate                     ), intent(in   ) :: coordinates
+    type            (coordinateCylindrical          )                :: position
+    double precision                                 , parameter     :: coshArgumentMaximum=50.0d0
+    double precision                                                 :: r                         , z, &
+         &                                                              coshTerm
 
-    if (.not.self%matches(componentType,massType)) then
-       exponentialDiskDensity=0.0d0
-       return
-    end if
     ! If disk is razor thin, density is undefined.
     if (self%scaleHeight <= 0.0d0) call Error_Report('density undefined for razor-thin disk'//{introspection:location})
     ! Get position in cylindrical coordinate system.
@@ -354,21 +369,53 @@ contains
     return
   end function exponentialDiskDensity
 
-  double precision function exponentialDiskDensitySphericalAverage(self,radius,componentType,massType)
+  double precision function exponentialDensityGradientRadial(self,coordinates,logarithmic)
+    !!{
+    Return the density gradient in the radial direction in a scaled spherical mass distribution.
+    !!}
+    use :: Coordinates, only : assignment(=), coordinateCylindrical
+    use :: Error      , only : Error_Report
+    implicit none
+    class           (massDistributionExponentialDisk), intent(inout), target   :: self
+    class           (coordinate                     ), intent(in   )           :: coordinates
+    logical                                          , intent(in   ), optional :: logarithmic
+    double precision                                 , parameter               :: coshArgumentMaximum=50.0d0
+    type            (coordinateCylindrical          )                          :: position
+    double precision                                                           :: r                         , z, &
+         &                                                                        coshTerm
+    !![
+    <optionalArgument name="logarithmic" defaultsTo=".false."/>
+    !!]
+    
+    ! If disk is razor thin, density is undefined.
+    if (self%scaleHeight <= 0.0d0) call Error_Report('density undefined for razor-thin disk'//{introspection:location})
+    ! Get position in cylindrical coordinate system.
+    position=coordinates
+    ! Compute density.
+    r=    position%r() /self%scaleRadius
+    z=abs(position%z())/self%scaleHeight
+    if (z > coshArgumentMaximum) then
+       coshTerm=(2.0d0*exp(-z)/(1.0d0+exp(-2.0d0*z)))**2
+    else
+       coshTerm=1.0d0/cosh(z)**2
+    end if
+    exponentialDensityGradientRadial=-(r+2.0d0*z*tanh(z))
+    if (.not.logarithmic_)                                                                          &
+         & exponentialDensityGradientRadial=+         exponentialDensityGradientRadial              &
+         &                                  *self    %density                         (coordinates) &
+         &                                  /position%rSpherical                      (           )
+    return
+  end function exponentialDensityGradientRadial
+  
+  double precision function exponentialDiskDensitySphericalAverage(self,radius)
     !!{
     Return the spherically-averaged density at the specified {\normalfont \ttfamily coordinates} in an exponential disk mass
     distribution. Note that this assumes the thin-disk approximation.
     !!}
     implicit none
-    class           (massDistributionExponentialDisk), intent(inout)           :: self
-    double precision                                 , intent(in   )           :: radius
-    type            (enumerationComponentTypeType   ), intent(in   ), optional :: componentType
-    type            (enumerationMassTypeType        ), intent(in   ), optional :: massType
+    class           (massDistributionExponentialDisk), intent(inout) :: self
+    double precision                                 , intent(in   ) :: radius
 
-    if (.not.self%matches(componentType,massType)) then
-       exponentialDiskDensitySphericalAverage=0.0d0
-       return
-    end if
     exponentialDiskDensitySphericalAverage=+0.5d0                                 &
          &                                 *     self%surfaceDensityNormalization &
          &                                 /                               radius &
@@ -379,23 +426,17 @@ contains
     return
   end function exponentialDiskDensitySphericalAverage
 
-  double precision function exponentialDiskMassEnclosedBySphere(self,radius,componentType,massType)
+  double precision function exponentialDiskMassEnclosedBySphere(self,radius)
     !!{
     Computes the mass enclosed within a sphere of given {\normalfont \ttfamily radius} for exponential disk mass
     distributions. Note that this assumes the thin-disk approximation.
     !!}
     use :: Numerical_Constants_Math, only : Pi
     implicit none
-    class           (massDistributionExponentialDisk), intent(inout), target   :: self
-    double precision                                 , intent(in   )           :: radius
-    type            (enumerationComponentTypeType   ), intent(in   ), optional :: componentType
-    type            (enumerationMassTypeType        ), intent(in   ), optional :: massType
-    double precision                                                           :: fractionalRadius
+    class           (massDistributionExponentialDisk), intent(inout), target :: self
+    double precision                                 , intent(in   )         :: radius
+    double precision                                                         :: fractionalRadius
 
-    if (.not.self%matches(componentType,massType)) then
-       exponentialDiskMassEnclosedBySphere=0.0d0
-       return
-    end if
     fractionalRadius                   =+radius                              &
          &                              /self%scaleRadius
     exponentialDiskMassEnclosedBySphere=+2.0d0                               &
@@ -413,22 +454,16 @@ contains
     return
   end function exponentialDiskMassEnclosedBySphere
 
-  double precision function exponentialDiskSurfaceDensity(self,coordinates,componentType,massType)
+  double precision function exponentialDiskSurfaceDensity(self,coordinates)
     !!{
     Return the surface density at the specified {\normalfont \ttfamily coordinates} in an exponential disk mass distribution.
     !!}
     use :: Coordinates, only : coordinate
     implicit none
-    class           (massDistributionExponentialDisk), intent(inout)           :: self
-    class           (coordinate                     ), intent(in   )           :: coordinates
-    type            (enumerationComponentTypeType   ), intent(in   ), optional :: componentType
-    type            (enumerationMassTypeType        ), intent(in   ), optional :: massType
-    double precision                                                           :: r
+    class           (massDistributionExponentialDisk), intent(inout) :: self
+    class           (coordinate                     ), intent(in   ) :: coordinates
+    double precision                                                 :: r
 
-    if (.not.self%matches(componentType,massType)) then
-       exponentialDiskSurfaceDensity=0.0d0
-       return
-    end if
     ! Get the radial coordinate.
     r=coordinates%rCylindrical()/self%scaleRadius
     ! Compute the density.
@@ -436,23 +471,34 @@ contains
     return
   end function exponentialDiskSurfaceDensity
 
-  double precision function exponentialDiskRotationCurve(self,radius,componentType,massType)
+  double precision function exponentialDiskRadiusEnclosingSurfaceDensity(self,densitySurface,radiusGuess) result(radius)
+    !!{
+    Computes the radius enclosing a given surface density for exponential disk mass distributions.
+    !!}    
+    implicit none
+    class           (massDistributionExponentialDisk), intent(inout), target   :: self
+    double precision                                 , intent(in   )           :: densitySurface
+    double precision                                 , intent(in   ), optional :: radiusGuess
+    
+    radius=-     self%scaleRadius                 &
+    &      *log(                                  &
+    &           +     densitySurface              &
+    &           /self%surfaceDensityNormalization &
+    &          )
+    return
+  end function exponentialDiskRadiusEnclosingSurfaceDensity
+  
+  double precision function exponentialDiskRotationCurve(self,radius)
     !!{
     Return the mid-plane rotation curve for an exponential disk.
     !!}
     use :: Numerical_Constants_Astronomical, only : gravitationalConstantGalacticus
     implicit none
-    class           (massDistributionExponentialDisk), intent(inout)           :: self
-    double precision                                 , intent(in   )           :: radius
-    type            (enumerationComponentTypeType   ), intent(in   ), optional :: componentType
-    type            (enumerationMassTypeType        ), intent(in   ), optional :: massType
-    double precision                                                           :: r           , halfRadius, &
-         &                                                                        radiusFactor
+    class           (massDistributionExponentialDisk), intent(inout) :: self
+    double precision                                 , intent(in   ) :: radius
+    double precision                                                 :: r           , halfRadius, &
+         &                                                              radiusFactor
 
-    if (.not.self%matches(componentType,massType)) then
-       exponentialDiskRotationCurve=0.0d0
-       return
-    end if
     ! Get scale-free radius.
     r=radius/self%scaleRadius
     ! Compute rotation curve.
@@ -486,23 +532,17 @@ contains
     return
   end function exponentialDiskRotationCurve
 
-  double precision function exponentialDiskRotationCurveGradient(self,radius,componentType,massType)
+  double precision function exponentialDiskRotationCurveGradient(self,radius)
     !!{
     Return the mid-plane rotation curve gradient for an exponential disk.
     !!}
     use :: Numerical_Constants_Astronomical, only : gravitationalConstantGalacticus
     implicit none
-    class           (massDistributionExponentialDisk), intent(inout)           :: self
-    double precision                                 , intent(in   )           :: radius
-    type            (enumerationComponentTypeType   ), intent(in   ), optional :: componentType
-    type            (enumerationMassTypeType        ), intent(in   ), optional :: massType
-    double precision                                 , parameter               :: fractionalRadiusMaximum=30.0d0
-    double precision                                                           :: besselArgument                , besselFactor
+    class           (massDistributionExponentialDisk), intent(inout) :: self
+    double precision                                 , intent(in   ) :: radius
+    double precision                                 , parameter     :: fractionalRadiusMaximum=30.0d0
+    double precision                                                 :: besselArgument                , besselFactor
 
-    if (.not.self%matches(componentType,massType)) then
-       exponentialDiskRotationCurveGradient=0.0d0
-       return
-    end if
     ! Compute Bessel functions argument.
     besselArgument=+radius           &
          &         /2.0d0            &
@@ -520,30 +560,38 @@ contains
     end if
     ! Make dimensionful if necessary.
     if (.not.self%dimensionless) exponentialDiskRotationCurveGradient= &
-         &  +sqrt(gravitationalConstantGalacticus)                     &
+         &  +gravitationalConstantGalacticus                           &
          &  *exponentialDiskRotationCurveGradient
     return
   end function exponentialDiskRotationCurveGradient
 
-  double precision function exponentialDiskPotential(self,coordinates,componentType,massType)
+  logical function exponentialDiskPotentialIsAnalytic(self) result(isAnalytic)
+    !!{
+    Return that the potential has an analytic form.
+    !!}
+    implicit none
+    class(massDistributionExponentialDisk), intent(inout) :: self
+
+    isAnalytic=.true.
+    return
+  end function exponentialDiskPotentialIsAnalytic
+
+  double precision function exponentialDiskPotential(self,coordinates,status)
     !!{
     Return the gravitational potential for an exponential disk.
     !!}
     use :: Coordinates                     , only : assignment(=)                  , coordinateCylindrical
+    use :: Galactic_Structure_Options      , only : structureErrorCodeSuccess
     use :: Numerical_Constants_Astronomical, only : gravitationalConstantGalacticus
     implicit none
-    class           (massDistributionExponentialDisk), intent(inout)           :: self
-    class           (coordinate                     ), intent(in   )           :: coordinates
-    type            (enumerationComponentTypeType   ), intent(in   ), optional :: componentType
-    type            (enumerationMassTypeType        ), intent(in   ), optional :: massType
-    type            (coordinateCylindrical          )                          :: position
-    double precision                                                           :: correctionSmallRadius, halfRadius, &
-         &                                                                        radius
+    class           (massDistributionExponentialDisk  ), intent(inout), target   :: self
+    class           (coordinate                       ), intent(in   )           :: coordinates
+    type            (enumerationStructureErrorCodeType), intent(  out), optional :: status
+    type            (coordinateCylindrical            )                          :: position
+    double precision                                                             :: correctionSmallRadius, halfRadius, &
+         &                                                                          radius
 
-    if (.not.self%matches(componentType,massType)) then
-       exponentialDiskPotential=0.0d0
-       return
-    end if
+    if (present(status)) status=structureErrorCodeSuccess
     ! Get position in cylindrical coordinate system.
     position=coordinates
     ! Compute density.
@@ -613,8 +661,8 @@ contains
     implicit none
     class           (massDistributionExponentialDisk), intent(inout) :: self
     double precision                                 , intent(in   ) :: halfRadius
-    double precision                                 , parameter     :: halfRadiusSmall                  =1.0d-3
-    integer                                          , parameter     :: rotationCurvePointsPerDecade=10
+    double precision                                 , parameter     :: halfRadiusSmall             =1.0d-3
+    integer                                          , parameter     :: rotationCurvePointsPerDecade=100
     integer                                                          :: iPoint                             , rotationCurvePointsCount
     double precision                                                 :: x
     logical                                                          :: makeTable
@@ -676,7 +724,7 @@ contains
     double precision                                 , intent(in   ) :: halfRadius
     double precision                                 , parameter     :: halfRadiusSmall                     =1.0d-3
     double precision                                 , parameter     :: halfRadiusLarge                     =1.0d+2
-    integer                                          , parameter     :: rotationCurveGradientPointsPerDecade=10
+    integer                                          , parameter     :: rotationCurveGradientPointsPerDecade=100
     integer                                                          :: iPoint                                      , rotationCurveGradientPointsCount
     double precision                                                 :: x
 
@@ -713,17 +761,17 @@ contains
           x=self%rotationCurveGradientTable%x(iPoint)
           call self%rotationCurveGradientTable%populate                                      &
                &  (                                                                          &
-               &    2.0d0                                                                    &
+               &   +2.0d0                                                                    &
                &   *x                                                                        &
                &   *(                                                                        &
-               &      Bessel_Function_I0(x)*Bessel_Function_K0(x)                            &
-               &     -Bessel_Function_I1(x)*Bessel_Function_K1(x)                            &
+               &     +  Bessel_Function_I0(x)                         *Bessel_Function_K0(x) &
+               &     -  Bessel_Function_I1(x)                         *Bessel_Function_K1(x) &
                &    )                                                                        &
                &   +x**2                                                                     &
                &   *(                                                                        &
-               &        Bessel_Function_I1(x)                         *Bessel_Function_K0(x) &
+               &     +  Bessel_Function_I1(x)                         *Bessel_Function_K0(x) &
                &     -  Bessel_Function_K1(x)                         *Bessel_Function_I0(x) &
-               &     -( Bessel_Function_I0(x)-Bessel_Function_I1(x)/x)*Bessel_Function_K1(x) &
+               &     -(+Bessel_Function_I0(x)-Bessel_Function_I1(x)/x)*Bessel_Function_K1(x) &
                &     -(-Bessel_Function_K0(x)-Bessel_Function_K1(x)/x)*Bessel_Function_I1(x) &
                &    ),                                                                       &
                &   iPoint                                                                    &
@@ -738,7 +786,7 @@ contains
     return
   end function exponentialDiskBesselFactorRotationCurveGradient
 
-  double precision function exponentialDiskSurfaceDensityRadialMoment(self,moment,radiusMinimum,radiusMaximum,isInfinite,componentType,massType)
+  double precision function exponentialDiskSurfaceDensityRadialMoment(self,moment,radiusMinimum,radiusMaximum,isInfinite)
     !!{
     Compute radial moments of the exponential disk mass distribution surface density profile.
     !!}
@@ -749,14 +797,8 @@ contains
     double precision                                 , intent(in   )           :: moment
     double precision                                 , intent(in   ), optional :: radiusMinimum, radiusMaximum
     logical                                          , intent(  out), optional :: isInfinite
-    type            (enumerationComponentTypeType   ), intent(in   ), optional :: componentType
-    type            (enumerationMassTypeType        ), intent(in   ), optional :: massType
     double precision                                                           :: integralLow  , integralHigh
 
-    if (.not.self%matches(componentType,massType)) then
-       exponentialDiskSurfaceDensityRadialMoment=0.0d0
-       return
-    end if
     ! All moments n>-1 are finite.
     if (present(isInfinite)) isInfinite=(moment <= -1.0d0)
     if (moment <= -1.0d0) then
@@ -779,7 +821,7 @@ contains
     return
   end function exponentialDiskSurfaceDensityRadialMoment
 
-  function exponentialDiskAcceleration(self,coordinates,componentType,massType)
+  function exponentialDiskAcceleration(self,coordinates)
     !!{
     Computes the gravitational acceleration at {\normalfont \ttfamily coordinates} for exponential disk mass distributions.
     !!}
@@ -787,20 +829,14 @@ contains
     use :: Numerical_Constants_Astronomical, only : gigaYear     , gravitationalConstantGalacticus, megaParsec
     use :: Numerical_Constants_Prefixes    , only : kilo
     implicit none
-    double precision                                 , dimension(3  )           :: exponentialDiskAcceleration
-    class           (massDistributionExponentialDisk), intent(inout)            :: self
-    class           (coordinate                     ), intent(in   )            :: coordinates
-    type            (enumerationComponentTypeType   ), intent(in   ) , optional :: componentType
-    type            (enumerationMassTypeType        ), intent(in   ) , optional :: massType
-    double precision                                 , dimension(3  )           :: positionCartesian
-    type            (coordinateCylindrical          )                           :: coordinatesCylindrical
-    type            (coordinateCartesian            )                           :: coordinatesCartesian
-    double precision                                                            :: accelerationRadial        , accelerationVertical
+    double precision                                 , dimension(3)  :: exponentialDiskAcceleration
+    class           (massDistributionExponentialDisk), intent(inout) :: self
+    class           (coordinate                     ), intent(in   ) :: coordinates
+    double precision                                 , dimension(3)  :: positionCartesian
+    type            (coordinateCylindrical          )                :: coordinatesCylindrical
+    type            (coordinateCartesian            )                :: coordinatesCartesian
+    double precision                                                 :: accelerationRadial        , accelerationVertical
     
-    if (.not.self%matches(componentType,massType)) then
-       exponentialDiskAcceleration=0.0d0
-       return
-    end if
     ! Get position in cylindrical and Cartesian coordinate systems.
     coordinatesCylindrical=coordinates
     coordinatesCartesian  =coordinates
@@ -831,31 +867,24 @@ contains
     return
   end function exponentialDiskAcceleration
 
-  function exponentialDiskTidalTensor(self,coordinates,componentType,massType)
+  function exponentialDiskTidalTensor(self,coordinates)
     !!{
     Computes the gravitational tidal tensor at {\normalfont \ttfamily coordinates} for exponential disk mass distributions.
     !!}
     use :: Coordinates                     , only : assignment(=)                  , coordinateCartesian, coordinateCylindrical
     use :: Numerical_Constants_Astronomical, only : gravitationalConstantGalacticus
-    use :: Tensors                         , only : tensorNullR2D3Sym
     implicit none
-    type            (tensorRank2Dimension3Symmetric )                          :: exponentialDiskTidalTensor
-    class           (massDistributionExponentialDisk), intent(inout)           :: self
-    class           (coordinate                     ), intent(in   )           :: coordinates
-    type            (enumerationComponentTypeType   ), intent(in   ), optional :: componentType
-    type            (enumerationMassTypeType        ), intent(in   ), optional :: massType
-    double precision                                 , dimension(3  )          :: positionCartesian
-    double precision                                 , parameter               :: radiusCylindricalSmall    =1.0d-6
-    type            (coordinateCartesian            )                          :: coordinatesCartesian
-    type            (coordinateCylindrical          )                          :: coordinatesCylindrical
-    double precision                                                           :: accelerationRadial               , accelerationVertical       , &
-         &                                                                        tidalTensorRadialRadial          , tidalTensorVerticalVertical, &
-         &                                                                        tidalTensorCross                 , radiusCylindrical
+    type            (tensorRank2Dimension3Symmetric )                :: exponentialDiskTidalTensor
+    class           (massDistributionExponentialDisk), intent(inout) :: self
+    class           (coordinate                     ), intent(in   ) :: coordinates
+    double precision                                 , dimension(3)  :: positionCartesian
+    double precision                                 , parameter     :: radiusCylindricalSmall    =1.0d-6
+    type            (coordinateCartesian            )                :: coordinatesCartesian
+    type            (coordinateCylindrical          )                :: coordinatesCylindrical
+    double precision                                                 :: accelerationRadial               , accelerationVertical       , &
+         &                                                              tidalTensorRadialRadial          , tidalTensorVerticalVertical, &
+         &                                                              tidalTensorCross                 , radiusCylindrical
 
-    if (.not.self%matches(componentType,massType)) then
-       exponentialDiskTidalTensor=tensorNullR2D3Sym
-       return
-    end if
     ! Get position in cylindrical and Cartesian coordinate systems.
     coordinatesCylindrical=coordinates
     coordinatesCartesian  =coordinatesCylindrical
@@ -1044,203 +1073,206 @@ contains
     integer                                                          :: countRadii                               , iRadius                              , &
          &                                                              iHeight                                  , countWork
     double precision                                                 :: radius                                   , beta
-    type            (varying_string                 )                :: fileName
-    character       (len=8                          )                :: label
-    type            (hdf5Object                     )                :: file
-    type            (lockDescriptor                 )                :: fileLock
 
     ! Return if acceleration is initialized.
     if (self%accelerationInitialized) return
-    ! Construct a file name for the table.
-    write (label,'(f8.6)') self%scaleHeight/self%scaleRadius
-    fileName=inputPath(pathTypeDataDynamic)// &
-         &   'galacticStructure/'          // &
-         &   self%objectType()             // &
-         &   '_h'                          // &
-         &   trim(adjustl(label))          // &
-         &   '.hdf5'
-    call Directory_Make(char(File_Path(char(fileName))))
-    ! Always obtain the file lock before the hdf5Access lock to avoid deadlocks between OpenMP threads.
-    call File_Lock(char(fileName),fileLock,lockIsShared=.true.)
-    if (File_Exists(fileName)) then
-       !$ call hdf5Access%set()
-       call file%openFile    (char(fileName                     )                                 )
-       call file%readDataset(      'radii'                       ,self%accelerationRadii          )
-       call file%readDataset(      'heights'                     ,self%accelerationHeights        )
-       call file%readDataset(      'accelerationRadial'          ,self%accelerationRadial         )
-       call file%readDataset(      'accelerationVertical'        ,self%accelerationVertical       )
-       call file%readDataset(      'tidalTensorRadialRadial'     ,self%tidalTensorRadialRadial    )
-       call file%readDataset(      'tidalTensorVerticalVertical' ,self%tidalTensorVerticalVertical)
-       call file%readDataset(      'tidalTensorCross'            ,self%tidalTensorCross           )
-       call file%close      (                                                                     )
-       !$ call hdf5Access%unset()
-    else
-       ! Generate grid in radius and height.
-       countRadii=int(log10(radiusMaximum/radiusMinimum)*radiiPerDecade)+1
-       allocate(self%accelerationRadii          (countRadii           ))
-       allocate(self%accelerationHeights        (countRadii           ))
-       allocate(self%accelerationRadial         (countRadii,countRadii))
-       allocate(self%accelerationVertical       (countRadii,countRadii))
-       allocate(self%tidalTensorRadialRadial    (countRadii,countRadii))
-       allocate(self%tidalTensorVerticalVertical(countRadii,countRadii))
-       allocate(self%tidalTensorCross           (countRadii,countRadii))
-       self%accelerationRadii  =Make_Range(radiusMinimum,radiusMaximum,countRadii,rangeTypeLogarithmic)
-       self%accelerationHeights=Make_Range(radiusMinimum,radiusMaximum,countRadii,rangeTypeLogarithmic)
-       ! Compute the vertical inverse scale-height. Note that our definition of β differs slightly from that of Kuijken & Gilmore
-       ! (1989). They assume a density profile in the vertical direction of the form:
-       !
-       !  ρ(z) = sech^ξ(βz/ξ)
-       !
-       ! while we use:
-       !
-       !  ρ(z) = sech^ξ(z/h)
-       !
-       ! where h is the scale-height. Therefore:
-       !
-       !  β=ξ/h
-       !
-       ! and we then make it dimensionless by multiplying by the radial scale length.
-       beta   =+dble(xi)         &
-            &  *self%scaleRadius &
-            &  /self%scaleHeight
-       ! Iterate over radii and heights.
-       call displayIndent("tabulating gravitational accelerations for exponential disk",verbosityLevelWorking)
-       countWork=0
-       do iRadius=1,countRadii
-          radius=self%accelerationRadii(iRadius)
-          !$omp parallel
-          integratorAccelerationRadial         =integrator(accelerationRadialIntegrand         ,toleranceAbsolute=1.0d-6,toleranceRelative=1.0d-3)
-          integratorAccelerationVertical       =integrator(accelerationVerticalIntegrand       ,toleranceAbsolute=1.0d-6,toleranceRelative=1.0d-3)
-          integratorTidalTensorRadialRadial    =integrator(tidalTensorRadialRadialIntegrand    ,toleranceAbsolute=1.0d-6,toleranceRelative=1.0d-3)
-          integratorTidalTensorVerticalVertical=integrator(tidalTensorVerticalVerticalIntegrand,toleranceAbsolute=1.0d-6,toleranceRelative=1.0d-3)
-          integratorTidalTensorCross           =integrator(tidalTensorCrossIntegrand           ,toleranceAbsolute=1.0d-6,toleranceRelative=1.0d-3)
-          !$omp do
-          do iHeight=1,countRadii
-             !$omp atomic
-             countWork=countWork+1
-             call displayCounter(int(100.0d0*dble(countWork)/dble(countRadii**2)),iRadius == 1 .and. iHeight == 1,verbosityLevelWorking)
-             height=self%accelerationHeights(iHeight)          
-             ! Evaluate the integral for the radial component of acceleration.
-             self%accelerationRadial(iRadius,iHeight)=0.0d0
-             wavenumberHigh                          =0.0d0
-             iBesselZero                             =0
-             converged                               =.false.
-             do while (.not.converged)
-                iBesselZero      =+                        iBesselZero  &
-                     &            +                        1
-                wavenumberLow    =+wavenumberHigh
-                wavenumberHigh   =+Bessel_Function_J1_Zero(iBesselZero) &
-                     &            /radius        
-                accelerationDelta=+integratorAccelerationRadial%integrate(wavenumberLow,wavenumberHigh)
-                converged=abs(accelerationDelta) < 1.0d-6*abs(self%accelerationRadial(iRadius,iHeight))
-                self%accelerationRadial(iRadius,iHeight)=+self%accelerationRadial(iRadius,iHeight) &
-                     &                                   +     accelerationDelta
-             end do
-             ! Evaluate the integral for the vertical component of acceleration.
-             self%accelerationVertical(iRadius,iHeight)=0.0d0
-             wavenumberHigh                            =0.0d0
-             iBesselZero                               =0
-             converged                                 =.false.
-             do while (.not.converged)
-                iBesselZero      =+                       iBesselZero   &
-                     &            +                       1
-                wavenumberLow    =+wavenumberHigh
-                wavenumberHigh   =+Bessel_Function_J0_Zero(iBesselZero) &
-                     &            /radius
-                accelerationDelta=+integratorAccelerationVertical%integrate(wavenumberLow,wavenumberHigh)
-                converged=abs(accelerationDelta) < 1.0d-6*abs(self%accelerationVertical(iRadius,iHeight))
-                self%accelerationVertical(iRadius,iHeight)=+self%accelerationVertical(iRadius,iHeight) &
-                     &                                     +     accelerationDelta
-             end do
-             ! Evaluate the integral for the radial component of the tidal tensor.
-             self%tidalTensorRadialRadial(iRadius,iHeight)=0.0d0
-             do besselOrder=0,2,2                
-                tidalTensorRadialRadial=0.0d0
-                wavenumberHigh         =0.0d0
-                iBesselZero            =0
-                converged              =.false.
-                do while (.not.converged)
-                   iBesselZero  =+iBesselZero &
-                        &        +1
-                   wavenumberLow=+wavenumberHigh
-                   select case (besselOrder)
-                   case (0)
-                      wavenumberHigh=+Bessel_Function_J0_Zero(      iBesselZero) &
-                           &         /radius
-                   case (2)
-                      wavenumberHigh=+Bessel_Function_Jn_Zero(2.0d0,iBesselZero) &
-                           &         /radius
-                   case default
-                      call Error_Report('incorrect Bessel function order'//{introspection:location})
-                   end select
-                   tidalTensorDelta=+integratorTidalTensorRadialRadial%integrate(wavenumberLow,wavenumberHigh)
-                   converged=abs(tidalTensorDelta) < 1.0d-6*abs(tidalTensorRadialRadial)                   
-                   tidalTensorRadialRadial=+tidalTensorRadialRadial &
-                        &                  +     tidalTensorDelta
-                end do
-                self%tidalTensorRadialRadial(iRadius,iHeight)=+self%tidalTensorRadialRadial(iRadius,iHeight) &
-                     &                                        +     tidalTensorRadialRadial
-             end do
-             ! Evaluate the integral for the vertical-vertical component of the tidal tensor.
-             self%tidalTensorVerticalVertical(iRadius,iHeight)=0.0d0
-             wavenumberHigh                                   =0.0d0
-             iBesselZero                                      =0
-             converged                                        =.false.
-             do while (.not.converged)
-                iBesselZero     =+                        iBesselZero  &
-                     &           +                        1
-                wavenumberLow   =+wavenumberHigh
-                wavenumberHigh  =+Bessel_Function_J0_Zero(iBesselZero) &
-                     &           /radius
-                tidalTensorDelta=+integratorTidalTensorVerticalVertical%integrate(wavenumberLow,wavenumberHigh)
-                converged=abs(tidalTensorDelta) < 1.0d-6*abs(self%tidalTensorVerticalVertical(iRadius,iHeight))
-                self%tidalTensorVerticalVertical(iRadius,iHeight)=+self%tidalTensorVerticalVertical(iRadius,iHeight) &
-                     &                                            +     tidalTensorDelta
-             end do
-             ! Evaluate the integral for the cross component of the tidal tensor.
-             self%tidalTensorCross(iRadius,iHeight)=0.0d0
-             wavenumberHigh                        =0.0d0
-             iBesselZero                           =0
-             converged                             =.false.
-             do while (.not.converged)
-                iBesselZero     =+                        iBesselZero  &
-                     &           +                        1
-                wavenumberLow   =+wavenumberHigh
-                wavenumberHigh  =+Bessel_Function_J1_Zero(iBesselZero) &
-                     &           /radius
-                tidalTensorDelta=+integratorTidalTensorCross%integrate(wavenumberLow,wavenumberHigh)
-                converged=abs(tidalTensorDelta) < 1.0d-6*abs(self%tidalTensorCross(iRadius,iHeight))
-                self%tidalTensorCross(iRadius,iHeight)=+self%tidalTensorCross(iRadius,iHeight) &
-                     &                                 +     tidalTensorDelta
-             end do
-          end do
-          !$omp end do
-          !$omp end parallel
-       end do
-       call displayCounterClear(       verbosityLevelWorking)
-       call displayUnindent     ("done",verbosityLevelWorking)
-       !$ call hdf5Access%set()
-       call file%openFile    (char   (fileName                        )                              ,overWrite=.true.,readOnly=.false.)
-       call file%writeDataset(        self%accelerationRadii           ,'radii'                                                        )
-       call file%writeDataset(        self%accelerationHeights         ,'heights'                                                      )
-       call file%writeDataset(        self%accelerationRadial          ,'accelerationRadial'                                           )
-       call file%writeDataset(        self%accelerationVertical        ,'accelerationVertical'                                         )
-       call file%writeDataset(        self%tidalTensorRadialRadial     ,'tidalTensorRadialRadial'                                      )
-       call file%writeDataset(        self%tidalTensorVerticalVertical ,'tidalTensorVerticalVertical'                                  )
-       call file%writeDataset(        self%tidalTensorCross            ,'tidalTensorCross'                                             )
-       call file%close       (                                                                                                         )
-       !$ call hdf5Access%unset()
-    end if
-    call File_Unlock(fileLock)
-    ! Compute factors needed for interpolation.
-    self%accelerationRadiusMinimumLog     =      log(self%accelerationRadii  (                            1 ))
-    self%accelerationRadiusMaximumLog     =      log(self%accelerationRadii  (size(self%accelerationRadii  )))
-    self%accelerationHeightMinimumLog     =      log(self%accelerationHeights(                            1 ))
-    self%accelerationHeightMaximumLog     =      log(self%accelerationHeights(size(self%accelerationHeights)))
-    self%accelerationRadiusInverseInterval=1.0d0/log(self%accelerationRadii  (2)/self%accelerationRadii  (1))
-    self%accelerationHeightInverseInterval=1.0d0/log(self%accelerationHeights(2)/self%accelerationHeights(1))
-    ! Record that the acceleration table is initialized.
-    self%accelerationInitialized=.true.
+    block
+      type     (varying_string) :: fileName
+      character(len=8         ) :: label
+      type     (hdf5Object    ) :: file
+      type     (lockDescriptor) :: fileLock
+      
+      ! Construct a file name for the table.
+      write (label,'(f8.6)') self%scaleHeight/self%scaleRadius
+      fileName=inputPath(pathTypeDataDynamic)// &
+           &   'galacticStructure/'          // &
+           &   self%objectType()             // &
+           &   '_h'                          // &
+           &   trim(adjustl(label))          // &
+           &   '.hdf5'
+      call Directory_Make(char(File_Path(char(fileName))))
+      ! Always obtain the file lock before the hdf5Access lock to avoid deadlocks between OpenMP threads.
+      call File_Lock(char(fileName),fileLock,lockIsShared=.true.)
+      if (File_Exists(fileName)) then
+         !$ call hdf5Access%set()
+         call file%openFile    (char(fileName                     )                                 )
+         call file%readDataset(      'radii'                       ,self%accelerationRadii          )
+         call file%readDataset(      'heights'                     ,self%accelerationHeights        )
+         call file%readDataset(      'accelerationRadial'          ,self%accelerationRadial         )
+         call file%readDataset(      'accelerationVertical'        ,self%accelerationVertical       )
+         call file%readDataset(      'tidalTensorRadialRadial'     ,self%tidalTensorRadialRadial    )
+         call file%readDataset(      'tidalTensorVerticalVertical' ,self%tidalTensorVerticalVertical)
+         call file%readDataset(      'tidalTensorCross'            ,self%tidalTensorCross           )
+         call file%close      (                                                                     )
+         !$ call hdf5Access%unset()
+      else
+         ! Generate grid in radius and height.
+         countRadii=int(log10(radiusMaximum/radiusMinimum)*radiiPerDecade)+1
+         allocate(self%accelerationRadii          (countRadii           ))
+         allocate(self%accelerationHeights        (countRadii           ))
+         allocate(self%accelerationRadial         (countRadii,countRadii))
+         allocate(self%accelerationVertical       (countRadii,countRadii))
+         allocate(self%tidalTensorRadialRadial    (countRadii,countRadii))
+         allocate(self%tidalTensorVerticalVertical(countRadii,countRadii))
+         allocate(self%tidalTensorCross           (countRadii,countRadii))
+         self%accelerationRadii  =Make_Range(radiusMinimum,radiusMaximum,countRadii,rangeTypeLogarithmic)
+         self%accelerationHeights=Make_Range(radiusMinimum,radiusMaximum,countRadii,rangeTypeLogarithmic)
+         ! Compute the vertical inverse scale-height. Note that our definition of β differs slightly from that of Kuijken & Gilmore
+         ! (1989). They assume a density profile in the vertical direction of the form:
+         !
+         !  ρ(z) = sech²(βz/ξ)
+         !
+         ! while we use:
+         !
+         !  ρ(z) = sech²(z/h)
+         !
+         ! where h is the scale-height. Therefore:
+         !
+         !  β=ξ/h
+         !
+         ! and we then make it dimensionless by multiplying by the radial scale length.
+         beta   =+dble(xi)         &
+              &  *self%scaleRadius &
+              &  /self%scaleHeight
+         ! Iterate over radii and heights.
+         call displayIndent("tabulating gravitational accelerations for exponential disk",verbosityLevelWorking)
+         countWork=0
+         do iRadius=1,countRadii
+            radius=self%accelerationRadii(iRadius)
+            !$omp parallel
+            integratorAccelerationRadial         =integrator(accelerationRadialIntegrand         ,toleranceAbsolute=1.0d-6,toleranceRelative=1.0d-3)
+            integratorAccelerationVertical       =integrator(accelerationVerticalIntegrand       ,toleranceAbsolute=1.0d-6,toleranceRelative=1.0d-3)
+            integratorTidalTensorRadialRadial    =integrator(tidalTensorRadialRadialIntegrand    ,toleranceAbsolute=1.0d-6,toleranceRelative=1.0d-3)
+            integratorTidalTensorVerticalVertical=integrator(tidalTensorVerticalVerticalIntegrand,toleranceAbsolute=1.0d-6,toleranceRelative=1.0d-3)
+            integratorTidalTensorCross           =integrator(tidalTensorCrossIntegrand           ,toleranceAbsolute=1.0d-6,toleranceRelative=1.0d-3)
+            !$omp do
+            do iHeight=1,countRadii
+               !$omp atomic
+               countWork=countWork+1
+               call displayCounter(int(100.0d0*dble(countWork)/dble(countRadii**2)),iRadius == 1 .and. iHeight == 1,verbosityLevelWorking)
+               height=self%accelerationHeights(iHeight)          
+               ! Evaluate the integral for the radial component of acceleration.
+               self%accelerationRadial(iRadius,iHeight)=0.0d0
+               wavenumberHigh                          =0.0d0
+               iBesselZero                             =0
+               converged                               =.false.
+               do while (.not.converged)
+                  iBesselZero      =+                        iBesselZero  &
+                       &            +                        1
+                  wavenumberLow    =+wavenumberHigh
+                  wavenumberHigh   =+Bessel_Function_J1_Zero(iBesselZero) &
+                       &            /radius        
+                  accelerationDelta=+integratorAccelerationRadial%integrate(wavenumberLow,wavenumberHigh)
+                  converged=abs(accelerationDelta) < 1.0d-6*abs(self%accelerationRadial(iRadius,iHeight))
+                  self%accelerationRadial(iRadius,iHeight)=+self%accelerationRadial(iRadius,iHeight) &
+                       &                                   +     accelerationDelta
+               end do
+               ! Evaluate the integral for the vertical component of acceleration.
+               self%accelerationVertical(iRadius,iHeight)=0.0d0
+               wavenumberHigh                            =0.0d0
+               iBesselZero                               =0
+               converged                                 =.false.
+               do while (.not.converged)
+                  iBesselZero      =+                       iBesselZero   &
+                       &            +                       1
+                  wavenumberLow    =+wavenumberHigh
+                  wavenumberHigh   =+Bessel_Function_J0_Zero(iBesselZero) &
+                       &            /radius
+                  accelerationDelta=+integratorAccelerationVertical%integrate(wavenumberLow,wavenumberHigh)
+                  converged=abs(accelerationDelta) < 1.0d-6*abs(self%accelerationVertical(iRadius,iHeight))
+                  self%accelerationVertical(iRadius,iHeight)=+self%accelerationVertical(iRadius,iHeight) &
+                       &                                     +     accelerationDelta
+               end do
+               ! Evaluate the integral for the radial component of the tidal tensor.
+               self%tidalTensorRadialRadial(iRadius,iHeight)=0.0d0
+               do besselOrder=0,2,2                
+                  tidalTensorRadialRadial=0.0d0
+                  wavenumberHigh         =0.0d0
+                  iBesselZero            =0
+                  converged              =.false.
+                  do while (.not.converged)
+                     iBesselZero  =+iBesselZero &
+                          &        +1
+                     wavenumberLow=+wavenumberHigh
+                     select case (besselOrder)
+                     case (0)
+                        wavenumberHigh=+Bessel_Function_J0_Zero(      iBesselZero) &
+                             &         /radius
+                     case (2)
+                        wavenumberHigh=+Bessel_Function_Jn_Zero(2.0d0,iBesselZero) &
+                             &         /radius
+                     case default
+                        call Error_Report('incorrect Bessel function order'//{introspection:location})
+                     end select
+                     tidalTensorDelta=+integratorTidalTensorRadialRadial%integrate(wavenumberLow,wavenumberHigh)
+                     converged=abs(tidalTensorDelta) < 1.0d-6*abs(tidalTensorRadialRadial)                   
+                     tidalTensorRadialRadial=+tidalTensorRadialRadial &
+                          &                  +     tidalTensorDelta
+                  end do
+                  self%tidalTensorRadialRadial(iRadius,iHeight)=+self%tidalTensorRadialRadial(iRadius,iHeight) &
+                       &                                        +     tidalTensorRadialRadial
+               end do
+               ! Evaluate the integral for the vertical-vertical component of the tidal tensor.
+               self%tidalTensorVerticalVertical(iRadius,iHeight)=0.0d0
+               wavenumberHigh                                   =0.0d0
+               iBesselZero                                      =0
+               converged                                        =.false.
+               do while (.not.converged)
+                  iBesselZero     =+                        iBesselZero  &
+                       &           +                        1
+                  wavenumberLow   =+wavenumberHigh
+                  wavenumberHigh  =+Bessel_Function_J0_Zero(iBesselZero) &
+                       &           /radius
+                  tidalTensorDelta=+integratorTidalTensorVerticalVertical%integrate(wavenumberLow,wavenumberHigh)
+                  converged=abs(tidalTensorDelta) < 1.0d-6*abs(self%tidalTensorVerticalVertical(iRadius,iHeight))
+                  self%tidalTensorVerticalVertical(iRadius,iHeight)=+self%tidalTensorVerticalVertical(iRadius,iHeight) &
+                       &                                            +     tidalTensorDelta
+               end do
+               ! Evaluate the integral for the cross component of the tidal tensor.
+               self%tidalTensorCross(iRadius,iHeight)=0.0d0
+               wavenumberHigh                        =0.0d0
+               iBesselZero                           =0
+               converged                             =.false.
+               do while (.not.converged)
+                  iBesselZero     =+                        iBesselZero  &
+                       &           +                        1
+                  wavenumberLow   =+wavenumberHigh
+                  wavenumberHigh  =+Bessel_Function_J1_Zero(iBesselZero) &
+                       &           /radius
+                  tidalTensorDelta=+integratorTidalTensorCross%integrate(wavenumberLow,wavenumberHigh)
+                  converged=abs(tidalTensorDelta) < 1.0d-6*abs(self%tidalTensorCross(iRadius,iHeight))
+                  self%tidalTensorCross(iRadius,iHeight)=+self%tidalTensorCross(iRadius,iHeight) &
+                       &                                 +     tidalTensorDelta
+               end do
+            end do
+            !$omp end do
+            !$omp end parallel
+         end do
+         call displayCounterClear(       verbosityLevelWorking)
+         call displayUnindent     ("done",verbosityLevelWorking)
+         !$ call hdf5Access%set()
+         call file%openFile    (char   (fileName                        )                              ,overWrite=.true.,readOnly=.false.)
+         call file%writeDataset(        self%accelerationRadii           ,'radii'                                                        )
+         call file%writeDataset(        self%accelerationHeights         ,'heights'                                                      )
+         call file%writeDataset(        self%accelerationRadial          ,'accelerationRadial'                                           )
+         call file%writeDataset(        self%accelerationVertical        ,'accelerationVertical'                                         )
+         call file%writeDataset(        self%tidalTensorRadialRadial     ,'tidalTensorRadialRadial'                                      )
+         call file%writeDataset(        self%tidalTensorVerticalVertical ,'tidalTensorVerticalVertical'                                  )
+         call file%writeDataset(        self%tidalTensorCross            ,'tidalTensorCross'                                             )
+         call file%close       (                                                                                                         )
+         !$ call hdf5Access%unset()
+      end if
+      call File_Unlock(fileLock)
+      ! Compute factors needed for interpolation.
+      self%accelerationRadiusMinimumLog     =      log(self%accelerationRadii  (                            1 ))
+      self%accelerationRadiusMaximumLog     =      log(self%accelerationRadii  (size(self%accelerationRadii  )))
+      self%accelerationHeightMinimumLog     =      log(self%accelerationHeights(                            1 ))
+      self%accelerationHeightMaximumLog     =      log(self%accelerationHeights(size(self%accelerationHeights)))
+      self%accelerationRadiusInverseInterval=1.0d0/log(self%accelerationRadii  (2)/self%accelerationRadii  (1))
+      self%accelerationHeightInverseInterval=1.0d0/log(self%accelerationHeights(2)/self%accelerationHeights(1))
+      ! Record that the acceleration table is initialized.
+      self%accelerationInitialized=.true.
+    end block
     return
 
   contains
@@ -1572,25 +1604,19 @@ contains
     
   end subroutine exponentialDiskAccelerationTabulate
   
-  function exponentialDiskPositionSample(self,randomNumberGenerator_,componentType,massType)
+  function exponentialDiskPositionSample(self,randomNumberGenerator_)
     !!{
     Sample a position from an exponential disk distribution.
     !!}
     use :: Lambert_Ws              , only : Lambert_Wm1
     use :: Numerical_Constants_Math, only : Pi
     implicit none
-    double precision                                 , dimension(3)            :: exponentialDiskPositionSample
-    class           (massDistributionExponentialDisk), intent(inout)           :: self
-    class           (randomNumberGeneratorClass     ), intent(inout)           :: randomNumberGenerator_
-    type            (enumerationComponentTypeType   ), intent(in   ), optional :: componentType
-    type            (enumerationMassTypeType        ), intent(in   ), optional :: massType
-    double precision                                                           :: radius                       , height, &
-         &                                                                        phi
+    double precision                                 , dimension(3)  :: exponentialDiskPositionSample
+    class           (massDistributionExponentialDisk), intent(inout) :: self
+    class           (randomNumberGeneratorClass     ), intent(inout) :: randomNumberGenerator_
+    double precision                                                 :: radius                       , height, &
+         &                                                              phi
 
-    if (.not.self%matches(componentType,massType)) then
-       exponentialDiskPositionSample=0.0d0
-       return
-    end if
     ! Select a radial coordinate.
     radius=(-1.0d0-Lambert_Wm1((-1.0d0+      randomNumberGenerator_%uniformSample())/exp(1.0d0)))*self%scaleRadius
     ! Select a vertical coordinate.

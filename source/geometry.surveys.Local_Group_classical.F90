@@ -1,5 +1,5 @@
 !! Copyright 2009, 2010, 2011, 2012, 2013, 2014, 2015, 2016, 2017, 2018,
-!!           2019, 2020, 2021, 2022, 2023
+!!           2019, 2020, 2021, 2022, 2023, 2024
 !!    Andrew Benson <abenson@carnegiescience.edu>
 !!
 !! This file is part of Galacticus.
@@ -112,22 +112,31 @@ contains
     return
   end function localGroupClassicalFieldCount
 
-  double precision function localGroupClassicalDistanceMaximum(self,mass,magnitudeAbsolute,luminosity,field)
+  double precision function localGroupClassicalDistanceMaximum(self,mass,magnitudeAbsolute,luminosity,starFormationRate,field)
     !!{
     Compute the maximum distance at which a galaxy is visible.
     !!}
     implicit none
     class           (surveyGeometryLocalGroupClassical), intent(inout)           :: self
-    double precision                                   , intent(in   ), optional :: mass , magnitudeAbsolute, luminosity
+    double precision                                   , intent(in   ), optional :: mass      , magnitudeAbsolute, &
+         &                                                                          luminosity, starFormationRate
     integer                                            , intent(in   ), optional :: field
-    !$GLC attributes unused :: field, magnitudeAbsolute, luminosity
+    !$GLC attributes unused :: field
 
+    ! Validate arguments.
+    if (present(magnitudeAbsolute)) call Error_Report('`magnitudeAbsolute` is not supported'//{introspection:location})
+    if (present(luminosity       )) call Error_Report(       '`luminosity` is not supported'//{introspection:location})
+    if (present(starFormationRate)) call Error_Report('`starFormationRate` is not supported'//{introspection:location})
     ! For galaxies above the mass threshold, assume they can be detected out to the maximum specified distance. Galaxies below the
     ! threshold are never detected.
-    if (mass > self%massThreshold) then
-       localGroupClassicalDistanceMaximum=self%distanceMaximumSurvey
+    if (present(mass)) then
+       if (mass > self%massThreshold) then
+          localGroupClassicalDistanceMaximum=self%distanceMaximumSurvey
+       else
+          localGroupClassicalDistanceMaximum=0.0d0
+       end if
     else
-       localGroupClassicalDistanceMaximum=0.0d0
+       localGroupClassicalDistanceMaximum   =self%distanceMaximumSurvey
     end if
     return
   end function localGroupClassicalDistanceMaximum

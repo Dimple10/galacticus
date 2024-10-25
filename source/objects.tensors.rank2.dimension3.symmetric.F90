@@ -1,5 +1,5 @@
 !! Copyright 2009, 2010, 2011, 2012, 2013, 2014, 2015, 2016, 2017, 2018,
-!!           2019, 2020, 2021, 2022, 2023
+!!           2019, 2020, 2021, 2022, 2023, 2024
 !!    Andrew Benson <abenson@carnegiescience.edu>
 !!
 !! This file is part of Galacticus.
@@ -258,6 +258,56 @@ contains
          &         )
     return
   end procedure Tensor_R2_D3_Sym_Is_Zero
+
+  module procedure Tensor_R2_D3_Sym_Element
+    !!{
+    Return the enumeration element of a {\normalfont \ttfamily tensorRank2Dimension3Symmetric} object.
+    !!}
+    use :: Error, only : Error_Report
+    implicit none
+
+    select case (i)
+    case (0)
+       select case (j)
+       case (0)
+          Tensor_R2_D3_Sym_Element=self%x00
+          return
+       case (1)
+          Tensor_R2_D3_Sym_Element=self%x01
+          return
+       case (2)
+          Tensor_R2_D3_Sym_Element=self%x02
+          return
+       end select
+    case (1)
+       select case (j)
+       case (0)
+          Tensor_R2_D3_Sym_Element=self%x01
+          return
+       case (1)
+          Tensor_R2_D3_Sym_Element=self%x11
+          return
+       case (2)
+          Tensor_R2_D3_Sym_Element=self%x12
+          return
+       end select
+    case (2)
+       select case (j)
+       case (0)
+          Tensor_R2_D3_Sym_Element=self%x02
+          return
+       case (1)
+          Tensor_R2_D3_Sym_Element=self%x12
+          return
+       case (2)
+          Tensor_R2_D3_Sym_Element=self%x22
+          return
+       end select
+    end select
+    Tensor_R2_D3_Sym_Element=0.0d0
+    call Error_Report('invalid indices'//{introspection:location})
+    return
+  end procedure Tensor_R2_D3_Sym_Element
 
   module procedure Tensor_R2_D3_Sym_Add
     !!{

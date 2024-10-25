@@ -1,5 +1,5 @@
 !! Copyright 2009, 2010, 2011, 2012, 2013, 2014, 2015, 2016, 2017, 2018,
-!!           2019, 2020, 2021, 2022, 2023
+!!           2019, 2020, 2021, 2022, 2023, 2024
 !!    Andrew Benson <abenson@carnegiescience.edu>
 !!
 !! This file is part of Galacticus.
@@ -44,6 +44,18 @@ subroutine Node_Component_Disk_Very_Simple_Attach_Pipe(self)
   call hotHalo%hotHaloCoolingAbundancesRateFunction(DiskVerySimpleAbundancesGasRateGeneric)
   return
 end subroutine Node_Component_Disk_Very_Simple_Attach_Pipe
+
+double precision function Node_Component_Disk_Very_Simple_Mass_Baryonic(self) result(massBaryonic)
+  !!{
+  Return the baryonic mass for the very simple disk component.
+  !!}
+  implicit none
+  class(nodeComponentDiskVerySimple), intent(inout) :: self
+
+  massBaryonic=+max(0.0d0,self%massStellar()) &
+       &       +max(0.0d0,self%massGas    ())
+  return
+end function Node_Component_Disk_Very_Simple_Mass_Baryonic
 
 double precision function Node_Component_Disk_Very_Simple_Enclosed_Mass(self,radius,componentType,massType,weightBy,weightIndex)
   !!{

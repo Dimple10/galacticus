@@ -1,5 +1,5 @@
 !! Copyright 2009, 2010, 2011, 2012, 2013, 2014, 2015, 2016, 2017, 2018,
-!!           2019, 2020, 2021, 2022, 2023
+!!           2019, 2020, 2021, 2022, 2023, 2024
 !!    Andrew Benson <abenson@carnegiescience.edu>
 !!
 !! This file is part of Galacticus.
@@ -446,7 +446,7 @@ contains
     evolveForward=x1 > x0
     ! Reset the driver.
     status_   =GSL_ODEIV2_Driver_Reset       (self%gsl_odeiv2_driver       )
-    if    (status_ /= GSL_Success) call Error_Report('failed to reset ODE driver'    //{introspection:location})
+    if    (status_ /= GSL_Success) call Error_Report('failed to reset ODE driver'   //{introspection:location})
     if (xStep_ /= 0.0d0) then
        status_=GSL_ODEIV2_Driver_Reset_hStart(self%gsl_odeiv2_driver,xStep_)
        if (status_ /= GSL_Success) call Error_Report('failed to reset ODE step size'//{introspection:location})
@@ -456,9 +456,10 @@ contains
        zCount=size(z)
        allocate(z0(zCount))
        z0=z
-       call self%integrator%integrandSet (zCount,integrandsWrapper)
+       call self%integrator%integrandSet(zCount,integrandsWrapper)
        latentIntegrator_=C_FunLoc(latentIntegrator)
     else
+       allocate(z0(0))
        latentIntegrator_=C_NULL_FUNPTR 
     end if
     ! Initialize error analyzer.

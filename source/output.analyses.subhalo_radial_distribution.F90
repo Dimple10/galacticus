@@ -1,5 +1,5 @@
 !! Copyright 2009, 2010, 2011, 2012, 2013, 2014, 2015, 2016, 2017, 2018,
-!!           2019, 2020, 2021, 2022, 2023
+!!           2019, 2020, 2021, 2022, 2023, 2024
 !!    Andrew Benson <abenson@carnegiescience.edu>
 !!
 !! This file is part of Galacticus.
@@ -21,7 +21,8 @@
   Contains a module which implements an output analysis class that computes subhalo radial distributions.
   !!}
   
-  use :: Cosmology_Functions, only : cosmologyFunctionsClass
+  use :: Cosmology_Functions     , only : cosmologyFunctionsClass
+  use :: Dark_Matter_Profiles_DMO, only : darkMatterProfileDMOClass
 
   !![
   <outputAnalysis name="outputAnalysisSubhaloRadialDistribution">
@@ -32,6 +33,7 @@
    <stateStorable>
     <functionClass variables="volumeFunctionsSubHalos, volumeFunctionsHostHalos"/>
    </stateStorable>
+   <runTimeFileDependencies paths="fileName"/>
   </outputAnalysis>
   !!]
   type, extends(outputAnalysisClass) :: outputAnalysisSubhaloRadialDistribution
@@ -92,9 +94,9 @@ contains
     type            (inputParameters                        ), intent(inout) :: parameters
     class           (cosmologyParametersClass               ), pointer       :: cosmologyParameters_
     class           (cosmologyFunctionsClass                ), pointer       :: cosmologyFunctions_
+    class           (darkMatterProfileDMOClass              ), pointer       :: darkMatterProfileDMO_
     class           (outputTimesClass                       ), pointer       :: outputTimes_
     class           (virialDensityContrastClass             ), pointer       :: virialDensityContrastDefinition_ , virialDensityContrast_
-    class           (darkMatterProfileDMOClass              ), pointer       :: darkMatterProfileDMO_
     double precision                                                         :: radiusFractionMinimum            , radiusFractionMaximum            , &
          &                                                                      redshift                         , negativeBinomialScatterFractional, &
          &                                                                      massRatioThreshold
@@ -155,18 +157,18 @@ contains
     <objectBuilder class="cosmologyParameters"   name="cosmologyParameters_"             source="parameters"                                                />
     <objectBuilder class="cosmologyFunctions"    name="cosmologyFunctions_"              source="parameters"                                                />
     <objectBuilder class="virialDensityContrast" name="virialDensityContrast_          " source="parameters"                                                />
-    <objectBuilder class="virialDensityContrast" name="virialDensityContrastDefinition_" source="parameters" parameterName="virialDensityContrastDefinition"/>
     <objectBuilder class="darkMatterProfileDMO"  name="darkMatterProfileDMO_"            source="parameters"                                                />
+    <objectBuilder class="virialDensityContrast" name="virialDensityContrastDefinition_" source="parameters" parameterName="virialDensityContrastDefinition"/>
     !!]
     if (parameters%isPresent('fileName')) then
        !![
        <conditionalCall>
-        <call>self=outputAnalysisSubhaloRadialDistribution(outputTimes_,virialDensityContrastDefinition_,cosmologyParameters_,cosmologyFunctions_,virialDensityContrast_,darkMatterProfileDMO_,fileName,negativeBinomialScatterFractional{conditions})</call>
+        <call>self=outputAnalysisSubhaloRadialDistribution(darkMatterProfileDMO_,outputTimes_,virialDensityContrastDefinition_,cosmologyParameters_,cosmologyFunctions_,virialDensityContrast_,fileName,negativeBinomialScatterFractional{conditions})</call>
          <argument name="redshift" value="redshift" parameterPresent="parameters"/>
        </conditionalCall>
        !!]
     else
-       self=outputAnalysisSubhaloRadialDistribution(outputTimes_,virialDensityContrastDefinition_,cosmologyParameters_,cosmologyFunctions_,virialDensityContrast_,darkMatterProfileDMO_,cosmologyFunctions_%cosmicTime(cosmologyFunctions_%expansionFactorFromRedshift(redshift)),radiusFractionMinimum,radiusFractionMaximum,countRadiiFractional,massRatioThreshold,negativeBinomialScatterFractional)
+       self=outputAnalysisSubhaloRadialDistribution(darkMatterProfileDMO_,outputTimes_,virialDensityContrastDefinition_,cosmologyParameters_,cosmologyFunctions_,virialDensityContrast_,cosmologyFunctions_%cosmicTime(cosmologyFunctions_%expansionFactorFromRedshift(redshift)),radiusFractionMinimum,radiusFractionMaximum,countRadiiFractional,massRatioThreshold,negativeBinomialScatterFractional)
     end if
     !![
     <inputParametersValidate source="parameters"/>
@@ -180,7 +182,7 @@ contains
     return
   end function subhaloRadialDistributionConstructorParameters
   
-  function subhaloRadialDistributionConstructorFile(outputTimes_,virialDensityContrastDefinition_,cosmologyParameters_,cosmologyFunctions_,virialDensityContrast_,darkMatterProfileDMO_,fileName,negativeBinomialScatterFractional,redshift) result (self)
+  function subhaloRadialDistributionConstructorFile(darkMatterProfileDMO_,outputTimes_,virialDensityContrastDefinition_,cosmologyParameters_,cosmologyFunctions_,virialDensityContrast_,fileName,negativeBinomialScatterFractional,redshift) result (self)
     !!{
     Constructor for the ``subhaloRadialDistribution'' output analysis class for internal use.
     !!}
@@ -198,7 +200,7 @@ contains
     class           (virialDensityContrastClass             ), intent(in   ), target         :: virialDensityContrast_            , virialDensityContrastDefinition_
     class           (cosmologyParametersClass               ), intent(inout), target         :: cosmologyParameters_
     class           (cosmologyFunctionsClass                ), intent(inout), target         :: cosmologyFunctions_
-    class           (darkMatterProfileDMOClass              ), intent(in   ), target         :: darkMatterProfileDMO_
+    class           (darkMatterProfileDMOClass              ), intent(inout), target         :: darkMatterProfileDMO_
     double precision                                         , intent(in   ), optional       :: redshift
     double precision                                         , allocatable  , dimension(:  ) :: radiiFractionalTarget             , radialDistributionTarget         , &
          &                                                                                      radialDistributionErrorTarget
@@ -235,14 +237,14 @@ contains
     do i=1_c_size_t,countRadiiFractional
        radialDistributionCovarianceTarget(i,i)=radialDistributionErrorTarget(i)**2
     end do
-    self=outputAnalysisSubhaloRadialDistribution(outputTimes_,virialDensityContrastDefinition_,cosmologyParameters_,cosmologyFunctions_,virialDensityContrast_,darkMatterProfileDMO_,time,radiusFractionMinimum,radiusFractionMaximum,countRadiiFractional,massRatioThreshold,negativeBinomialScatterFractional,radialDistributionTarget,radialDistributionCovarianceTarget,labelTarget)
+    self=outputAnalysisSubhaloRadialDistribution(darkMatterProfileDMO_,outputTimes_,virialDensityContrastDefinition_,cosmologyParameters_,cosmologyFunctions_,virialDensityContrast_,time,radiusFractionMinimum,radiusFractionMaximum,countRadiiFractional,massRatioThreshold,negativeBinomialScatterFractional,radialDistributionTarget,radialDistributionCovarianceTarget,labelTarget)
     !![
     <constructorAssign variables="fileName, redshift"/>
     !!]
     return
   end function subhaloRadialDistributionConstructorFile
 
-  function subhaloRadialDistributionConstructorInternal(outputTimes_,virialDensityContrastDefinition_,cosmologyParameters_,cosmologyFunctions_,virialDensityContrast_,darkMatterProfileDMO_,time,radiusFractionMinimum,radiusFractionMaximum,countRadiiFractional,massRatioThreshold,negativeBinomialScatterFractional,radialDistributionTarget,radialDistributionCovarianceTarget,labelTarget) result (self)
+  function subhaloRadialDistributionConstructorInternal(darkMatterProfileDMO_,outputTimes_,virialDensityContrastDefinition_,cosmologyParameters_,cosmologyFunctions_,virialDensityContrast_,time,radiusFractionMinimum,radiusFractionMaximum,countRadiiFractional,massRatioThreshold,negativeBinomialScatterFractional,radialDistributionTarget,radialDistributionCovarianceTarget,labelTarget) result (self)
     !!{
     Constructor for the ``subhaloRadialDistribution'' output analysis class for internal use.
     !!}
@@ -269,7 +271,7 @@ contains
     class           (virialDensityContrastClass                  ), intent(in   ), target                   :: virialDensityContrast_                          , virialDensityContrastDefinition_
     class           (cosmologyParametersClass                    ), intent(in   ), target                   :: cosmologyParameters_
     class           (cosmologyFunctionsClass                     ), intent(in   ), target                   :: cosmologyFunctions_
-    class           (darkMatterProfileDMOClass                   ), intent(in   ), target                   :: darkMatterProfileDMO_
+    class           (darkMatterProfileDMOClass                   ), intent(inout), target                   :: darkMatterProfileDMO_
     double precision                                              , intent(in   ), dimension(:)  , optional :: radialDistributionTarget
     double precision                                              , intent(in   ), dimension(:,:), optional :: radialDistributionCovarianceTarget
     type            (varying_string                              ), intent(in   )                , optional :: labelTarget
@@ -295,7 +297,7 @@ contains
     double precision                                              , parameter                               :: massHostLogarithmicMaximum           =1.0d2
     integer         (c_size_t                                    )                                          :: i
     !![
-    <constructorAssign variables="massRatioThreshold, negativeBinomialScatterFractional, countRadiiFractional, radiusFractionMinimum, radiusFractionMaximum, radialDistributionTarget, radialDistributionCovarianceTarget, labelTarget, *cosmologyFunctions_, *outputTimes_, *cosmologyParameters_, *virialDensityContrast_, *virialDensityContrastDefinition_, *darkMatterProfileDMO_"/>
+    <constructorAssign variables="massRatioThreshold, negativeBinomialScatterFractional, countRadiiFractional, radiusFractionMinimum, radiusFractionMaximum, radialDistributionTarget, radialDistributionCovarianceTarget, labelTarget, *cosmologyFunctions_, *darkMatterProfileDMO_, *outputTimes_, *cosmologyParameters_, *virialDensityContrast_, *virialDensityContrastDefinition_"/>
     !!]
 
     ! Initialize.
@@ -548,7 +550,7 @@ contains
     return
   end subroutine subhaloRadialDistributionFinalizeAnalysis
 
-  subroutine subhaloRadialDistributionFinalize(self)
+  subroutine subhaloRadialDistributionFinalize(self,groupName)
     !!{
     Implement a {\normalfont \ttfamily subhaloRadialDistribution} output analysis finalization.
     !!}
@@ -557,15 +559,22 @@ contains
     use :: IO_HDF5                         , only : hdf5Object
     use :: Numerical_Constants_Astronomical, only : massSolar
     implicit none
-    class(outputAnalysisSubhaloRadialDistribution), intent(inout) :: self
-    type (hdf5Object                             )                :: analysesGroup, analysisGroup, &
-         &                                                           dataset
+    class(outputAnalysisSubhaloRadialDistribution), intent(inout)           :: self
+    type (varying_string                         ), intent(in   ), optional :: groupName
+    type (hdf5Object                             )               , target   :: analysesGroup, subGroup
+    type (hdf5Object                             )               , pointer  :: inGroup
+    type (hdf5Object                             )                          :: analysisGroup, dataset
 
     ! Finalize analysis.
     call self%finalizeAnalysis()
     !$ call hdf5Access%set()
-    analysesGroup=outputFile   %openGroup('analyses'                                                )
-    analysisGroup=analysesGroup%openGroup('subhaloRadialDistribution','Analysis of subhalo mass functions')
+    analysesGroup =  outputFile   %openGroup('analyses'                         )
+    inGroup       => analysesGroup
+    if (present(groupName)) then
+       subGroup   =  analysesGroup%openGroup(char(groupName)                    )
+       inGroup    => subGroup
+    end if
+    analysisGroup=inGroup%openGroup('subhaloRadialDistribution','Analysis of subhalo mass functions')
     call analysisGroup   %writeAttribute('Subhalo radial distribution'            ,'description'                                                                                               )
     call analysisGroup   %writeAttribute('function1D'                             ,'type'                                                                                                      )
     call analysisGroup   %writeAttribute('$R_\mathrm{sub}/R_\mathrm{vir,host}$'   ,'xAxisLabel'                                                                                                )
@@ -590,6 +599,8 @@ contains
        call analysisGroup%writeDataset  (self%radialDistributionCovarianceTarget  ,'radialDistributionCovarianceTarget','Subhalo number per bin [observed; covariance]'                        )
     end if
     call analysisGroup   %close         (                                                                                                                                                      )
+    if (present(groupName)) &
+         & call subGroup %close         (                                                                                                                                                      )
     call analysesGroup   %close         (                                                                                                                                                      )
     !$ call hdf5Access%unset()
     return
@@ -601,15 +612,17 @@ contains
     assumes that the model prediction for the number of subhalos in any given mass bin follows a negative binomial
     distribution as was found for dark matter subhalos \citep[][see also
     \protect\citealt{lu_connection_2016}]{boylan-kolchin_theres_2010}. This has been confirmed by examining the results of many
-    tree realizations, although it in principal could be model-dependent.
+    tree realizations, although it in principle could be model-dependent.
     !!}
+    use :: Numerical_Constants_Math         , only : Pi
     use :: Models_Likelihoods_Constants     , only : logImpossible
     use :: Statistics_Distributions_Discrete, only : distributionFunctionDiscrete1DNegativeBinomial
     implicit none
     class           (outputAnalysisSubhaloRadialDistribution       ), intent(inout) :: self
     type            (distributionFunctionDiscrete1DNegativeBinomial)                :: distribution
     integer                                                                         :: i
-    double precision                                                                :: negativeBinomialProbabilitySuccess
+    double precision                                                                :: negativeBinomialProbabilitySuccess, countEffective, &
+         &                                                                             variance
 
     call self%finalizeAnalysis()
     subhaloRadialDistributionLogLikelihood=0.0d0
@@ -620,6 +633,17 @@ contains
              return
           end if
        else
+          ! Compute the likelihood assuming a negative binomial distribution. Note that we "de-normalize" the likelihood by
+          ! multiplying by √[2πσᵢ²] (the normalization term in the corresponding normal distribution). This is useful to allow
+          ! (-logℒ) to be used as a metric for significant shifts in the model results, without changing the relative
+          ! likelihood of models (as this de-normalization shift is a constant multiplicative factor).
+          countEffective                        = dble(max(1.0d0,self%radialDistributionTarget(i)))
+          variance                              =+       countEffective                       &
+               &                                 *(                                           &
+               &                                   +     1.0d0                                &
+               &                                   +self%negativeBinomialScatterFractional**2 &
+               &                                   *     countEffective                       &
+               &                                  )
           negativeBinomialProbabilitySuccess    =+  1.0d0                                                                &
                &                                 /(                                                                      &
                &                                   +1.0d0                                                                &
@@ -627,7 +651,13 @@ contains
                &                                  )
           distribution                          = distributionFunctionDiscrete1DNegativeBinomial                (negativeBinomialProbabilitySuccess,     self%countFailures               )
           subhaloRadialDistributionLogLikelihood=+subhaloRadialDistributionLogLikelihood                                                                                                    &
-               &                                 +distribution                                  %massLogarithmic(                                   nint(self%radialDistributionTarget(i)))
+               &                                 +distribution                                  %massLogarithmic(                                   nint(self%radialDistributionTarget(i))) &
+                  &                              +0.50d0                                                                                                                                    &
+                  &                              *log(                                                                                                                                      &
+                  &                                   +2.0d0                                                                                                                                &
+                  &                                   *Pi                                                                                                                                   &
+                  &                                   *variance                                                                                                                             &
+                  &                                  )
        end if
     end do
     return

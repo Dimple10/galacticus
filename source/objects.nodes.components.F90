@@ -1,5 +1,5 @@
 !! Copyright 2009, 2010, 2011, 2012, 2013, 2014, 2015, 2016, 2017, 2018,
-!!           2019, 2020, 2021, 2022, 2023
+!!           2019, 2020, 2021, 2022, 2023, 2024
 !!    Andrew Benson <abenson@carnegiescience.edu>
 !!
 !! This file is part of Galacticus.
@@ -68,6 +68,8 @@ contains
     Perform per-thread initialization tasks for node components.
     !!}
     use :: Input_Parameters, only : inputParameters
+    use :: Events_Hooks    , only : eventsHooksAtLevelToAllLevels   , calculationResetEvent   , openMPThreadBindingAllLevels
+    use :: Galacticus_Nodes, only : massDistributionCalculationReset, massDistributionsDestroy, massDistributionsLast
     !![
     <include directive="nodeComponentThreadInitializationTask" type="moduleUse">
     !!]
@@ -79,6 +81,9 @@ contains
     type(inputParameters), intent(inout) :: parameters
 
     if (initializationThreadCount == 0) then
+       ! Force all events that attach during this initialization to attach at all levels. This is necessary as the master thread in
+       ! an OpenMP parallel section inherits objects from before the parallel region.
+       call eventsHooksAtLevelToAllLevels(.true. )
        !![
        <include directive="nodeComponentThreadInitializationTask" type="functionCall" functionType="void">
         <functionArgs>parameters</functionArgs>
@@ -87,6 +92,11 @@ contains
        !![
        </include>
        !!]
+       ! Attach to an event that will be used to reset massDistributions of treeNodes during evolution.
+       call calculationResetEvent%attach(massDistributionsLast,massDistributionCalculationReset,openMPThreadBindingAllLevels,label='massDistribution')
+       call massDistributionsDestroy()
+       ! Restore event hooking to standard behavior.
+       call eventsHooksAtLevelToAllLevels(.false.)
     end if
     initializationThreadCount=initializationThreadCount+1
     return
@@ -113,6 +123,8 @@ contains
     !![
     </include>
     !!]
+    use :: Events_Hooks    , only : calculationResetEvent
+    use :: Galacticus_Nodes, only : massDistributionCalculationReset, massDistributionsLast
     implicit none
 
     initializationThreadCount=initializationThreadCount-1
@@ -124,6 +136,7 @@ contains
        !![
        </include>
        !!]
+       if (calculationResetEvent%isAttached(massDistributionsLast,massDistributionCalculationReset)) call calculationResetEvent%detach(massDistributionsLast,massDistributionCalculationReset)
     end if
     return
   end subroutine Node_Components_Thread_Uninitialize

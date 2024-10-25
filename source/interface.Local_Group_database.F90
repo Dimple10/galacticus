@@ -1,5 +1,5 @@
 !! Copyright 2009, 2010, 2011, 2012, 2013, 2014, 2015, 2016, 2017, 2018,
-!!           2019, 2020, 2021, 2022, 2023
+!!           2019, 2020, 2021, 2022, 2023, 2024
 !!    Andrew Benson <abenson@carnegiescience.edu>
 !!
 !! This file is part of Galacticus.
@@ -131,12 +131,16 @@ contains
     !!}
     use :: Input_Paths       , only : inputPath                   , pathTypeDataStatic
     use :: IO_XML            , only : XML_Get_Elements_By_Tag_Name, XML_Get_First_Element_By_Tag_Name, XML_Parse
-    use :: ISO_Varying_String, only : char
+    use :: ISO_Varying_String, only : char                        , varying_string                   , operator(//)
     implicit none
-    type(localGroupDB) :: self
-
-    self%database => XML_Parse(char(inputPath(pathTypeDataStatic))//"observations/localGroup/localGroupSatellites.xml")
+    type(localGroupDB  ) :: self
+    type(varying_string) :: fileName
+    
+    fileName=inputPath(pathTypeDataStatic)//"observations/localGroup/localGroupSatellites.xml"
+    !$omp critical (FoX_DOM_Access)
+    self%database => XML_Parse(char(fileName))
     call XML_Get_Elements_By_Tag_Name(XML_Get_First_Element_By_Tag_Name(self%database,'galaxies'),'galaxy',self%galaxies)
+    !$omp end critical (FoX_DOM_Access)
     allocate(self%selected(0:size(self%galaxies)-1))
     self%selected=.false.
     return
@@ -485,7 +489,7 @@ contains
           end do
           newNode => appendChild(galaxy,newNode)
        else if (.not.hasHeliocentric .and. hasModulus) then
-          ! Convert distance modules to a heliocentric distance.
+          ! Convert distance modulus to a heliocentric distance.
           attribute => getAttributeNode(propertyList2(0)%element,'value')
           call extractDataContent(attribute,distanceModulus)
           distanceHeliocentric=10.0d0**((distanceModulus-25.0d0)/5.0d0)
@@ -532,7 +536,6 @@ contains
                 positionHeliocentricX=abs(uncertainty1*cos(declinationDecimal*degreesToRadians)*cos(rightAscensionDecimal*degreesToRadians))
                 positionHeliocentricY=abs(uncertainty1*cos(declinationDecimal*degreesToRadians)*sin(rightAscensionDecimal*degreesToRadians))
                 positionHeliocentricZ=abs(uncertainty1*sin(declinationDecimal*degreesToRadians))
-
                 write (textContent,'(e16.8,1x,e16.8,1x,e16.8)') positionHeliocentricX,positionHeliocentricY,positionHeliocentricZ
                 call setAttribute(newNode,trim(uncertainties(j)),trim(adjustl(textContent)))
              end if
@@ -568,17 +571,19 @@ contains
           newNode => createElementNS(self%database,getNamespaceURI(self%database),'distanceMilkyWay')
           write (textContent,'(e16.8)') distance
           call setAttribute(newNode,"value",trim(adjustl(textContent)))
-          if (hasAttribute(propertyList1(0)%element,'uncertainty')) then
-             attribute => getAttributeNode(propertyList1(0)%element,'uncertainty')
-             call extractDataContent(attribute,uncertaintyPosition)
-             if (distance > 0.0d0) then
-                uncertainty2=sqrt(sum((position-positionMilkyWay)**2*(uncertaintyPosition**2+uncertaintyPositionMilkyWay**2)))/distance
-             else
-                uncertainty2=0.0d0
+          do j=1,size(uncertainties)
+             if (hasAttribute(propertyList1(0)%element,trim(uncertainties(j)))) then
+                attribute => getAttributeNode(propertyList1(0)%element,trim(uncertainties(j)))
+                call extractDataContent(attribute,uncertaintyPosition)
+                if (distance > 0.0d0) then
+                   uncertainty2=sqrt(sum((position-positionMilkyWay)**2*(uncertaintyPosition**2+uncertaintyPositionMilkyWay**2)))/distance
+                else
+                   uncertainty2=0.0d0
+                end if
+                write (textContent,'(e16.8)') uncertainty2
+                call setAttribute(newNode,trim(uncertainties(j)),trim(adjustl(textContent)))
              end if
-             write (textContent,'(e16.8)') uncertainty2
-             call setAttribute(newNode,'uncertainty',trim(adjustl(textContent)))
-          end if
+          end do
           newNode => appendChild(galaxy,newNode)
        end if
        ! M31.
@@ -594,17 +599,20 @@ contains
           newNode => createElementNS(self%database,getNamespaceURI(self%database),'distanceM31')
           write (textContent,'(e16.8)') distance
           call setAttribute(newNode,"value",trim(adjustl(textContent)))
-          if (hasAttribute(propertyList1(0)%element,'uncertainty')) then
-             attribute => getAttributeNode(propertyList1(0)%element,'uncertainty')
-             call extractDataContent(attribute,uncertaintyPosition)
-             if (distance > 0.0d0) then
-                uncertainty2=sqrt(sum((position-positionM31)**2*(uncertaintyPosition**2+uncertaintyPositionM31**2)))/distance
-             else
-                uncertainty2=0.0d0
+          do j=1,size(uncertainties)
+             if (hasAttribute(propertyList1(0)%element,trim(uncertainties(j)))) then
+                attribute => getAttributeNode(propertyList1(0)%element,trim(uncertainties(j)))
+                attribute => getAttributeNode(propertyList1(0)%element,trim(uncertainties(j)))
+                call extractDataContent(attribute,uncertaintyPosition)
+                if (distance > 0.0d0) then
+                   uncertainty2=sqrt(sum((position-positionM31)**2*(uncertaintyPosition**2+uncertaintyPositionM31**2)))/distance
+                else
+                   uncertainty2=0.0d0
+                end if
+                write (textContent,'(e16.8)') uncertainty2
+                call setAttribute(newNode,trim(uncertainties(j)),trim(adjustl(textContent)))
              end if
-             write (textContent,'(e16.8)') uncertainty2
-             call setAttribute(newNode,'uncertainty',trim(adjustl(textContent)))
-          end if
+          end do
           newNode => appendChild(galaxy,newNode)
        end if
     end do

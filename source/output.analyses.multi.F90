@@ -1,5 +1,5 @@
 !! Copyright 2009, 2010, 2011, 2012, 2013, 2014, 2015, 2016, 2017, 2018,
-!!           2019, 2020, 2021, 2022, 2023
+!!           2019, 2020, 2021, 2022, 2023, 2024
 !!    Andrew Benson <abenson@carnegiescience.edu>
 !!
 !! This file is part of Galacticus.
@@ -166,17 +166,18 @@ contains
     return
   end subroutine multiAnalyze
 
-  subroutine multiFinalize(self)
+  subroutine multiFinalize(self,groupName)
     !!{
     Finalize all analyses.
     !!}
     implicit none
-    class(outputAnalysisMulti), intent(inout) :: self
-    type (multiAnalysisList  ), pointer       :: analysis_
+    class(outputAnalysisMulti), intent(inout)           :: self
+    type (varying_string     ), intent(in   ), optional :: groupName
+    type (multiAnalysisList  ), pointer                 :: analysis_
 
     analysis_ => self%analyses
     do while (associated(analysis_))
-       call analysis_%analysis_%finalize()
+       call analysis_%analysis_%finalize(groupName)
        analysis_ => analysis_%next
     end do
     return

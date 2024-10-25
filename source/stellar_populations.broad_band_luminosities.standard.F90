@@ -1,5 +1,5 @@
 !! Copyright 2009, 2010, 2011, 2012, 2013, 2014, 2015, 2016, 2017, 2018,
-!!           2019, 2020, 2021, 2022, 2023
+!!           2019, 2020, 2021, 2022, 2023, 2024
 !!    Andrew Benson <abenson@carnegiescience.edu>
 !!
 !! This file is part of Galacticus.
@@ -174,7 +174,7 @@ contains
     integer                                                         , dimension( :                   ), intent(in   ) :: luminosityIndex                       , filterIndex
     double precision                                                , dimension( :                   ), intent(in   ) :: age                                   , redshift
     type            (abundances                                    )                                  , intent(in   ) :: abundancesStellar
-    type            (stellarPopulationSpectraPostprocessorList     ), dimension( :                   ), intent(in   ) :: stellarPopulationSpectraPostprocessor_
+    type            (stellarPopulationSpectraPostprocessorList     ), dimension( :                   ), intent(inout) :: stellarPopulationSpectraPostprocessor_
     class           (stellarPopulationClass                        )                                  , intent(inout) :: stellarPopulation_
     double precision                                                , dimension(size(luminosityIndex))                :: standardLuminosities
     double precision                                                , dimension(0:1                  )                :: hAge                                  , hMetallicity
@@ -254,7 +254,7 @@ contains
     double precision                                                , intent(in   ), dimension( :   )              :: redshift
     double precision                                                , intent(  out), dimension( :   ), allocatable :: ages
     double precision                                                , intent(  out), dimension( : ,:), allocatable :: luminosities
-    type            (stellarPopulationSpectraPostprocessorList     ), intent(in   ), dimension( :   )              :: stellarPopulationSpectraPostprocessor_
+    type            (stellarPopulationSpectraPostprocessorList     ), intent(inout), dimension( :   )              :: stellarPopulationSpectraPostprocessor_
     class           (stellarPopulationClass                        ), intent(inout)                                :: stellarPopulation_
     type            (abundances                                    ), intent(in   )                                :: abundancesStellar
     double precision                                                               , dimension(0:1  )              :: hMetallicity
@@ -304,25 +304,26 @@ contains
     !!{
     Tabulate stellar population luminosity in the given filters.
     !!}
-    use            :: Abundances_Structure            , only : logMetallicityZero , metallicityTypeLogarithmicByMassSolar
-    use            :: Display                         , only : displayCounter     , displayCounterClear                  , displayGreen            , displayIndent        , &
-          &                                                    displayMagenta     , displayReset                         , displayUnindent         , verbosityLevelWorking
-    use            :: File_Utilities                  , only : File_Exists        , File_Lock                            , File_Unlock             , lockDescriptor
-    use            :: Error                           , only : Error_Report       , Warn                                 , errorStatusFail         , errorStatusSuccess
+    use            :: Abundances_Structure            , only : logMetallicityZero          , metallicityTypeLogarithmicByMassSolar
+    use            :: Display                         , only : displayCounter              , displayCounterClear                  , displayGreen            , displayIndent        , &
+          &                                                    displayMagenta              , displayReset                         , displayUnindent         , verbosityLevelWorking
+    use            :: File_Utilities                  , only : File_Exists                 , File_Lock                            , File_Unlock             , lockDescriptor
+    use            :: Error                           , only : Error_Report                , Warn                                 , errorStatusFail         , errorStatusSuccess
     use            :: HDF5_Access                     , only : hdf5Access
     use            :: IO_HDF5                         , only : hdf5Object
     use, intrinsic :: ISO_C_Binding                   , only : c_size_t
-    use            :: ISO_Varying_String              , only : assignment(=)      , char                                 , operator(//)            , var_str
+    use            :: ISO_Varying_String              , only : assignment(=)               , char                                 , operator(//)            , var_str
     use            :: Input_Parameters                , only : inputParameters
-    use            :: Instruments_Filters             , only : Filter_Extent      , Filter_Name                          , Filter_Response_Function
+    use            :: Instruments_Filters             , only : Filter_Extent               , Filter_Name                          , Filter_Response_Function
     use            :: Numerical_Constants_Astronomical, only : metallicitySolar
-    use            :: Numerical_Integration           , only : GSL_Integ_Gauss15  , integrator
+    use            :: Numerical_Integration           , only : GSL_Integ_Gauss15           , integrator
     use            :: String_Handling                 , only : operator(//)
+    use            :: Table_Labels                    , only : extrapolationTypeExtrapolate
     implicit none
     class           (stellarPopulationBroadBandLuminositiesStandard), intent(inout)                   :: self
     integer                                                         , intent(in   ), dimension(:    ) :: filterIndex                                   , luminosityIndex
     double precision                                                , intent(in   ), dimension(:    ) :: redshift
-    type            (stellarPopulationSpectraPostprocessorList     ), intent(in   ), dimension(:    ) :: stellarPopulationSpectraPostprocessor_
+    type            (stellarPopulationSpectraPostprocessorList     ), intent(inout), dimension(:    ) :: stellarPopulationSpectraPostprocessor_
     class           (stellarPopulationClass                        ), intent(inout)                   :: stellarPopulation_
     type            (luminosityTable                               ), allocatable  , dimension(:    ) :: luminosityTablesTemporary
     double precision                                                , allocatable  , dimension(:,:,:) :: luminosityTemporary
@@ -417,8 +418,8 @@ contains
                    self%luminosityTables(populationID)%metallicity=logMetallicityZero
                 end where
                 allocate(self%luminosityTables(populationID)%luminosity(luminosityIndexMaximum,self%luminosityTables(populationID)%agesCount,self%luminosityTables(populationID)%metallicitiesCount))
-                self%luminosityTables(populationID)%interpolatorAge        =interpolator(self%luminosityTables(populationID)%age        )
-                self%luminosityTables(populationID)%interpolatorMetallicity=interpolator(self%luminosityTables(populationID)%metallicity)
+                self%luminosityTables(populationID)%interpolatorAge        =interpolator(self%luminosityTables(populationID)%age        ,extrapolationType=extrapolationTypeExtrapolate)
+                self%luminosityTables(populationID)%interpolatorMetallicity=interpolator(self%luminosityTables(populationID)%metallicity,extrapolationType=extrapolationTypeExtrapolate)
                 computeTable=.true.
              end if
              !$omp end single
@@ -431,11 +432,11 @@ contains
                 if (self%storeToFile) then
                    ! Construct name of the file to which this would be stored.
                    if (.not.stellarPopulationHashedDescriptorComputed) then
-                      stellarPopulationHashedDescriptor        =stellarPopulation_%hashedDescriptor(includeSourceDigest=.true.)
+                      stellarPopulationHashedDescriptor        =stellarPopulation_%hashedDescriptor(includeSourceDigest=.true.,includeFileModificationTimes=.true.)
                       stellarPopulationHashedDescriptorComputed=.true.
                    end if
                    if (.not.associated(stellarPopulationSpectraPostprocessor_(iLuminosity)%stellarPopulationSpectraPostprocessor_,stellarPopulationSpectraPostprocessorPrevious_)) then
-                      postprocessorHashedDescriptor                  =  stellarPopulationSpectraPostprocessor_(iLuminosity)%stellarPopulationSpectraPostprocessor_%hashedDescriptor(includeSourceDigest=.true.)
+                      postprocessorHashedDescriptor                  =  stellarPopulationSpectraPostprocessor_(iLuminosity)%stellarPopulationSpectraPostprocessor_%hashedDescriptor(includeSourceDigest=.true.,includeFileModificationTimes=.true.)
                       stellarPopulationSpectraPostprocessorPrevious_ => stellarPopulationSpectraPostprocessor_(iLuminosity)%stellarPopulationSpectraPostprocessor_
                    end if
                    luminositiesFileName=self%storeDirectory                  // &

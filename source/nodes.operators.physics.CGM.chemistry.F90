@@ -1,5 +1,5 @@
 !! Copyright 2009, 2010, 2011, 2012, 2013, 2014, 2015, 2016, 2017, 2018,
-!!           2019, 2020, 2021, 2022, 2023
+!!           2019, 2020, 2021, 2022, 2023, 2024
 !!    Andrew Benson <abenson@carnegiescience.edu>
 !!
 !! This file is part of Galacticus.
@@ -27,8 +27,7 @@
   use :: Chemical_Reaction_Rates               , only : chemicalReactionRateClass
   use :: Cosmology_Functions                   , only : cosmologyFunctionsClass
   use :: Dark_Matter_Halo_Scales               , only : darkMatterHaloScaleClass
-  use :: Hot_Halo_Mass_Distributions           , only : hotHaloMassDistributionClass
-  use :: Radiation_Fields                      , only : radiationFieldClass                   , radiationFieldCosmicMicrowaveBackground, radiationFieldSummation, crossSectionFunctionTemplate
+  use :: Radiation_Fields                      , only : radiationFieldClass                   , crossSectionFunctionTemplate
   use :: Numerical_Constants_Physical          , only : plancksConstant                       , speedLight
   use :: Numerical_Constants_Units             , only : angstromsPerMeter                     , electronVolt
 
@@ -60,12 +59,6 @@
       The abundances of H, H$^+$, and e$^-$ are then fixed according to this fraction, and reaction rates for them are set to
       zero.
     </description>
-    <deepCopy>
-      <functionClass variables="radiation_, radiationCosmicMicrowaveBackground"/>
-    </deepCopy>
-    <stateStorable>
-      <functionClass variables="radiation_, radiationCosmicMicrowaveBackground"/>
-    </stateStorable>
   </nodeOperator>
   !!]
   type, extends(nodeOperatorClass) :: nodeOperatorCGMChemistry
@@ -80,10 +73,7 @@
      class           (chemicalReactionRateClass              ), pointer                   :: chemicalReactionRate_              => null()
      class           (darkMatterHaloScaleClass               ), pointer                   :: darkMatterHaloScale_               => null()
      class           (cosmologyFunctionsClass                ), pointer                   :: cosmologyFunctions_                => null()
-     class           (hotHaloMassDistributionClass           ), pointer                   :: hotHaloMassDistribution_           => null()
-     type            (radiationFieldSummation                ), pointer                   :: radiation_                         => null()
-     type            (radiationFieldCosmicMicrowaveBackground), pointer                   :: radiationCosmicMicrowaveBackground => null()
-     class           (radiationFieldClass                    ), pointer                   :: radiationIntergalacticBackground   => null()
+     class           (radiationFieldClass                    ), pointer                   :: radiation_                         => null()
      logical                                                  , allocatable, dimension(:) :: maskAnalytic
      integer                                                                              :: atomicHydrogenIndex                         , atomicHydrogenCationIndex, &
           &                                                                                  electronIndex
@@ -135,7 +125,7 @@ contains
     Constructor for the {\normalfont \ttfamily cgmChemistry} node operator class which takes a parameter set as input.
     !!}
     use :: Input_Parameters, only : inputParameters
-    use :: Radiation_Fields, only : radiationFieldIntergalacticBackground
+    use :: Radiation_Fields, only : radiationFieldNull
     implicit none
     type            (nodeOperatorCGMChemistry              )                :: self
     type            (inputParameters                       ), intent(inout) :: parameters
@@ -145,8 +135,7 @@ contains
     class           (chemicalReactionRateClass             ), pointer       :: chemicalReactionRate_
     class           (darkMatterHaloScaleClass              ), pointer       :: darkMatterHaloScale_
     class           (cosmologyFunctionsClass               ), pointer       :: cosmologyFunctions_
-    class           (radiationFieldClass                   ), pointer       :: radiationIntergalacticBackground
-    class           (hotHaloMassDistributionClass          ), pointer       :: hotHaloMassDistribution_
+    class           (radiationFieldClass                   ), pointer       :: radiation_
     double precision                                                        :: fractionTimescaleEquilibrium
 
     !![
@@ -162,42 +151,40 @@ contains
     <objectBuilder class="atomicIonizationRateCollisional"   name="atomicIonizationRateCollisional_"   source="parameters"/>
     <objectBuilder class="atomicRecombinationRateRadiative"  name="atomicRecombinationRateRadiative_"  source="parameters"/>
     <objectBuilder class="atomicCrossSectionIonizationPhoto" name="atomicCrossSectionIonizationPhoto_" source="parameters"/>
-    <objectBuilder class="hotHaloMassDistribution"           name="hotHaloMassDistribution_"           source="parameters"/>
     !!]
+    radiation_ => null()
     if (parameters%isPresent('radiationFieldIntergalacticBackground',searchInParents=.true.)) then
        !![
-       <objectBuilder class="radiationField" name="radiationIntergalacticBackground" parameterName="radiationFieldIntergalacticBackground" source="parameters"/>
+       <objectBuilder class="radiationField" name="radiation_" parameterName="radiationFieldIntergalacticBackground" source="parameters"/>
        !!]
-       select type (radiationIntergalacticBackground)
-       class is (radiationFieldIntergalacticBackground)
-          ! This is as expected.
-       class default
-          call Error_Report('radiation field is not of the intergalactic background class'//{introspection:location})
-       end select
     else
-       radiationIntergalacticBackground => null()
-    end if
-    self=nodeOperatorCGMChemistry(fractionTimescaleEquilibrium,atomicIonizationRateCollisional_,atomicRecombinationRateRadiative_,atomicCrossSectionIonizationPhoto_,chemicalReactionRate_,darkMatterHaloScale_,cosmologyFunctions_,hotHaloMassDistribution_,radiationIntergalacticBackground)
+       allocate(radiationFieldNull :: radiation_)
+       select type (radiation_)
+       type is (radiationFieldNull)
+          !![
+	  <referenceConstruct object="radiation_" constructor="radiationFieldNull()"/>
+          !!]
+       end select
+    end if    
+    self=nodeOperatorCGMChemistry(fractionTimescaleEquilibrium,atomicIonizationRateCollisional_,atomicRecombinationRateRadiative_,atomicCrossSectionIonizationPhoto_,chemicalReactionRate_,darkMatterHaloScale_,cosmologyFunctions_,radiation_)
     !![
     <inputParametersValidate source="parameters"/>
     <objectDestructor name="chemicalReactionRate_"             />
     <objectDestructor name="darkMatterHaloScale_"              />
     <objectDestructor name="cosmologyFunctions_"               />
-    <objectDestructor name="radiationIntergalacticBackground"  />
+    <objectDestructor name="radiation_"                        />
     <objectDestructor name="atomicIonizationRateCollisional_"  />
     <objectDestructor name="atomicRecombinationRateRadiative_" />
     <objectDestructor name="atomicCrossSectionIonizationPhoto_"/>
-    <objectDestructor name="hotHaloMassDistribution_"          />
     !!]
     return
   end function cgmChemistryConstructorParameters
 
-  function cgmChemistryConstructorInternal(fractionTimescaleEquilibrium,atomicIonizationRateCollisional_,atomicRecombinationRateRadiative_,atomicCrossSectionIonizationPhoto_,chemicalReactionRate_,darkMatterHaloScale_,cosmologyFunctions_,hotHaloMassDistribution_,radiationIntergalacticBackground) result(self)
+  function cgmChemistryConstructorInternal(fractionTimescaleEquilibrium,atomicIonizationRateCollisional_,atomicRecombinationRateRadiative_,atomicCrossSectionIonizationPhoto_,chemicalReactionRate_,darkMatterHaloScale_,cosmologyFunctions_,radiation_) result(self)
     !!{
     Internal constructor for the {\normalfont \ttfamily cgmChemistry} node operator class.
     !!}
-    use :: Radiation_Fields             , only : radiationFieldList
-    use :: Chemical_Abundances_Structure, only : Chemicals_Index   , Chemicals_Property_Count
+    use :: Chemical_Abundances_Structure, only : Chemicals_Index, Chemicals_Property_Count
     implicit none
     type            (nodeOperatorCGMChemistry              )                         :: self
     double precision                                        , intent(in   )          :: fractionTimescaleEquilibrium
@@ -207,11 +194,9 @@ contains
     class           (chemicalReactionRateClass             ), intent(in   ), target  :: chemicalReactionRate_
     class           (darkMatterHaloScaleClass              ), intent(in   ), target  :: darkMatterHaloScale_
     class           (cosmologyFunctionsClass               ), intent(in   ), target  :: cosmologyFunctions_
-    class           (hotHaloMassDistributionClass          ), intent(in   ), target  :: hotHaloMassDistribution_
-    class           (radiationFieldClass                   ), intent(in   ), pointer :: radiationIntergalacticBackground
-    type            (radiationFieldList                    )               , pointer :: radiationFieldList_
+    class           (radiationFieldClass                   ), intent(in   ), pointer :: radiation_
     !![
-    <constructorAssign variables="fractionTimescaleEquilibrium, *atomicIonizationRateCollisional_, *atomicRecombinationRateRadiative_, *atomicCrossSectionIonizationPhoto_, *chemicalReactionRate_, *darkMatterHaloScale_, *cosmologyFunctions_, *hotHaloMassDistribution_, *radiationIntergalacticBackground"/>
+    <constructorAssign variables="fractionTimescaleEquilibrium, *atomicIonizationRateCollisional_, *atomicRecombinationRateRadiative_, *atomicCrossSectionIonizationPhoto_, *chemicalReactionRate_, *darkMatterHaloScale_, *cosmologyFunctions_, *radiation_"/>
     !!]
 
     ! Determine if chemicals are being solved for.
@@ -227,22 +212,6 @@ contains
     self%maskAnalytic(self%atomicHydrogenIndex      )=.true.
     self%maskAnalytic(self%atomicHydrogenCationIndex)=.true.
     self%maskAnalytic(self%electronIndex            )=.true.
-    ! Create radiation fields.
-    allocate(radiationFieldList_                    )
-    allocate(self%radiation_                        )
-    allocate(self%radiationCosmicMicrowaveBackground)
-    !![
-    <referenceConstruct owner="self" object="radiationCosmicMicrowaveBackground" constructor="radiationFieldCosmicMicrowaveBackground(cosmologyFunctions_)"/>
-    !!]
-    radiationFieldList_%radiationField_ => self%radiationCosmicMicrowaveBackground
-    if (associated(radiationIntergalacticBackground)) then
-       allocate(radiationFieldList_%next)
-       radiationFieldList_%next%radiationField_ => radiationIntergalacticBackground
-    end if
-    !![
-    <referenceConstruct owner="self" object="radiation_" constructor="radiationFieldSummation(radiationFieldList_)"/>
-    !!]
-    nullify(radiationFieldList_)
     return
   end function cgmChemistryConstructorInternal
   
@@ -258,12 +227,9 @@ contains
     <objectDestructor name="self%darkMatterHaloScale_"              />
     <objectDestructor name="self%cosmologyFunctions_"               />
     <objectDestructor name="self%radiation_"                        />
-    <objectDestructor name="self%radiationCosmicMicrowaveBackground"/>
-    <objectDestructor name="self%radiationIntergalacticBackground"  />
     <objectDestructor name="self%atomicIonizationRateCollisional_"  />
     <objectDestructor name="self%atomicRecombinationRateRadiative_" />
     <objectDestructor name="self%atomicCrossSectionIonizationPhoto_"/>
-    <objectDestructor name="self%hotHaloMassDistribution_"          />
     !!]
     return
   end subroutine cgmChemistryDestructor
@@ -352,16 +318,19 @@ contains
     !!}
     use :: Chemical_Abundances_Structure    , only : chemicalAbundances 
     use :: Galacticus_Nodes                 , only : nodeComponentHotHalo
-    use :: Numerical_Constants_Astronomical , only : gigaYear            , megaParsec
+    use :: Numerical_Constants_Astronomical , only : gigaYear             , megaParsec
     use :: Numerical_Constants_Prefixes     , only : centi
     use :: Numerical_Constants_Math         , only : Pi
+    use :: Mass_Distributions               , only : massDistributionClass
+    use :: Galactic_Structure_Options       , only : componentTypeHotHalo , massTypeGaseous
     implicit none
     class           (nodeOperatorCGMChemistry), intent(inout), target    :: self
-    type            (treeNode                ), intent(inout)            :: node
+    type            (treeNode                ), intent(inout), target    :: node
     logical                                   , intent(inout)            :: interrupt
     procedure       (interruptTask           ), intent(inout), pointer   :: functionInterrupt
     integer                                   , intent(in   )            :: propertyType
     class           (nodeComponentHotHalo    )               , pointer   :: hotHalo
+    class           (massDistributionClass   )               , pointer   :: massDistribution_
     double precision                                         , parameter :: massHotHaloTiny        =1.0d-6
     type            (chemicalAbundances      ), save                     :: chemicalDensitiesRates        , chemicalMassesRates, &
          &                                                                  chemicalDensities
@@ -382,23 +351,27 @@ contains
     ! Compute the column length through the halo (in cm).
     massHotHalo=hotHalo%mass()
     if (massHotHalo > massHotHaloTiny) then
-       radiusOuter      =+hotHalo                         %outerRadius           (                      )
-       factorBoostColumn=+self   %hotHaloMassDistribution_%radialMoment          (node,0.0d0,radiusOuter) &
-            &            *4.0d0                                                                           &
-            &            *Pi                                                                              &
-            &            *radiusOuter  **2                                                                &
-            &            /3.0d0                                                                           &
-            &            /massHotHalo
-       lengthColumn     =+radiusOuter                                                                     &
-            &            *megaParsec                                                                      &
-            &            /centi
-       factorClumping   =+self   %hotHaloMassDistribution_%densitySquaredIntegral(node      ,radiusOuter) &
-            &            *4.0d0                                                                           &
-            &            /3.0d0                                                                           &
-            &            *Pi                                                                              &
-            &            *radiusOuter**3                                                                  &
-            &            /massHotHalo**2
-    else
+       massDistribution_ =>  node             %massDistribution     (componentTypeHotHalo,massTypeGaseous)
+       radiusOuter       =  +hotHalo          %outerRadius          (                                    )
+       factorBoostColumn =  +massDistribution_%densityRadialMoment  (0.0d0,radiusOuter                   ) &
+            &               *4.0d0                                                                         &
+            &               *Pi                                                                            &
+            &               *radiusOuter  **2                                                              &
+            &               /3.0d0                                                                         &
+            &               /massHotHalo
+       lengthColumn      =  +radiusOuter                                                                   &
+            &               *megaParsec                                                                    &
+            &               /centi
+       factorClumping    =  +massDistribution_%densitySquareIntegral(      radiusOuter                   ) &
+            &               *4.0d0                                                                         &
+            &               /3.0d0                                                                         &
+            &               *Pi                                                                            &
+            &               *radiusOuter**3                                                                &
+            &               /massHotHalo**2
+       !![
+       <objectDestructor name="massDistribution_"/>
+       !!]          
+     else
        lengthColumn     =+0.0d0
        factorClumping   =+1.0d0
     end if
@@ -406,9 +379,10 @@ contains
     call self%chemicalReactionRate_%rates(lengthColumn,temperature,chemicalDensities,factorClumping,self%radiation_,chemicalDensitiesRates,node)
     ! Convert to mass change rates.
     call chemicalDensitiesRates%numberToMass(chemicalMassesRates)
-    chemicalMassesRates=+chemicalMassesRates     &
-         &              *gigaYear                &
-         &              /massToDensityConversion
+    call chemicalMassesRates   %scale       (                         &
+         &                                   +gigaYear                &
+         &                                   /massToDensityConversion &
+         &                                  )
     ! Zero rates of analytically-solved properties.
     if (self%assumeEquilibrium) then
        call chemicalMassesRates%abundanceSet(self%atomicHydrogenIndex      ,0.0d0)
@@ -427,7 +401,6 @@ contains
     use :: Chemical_Abundances_Structure    , only : chemicalAbundances 
     use :: Chemical_Reaction_Rates_Utilities, only : Chemicals_Mass_To_Density_Conversion
     use :: Galacticus_Nodes                 , only : nodeComponentBasic                   , nodeComponentHotHalo
-    use :: Radiation_Fields                 , only : radiationFieldIntergalacticBackground
     implicit none
     class           (nodeOperatorCGMChemistry), intent(inout)           :: self
     type            (treeNode                ), intent(inout)           :: node
@@ -447,25 +420,22 @@ contains
     ! Get the temperature of the CGM.
     temperature=self%darkMatterHaloScale_%temperatureVirial(node)
     ! Set the radiation background.
-    call self%radiationCosmicMicrowaveBackground%timeSet(basic%time())
-    if (associated(self%radiationIntergalacticBackground)) then
-       select type (radiationIntergalacticBackground => self%radiationIntergalacticBackground)
-       class is (radiationFieldIntergalacticBackground)
-          call radiationIntergalacticBackground%timeSet(basic%time())
-       end select
-    end if
+    call self%radiation_%timeSet(basic%time())
     ! Get the masses of chemicals.
     chemicalMasses=hotHalo%chemicals()
     ! Truncate masses to zero to avoid unphysical behavior.
     call chemicalMasses%enforcePositive()
     massChemicals=chemicalMasses%sumOver()
-    if     (                                          &
-         &   massChemicals > 0.0d0                    &
-         &  .and.                                     &
-         &   massChemicals > hotHalo%mass()           &
-         & ) chemicalMasses=+        chemicalMasses   &
-         &                  *hotHalo%mass          () &
-         &                  /        massChemicals
+    if     (                                                                        &
+         &             massChemicals >         0.0d0                                &
+         &  .and.                                                                   &
+         &             massChemicals >         hotHalo%mass()                       &
+         &  .and.                                                                   &
+         &   -exponent(massChemicals)+exponent(hotHalo%mass()) < maxExponent(0.0d0) &
+         & ) call chemicalMasses%scale(                                             &
+         &                             +hotHalo%mass          ()                    &
+         &                             /        massChemicals                       &
+         &                            )
     ! Scale all chemical masses by their mass in atomic mass units to get a number density.
     call chemicalMasses%massToNumber(chemicalDensities)
     ! Compute factor converting mass of chemicals in (M☉/mᵤ) to number density in cm⁻³.
@@ -477,7 +447,7 @@ contains
     end if
     if (present(massToDensityConversion)) massToDensityConversion=massToDensityConversion_
     ! Convert to number density.
-    chemicalDensities=chemicalDensities*massToDensityConversion_
+    call chemicalDensities%scale(massToDensityConversion_)
     return
   end subroutine cgmChemistryComputeState
 

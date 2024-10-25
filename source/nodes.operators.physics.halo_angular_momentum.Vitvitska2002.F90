@@ -1,5 +1,5 @@
 !! Copyright 2009, 2010, 2011, 2012, 2013, 2014, 2015, 2016, 2017, 2018,
-!!           2019, 2020, 2021, 2022, 2023
+!!           2019, 2020, 2021, 2022, 2023, 2024
 !!    Andrew Benson <abenson@carnegiescience.edu>
 !!
 !! This file is part of Galacticus.
@@ -24,7 +24,6 @@
   
   use :: Dark_Matter_Halo_Scales           , only : darkMatterHaloScaleClass
   use :: Dark_Matter_Profile_Scales        , only : darkMatterProfileScaleRadiusClass
-  use :: Dark_Matter_Profiles_DMO          , only : darkMatterProfileDMOClass
   use :: Halo_Spin_Distributions           , only : haloSpinDistributionClass
   use :: Virial_Orbits                     , only : virialOrbitClass
   use :: Merger_Trees_Build_Mass_Resolution, only : mergerTreeMassResolutionClass
@@ -41,14 +40,18 @@
     contributed by unresolved accretion is zero. The three components of the angular momentum vector of unresolved accretion are
     treated as independent Wiener processes with time-dependent variance. Specifically, each component of the angular momentum
     vector obeys:
-    \begin{equation}
-     J_\mathrm{i}(t_2) = J_\mathrm{i}(t_1) + \left[ \sigma^2 \left( J_\mathrm{v}^2(t_2) - J_\mathrm{v}^2(t_1) \left\{ \frac{M(t_1)-M_\mathrm{u}}{M(t_2)} \right\}^2 \right) \right]^{1/2} N(0,1)
-    \end{equation}    
+    \begin{eqnarray}
+    J_\mathrm{i}(t_2) &amp;=&amp; J_\mathrm{i}(t_1) + \left[ \sigma^2 \left( J_\mathrm{v}^2(t_2) - J_\mathrm{v}^2(t_1) \left\{ \frac{M(t_1)+M_\mathrm{r}}{M(t_1)} \right\}^2 \right) \right]^{1/2} N(0,1) \nonumber \\
+                      &amp;=&amp; J_\mathrm{i}(t_1) + \left[ \sigma^2 \left( J_\mathrm{v}^2(t_2) - J_\mathrm{v}^2(t_1) \left\{ \frac{M(t_2)-M_\mathrm{u}}{M(t_1)} \right\}^2 \right) \right]^{1/2} N(0,1)
+    \end{eqnarray}    
     where $J_\mathrm{v}(t) = M_\mathrm{v}(t) V_\mathrm{v}(t) R_\mathrm{v}(t)$ is the characteristic virial angular momentum,
     $M_\mathrm{v}(t)$, $V_\mathrm{v}(t)$, and $R_\mathrm{v}(t)$ are the virial mass, velocity, and radius respectively,
-    $M_\mathrm{u}$ is the unresolved mass between times $t_1$ and $t_2$ $\sigma^2$ represents the variance in angular momentum per
-    unit increase in $J_\mathrm{v}^2$, and $N(0,1)$ is a random variable distributed as a standard normal. The parameter
-    $\sigma=${\normalfont \ttfamily [angularMomentumVarianceSpecific]}.
+    $M_\mathrm{r}$ and $M_\mathrm{u}$ are the resolved and unresolved mass between times $t_1$ and $t_2$r
+    respectively\footnote{Note that this assumes that the characteristic angular momentum scales in proportion to mass. In detail
+    this is not correct, as there is also some dependence on the change in redshift across the timestep due to the dependence of
+    virial densities on redshift. In practice, we ignore this dependence and absorb such effects into the parameter $\sigma$.},
+    $\sigma^2$ represents the variance in angular momentum per unit increase in $J_\mathrm{v}^2$, and $N(0,1)$ is a random
+    variable distributed as a standard normal. The parameter $\sigma=${\normalfont \ttfamily [angularMomentumVarianceSpecific]}.
    </description>
   </nodeOperator>
   !!]
@@ -59,7 +62,6 @@
      !!}
      private
      class           (haloSpinDistributionClass        ), pointer :: haloSpinDistribution_         => null()
-     class           (darkMatterProfileDMOClass        ), pointer :: darkMatterProfileDMO_         => null()
      class           (virialOrbitClass                 ), pointer :: virialOrbit_                  => null()
      class           (darkMatterHaloScaleClass         ), pointer :: darkMatterHaloScale_          => null()
      class           (darkMatterProfileScaleRadiusClass), pointer :: darkMatterProfileScaleRadius_ => null()
@@ -89,7 +91,6 @@ contains
     type            (nodeOperatorHaloAngularMomentumVitvitska2002)                :: self
     type            (inputParameters                             ), intent(inout) :: parameters
     class           (haloSpinDistributionClass                   ), pointer       :: haloSpinDistribution_
-    class           (darkMatterProfileDMOClass                   ), pointer       :: darkMatterProfileDMO_
     class           (virialOrbitClass                            ), pointer       :: virialOrbit_
     class           (darkMatterHaloScaleClass                    ), pointer       :: darkMatterHaloScale_
     class           (darkMatterProfileScaleRadiusClass           ), pointer       :: darkMatterProfileScaleRadius_
@@ -99,7 +100,7 @@ contains
     !![
     <inputParameter>
       <name>exponentMass</name>
-      <defaultValue>1.0d0</defaultValue>
+      <defaultValue>2.0d0</defaultValue>
       <source>parameters</source>
       <description>The exponent of mass ratio appearing in the orbital angular momentum term in the Vitvitska model.</description>
     </inputParameter>
@@ -111,16 +112,14 @@ contains
     </inputParameter>
     <objectBuilder class="darkMatterProfileScaleRadius" name="darkMatterProfileScaleRadius_" source="parameters"/>
     <objectBuilder class="haloSpinDistribution"         name="haloSpinDistribution_"         source="parameters"/>
-    <objectBuilder class="darkMatterProfileDMO"         name="darkMatterProfileDMO_"         source="parameters"/>
     <objectBuilder class="darkMatterHaloScale"          name="darkMatterHaloScale_"          source="parameters"/>
     <objectBuilder class="virialOrbit"                  name="virialOrbit_"                  source="parameters"/>
     <objectBuilder class="mergerTreeMassResolution"     name="mergerTreeMassResolution_"     source="parameters"/>
     !!]
-    self=nodeOperatorHaloAngularMomentumVitvitska2002(exponentMass,angularMomentumVarianceSpecific,darkMatterProfileScaleRadius_,haloSpinDistribution_,darkMatterProfileDMO_,darkMatterHaloScale_,virialOrbit_,mergerTreeMassResolution_)
+    self=nodeOperatorHaloAngularMomentumVitvitska2002(exponentMass,angularMomentumVarianceSpecific,darkMatterProfileScaleRadius_,haloSpinDistribution_,darkMatterHaloScale_,virialOrbit_,mergerTreeMassResolution_)
     !![
     <inputParametersValidate source="parameters"/>
     <objectDestructor name="haloSpinDistribution_"        />
-    <objectDestructor name="darkMatterProfileDMO_"        />
     <objectDestructor name="darkMatterHaloScale_"         />
     <objectDestructor name="darkMatterProfileScaleRadius_"/>
     <objectDestructor name="virialOrbit_"                 />
@@ -129,23 +128,42 @@ contains
     return
   end function haloAngularMomentumVitvitska2002ConstructorParameters
 
-  function haloAngularMomentumVitvitska2002ConstructorInternal(exponentMass,angularMomentumVarianceSpecific,darkMatterProfileScaleRadius_,haloSpinDistribution_,darkMatterProfileDMO_,darkMatterHaloScale_,virialOrbit_,mergerTreeMassResolution_) result(self)
+  function haloAngularMomentumVitvitska2002ConstructorInternal(exponentMass,angularMomentumVarianceSpecific,darkMatterProfileScaleRadius_,haloSpinDistribution_,darkMatterHaloScale_,virialOrbit_,mergerTreeMassResolution_) result(self)
     !!{
     Internal constructor for the {\normalfont \ttfamily haloAngularMomentumVitvitska2002} node operator class.
     !!}
+    use :: Error           , only : Component_List      , Error_Report
+    use :: Galacticus_Nodes, only : defaultSpinComponent
     implicit none
     type            (nodeOperatorHaloAngularMomentumVitvitska2002)                        :: self
     class           (haloSpinDistributionClass                   ), intent(in   ), target :: haloSpinDistribution_
-    class           (darkMatterProfileDMOClass                   ), intent(in   ), target :: darkMatterProfileDMO_
     class           (virialOrbitClass                            ), intent(in   ), target :: virialOrbit_
     class           (darkMatterHaloScaleClass                    ), intent(in   ), target :: darkMatterHaloScale_
     class           (darkMatterProfileScaleRadiusClass           ), intent(in   ), target :: darkMatterProfileScaleRadius_
     class           (mergerTreeMassResolutionClass               ), intent(in   ), target :: mergerTreeMassResolution_
     double precision                                              , intent(in   )         :: exponentMass                 , angularMomentumVarianceSpecific
     !![
-    <constructorAssign variables="exponentMass, angularMomentumVarianceSpecific, *darkMatterProfileScaleRadius_, *haloSpinDistribution_, *darkMatterProfileDMO_, *darkMatterHaloScale_, *virialOrbit_, *mergerTreeMassResolution_"/>
+    <constructorAssign variables="exponentMass, angularMomentumVarianceSpecific, *darkMatterProfileScaleRadius_, *haloSpinDistribution_, *darkMatterHaloScale_, *virialOrbit_, *mergerTreeMassResolution_"/>
     !!]
 
+    ! Ensure that the spin component supports vector angular momentum.
+    if     (                                                                                                                               &
+         &  .not.                                                                                                                          &
+         &   (                                                                                                                             &
+         &     defaultSpinComponent%angularMomentumVectorIsGettable()                                                                      &
+         &    .and.                                                                                                                        &
+         &     defaultSpinComponent%angularMomentumVectorIsSettable()                                                                      &
+         &   )                                                                                                                             &
+         & )                                                                                                                               &
+         & call Error_Report                                                                                                               &
+         &      (                                                                                                                          &
+         &       'method requires a spin component that provides a gettable and settable "angularMomentumVector" property.'             // &
+         &       Component_List(                                                                                                           &
+         &                      'spin'                                                                                                  ,  &
+         &                       defaultSpinComponent%angularMomentumVectorAttributeMatch(requireGettable=.true.,requireSettable=.true.)   &
+         &                     )                                                                                                        // &
+         &       {introspection:location}                                                                                                  &
+         &      )
     return
   end function haloAngularMomentumVitvitska2002ConstructorInternal
 
@@ -159,7 +177,6 @@ contains
     !![
     <objectDestructor name="self%darkMatterProfileScaleRadius_"/>
     <objectDestructor name="self%haloSpinDistribution_"        />
-    <objectDestructor name="self%darkMatterProfileDMO_"        />
     <objectDestructor name="self%darkMatterHaloScale_"         />
     <objectDestructor name="self%virialOrbit_"                 />
     <objectDestructor name="self%mergerTreeMassResolution_"    />
@@ -205,7 +222,7 @@ contains
     if (.not.associated(node%firstChild)) then
        theta               =acos(2.0d0   *node%hostTree%randomNumberGenerator_%uniformSample()-1.0d0)
        phi                 =     2.0d0*Pi*node%hostTree%randomNumberGenerator_%uniformSample()
-       angularMomentumValue=self%haloSpinDistribution_%sample(node)*Dark_Matter_Halo_Angular_Momentum_Scale(node,self%darkMatterProfileDMO_)
+       angularMomentumValue=self%haloSpinDistribution_%sample(node)*Dark_Matter_Halo_Angular_Momentum_Scale(node,self%darkMatterHaloScale_)
        angularMomentumTotal=angularMomentumValue*[sin(theta)*cos(phi),sin(theta)*sin(phi),cos(theta)]
     else
        nodeChild      =>  node  %firstChild
@@ -265,7 +282,7 @@ contains
           angularMomentumSubresolutionFactor=+1.0d0
        else
           b                                 =+massFunctionSlopeLogarithmic                                         &
-               &                             +self%exponentMAss                                                    &
+               &                             +self%exponentMass                                                    &
                &                             -2.0d0
           angularMomentumSubresolutionFactor=+Beta_Function_Incomplete_Normalized(a,b,massRatio/(1.0d0+massRatio)) &
                &                             *Beta_Function                      (a,b                            ) &
@@ -290,8 +307,11 @@ contains
        angularMomentumRootVariance=+sqrt(                                      &
             &                            +self%angularMomentumVarianceSpecific &
             &                            *(                                    &
-            &                              +angularMomentumScale       **2     &
-            &                              -angularMomentumScaleChild  **2     &
+            &                              +max(                               &
+            &                                   +angularMomentumScale     **2  &
+            &                                   -angularMomentumScaleChild**2, &
+            &                                   +0.0d0                         &
+            &                                  )                               &
             &                              *(                                  &
             &                                +basic   %mass          ()        &
             &                                -         massUnresolved          &

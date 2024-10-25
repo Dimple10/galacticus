@@ -1,5 +1,5 @@
 !! Copyright 2009, 2010, 2011, 2012, 2013, 2014, 2015, 2016, 2017, 2018,
-!!           2019, 2020, 2021, 2022, 2023
+!!           2019, 2020, 2021, 2022, 2023, 2024
 !!    Andrew Benson <abenson@carnegiescience.edu>
 !!
 !! This file is part of Galacticus.
@@ -339,7 +339,7 @@ contains
     return
   end subroutine standardDestructor
 
-  subroutine standardEvolve(self,tree,node,timeEnd,interrupted,functionInterrupt,galacticStructureSolver__,systemClockMaximum,status)
+  subroutine standardEvolve(self,tree,node,timeEnd,interrupted,functionInterrupt,galacticStructureSolver__,treeLock,systemClockMaximum,status)
     !!{
     Evolves {\normalfont \ttfamily node} to time {\normalfont \ttfamily timeEnd}, or until evolution is interrupted.
     !!}
@@ -384,6 +384,7 @@ contains
     logical                                                           , intent(  out)          :: interrupted
     procedure       (interruptTask                      )             , intent(  out), pointer :: functionInterrupt
     class           (galacticStructureSolverClass       )             , intent(in   ), target  :: galacticStructureSolver__
+    class           (ompLockClass                       )             , intent(inout)          :: treeLock
     integer         (kind_int8                          ), optional   , intent(in   )          :: systemClockMaximum
     integer                                              , optional   , intent(  out)          :: status
     procedure       (standardErrorHandler               )                            , pointer :: errorHandler
@@ -399,7 +400,7 @@ contains
     integer         (kind_int8                          )                                      :: systemClockCount
     type            (varying_string                     )                                      :: message                  , line
     character       (len =12                            )                                      :: label
-    
+
     ! Set status to success.
     if (present(status)) status=errorStatusSuccess
     ! Set time limit.
@@ -409,7 +410,8 @@ contains
        self%systemClockMaximum=-1_kind_int8
     end if
     ! Call functions to perform any pre-evolution tasks.
-    call self%nodeOperator_%differentialEvolutionPre(node)
+    call treeLock              %set                     (    )
+    call self    %nodeOperator_%differentialEvolutionPre(node)
     !![
     <include directive="preEvolveTask" type="functionCall" functionType="void">
      <functionArgs>node</functionArgs>
@@ -418,6 +420,7 @@ contains
     !![
     </include>
     !!]
+    call treeLock              %unset                   (    )
 
     ! Determine the end time for this node - either the specified end time, or the time associated with the parent node, whichever
     ! occurs first.
@@ -465,7 +468,7 @@ contains
              deallocate(self%odeTolerancesInactiveAbsolute)
           end if
           allocate(self%propertyValuesActive         (self%propertyCountAll))
-          allocate(self%propertyValuesActiveSaved  (self%propertyCountAll))
+          allocate(self%propertyValuesActiveSaved    (self%propertyCountAll))
           allocate(self%propertyValuesInactive       (self%propertyCountAll))
           allocate(self%propertyValuesInactiveSaved  (self%propertyCountAll))
           allocate(self%propertyScalesActive         (self%propertyCountAll))
@@ -701,12 +704,14 @@ contains
     end if
     ! Call routines to perform any post-evolution tasks.
     if (associated(node)) then
-       call self%nodeOperator_%differentialEvolutionPost(node)
+       call treeLock              %set                      (    )
+       call self    %nodeOperator_%differentialEvolutionPost(node)
        !![
        <eventHook name="postEvolve">
         <callWith>node</callWith>
        </eventHook>
        !!]
+       call treeLock              %unset                    (    )
     end if
     return
   end subroutine standardEvolve
@@ -740,7 +745,7 @@ contains
     integer                                                        :: iTime
     ! "evaluate" array is currently not used. It indicates which integrands must be evaluated, and which can (optionally) be
     ! ignored as they have already converged to the required tolerance. It is currently not used because the potential for
-    ! significant speed up appears to be small based on profiling. This will be model-depdendant though, so this decision can be
+    ! significant speed up appears to be small based on profiling. This will be model-dependent though, so this decision can be
     ! revisited.
     !$GLC attributes unused :: evaluate
 
@@ -789,19 +794,30 @@ contains
     !!{
     Function which evaluates the set of ODEs for the evolution of a specific node.
     !!}
+#ifdef DEBUGGING
+    use :: Debugging             , only : isDebugging    , debugLog
+    use :: ISO_Varying_String    , only : varying_string , assignment(=), var_str
+    use :: Galacticus_Nodes      , only : propertyTypeAll
+    use :: String_Handling       , only : operator(//)
+#endif
     use :: Error                 , only : errorStatusXCPU
     use :: Galacticus_Nodes      , only : interruptTask  , nodeComponentBasic
     use :: Interface_GSL         , only : GSL_Success
     use :: ODE_Solver_Error_Codes, only : interruptedAtX , odeSolverInterrupt
     implicit none
-    double precision                    , intent(in   )               :: time
-    double precision                    , intent(in   ), dimension(:) :: y
-    double precision                    , intent(  out), dimension(:) :: dydt
-    logical                                                           :: interrupt
-    procedure       (interruptTask     ), pointer                     :: functionInterrupt
-    class           (nodeComponentBasic), pointer                     :: basic
-    integer         (kind_int8         )                              :: systemClockCount
- 
+    double precision                    , intent(in   )                                       :: time
+    double precision                    , intent(in   ), dimension(:                        ) :: y
+    double precision                    , intent(  out), dimension(:                        ) :: dydt
+    logical                                                                                   :: interrupt
+    procedure       (interruptTask     ), pointer                                             :: functionInterrupt
+    class           (nodeComponentBasic), pointer                                             :: basic
+    integer         (kind_int8         )                                                      :: systemClockCount
+#ifdef DEBUGGING
+    integer         (c_size_t          )                                                      :: iProperty
+    character       (len=32            )                                                      :: label
+    type            (varying_string    )                                                      :: message
+    double precision                                   , dimension(self_%propertyCountActive) :: valuesDebug, ratesDebug
+#endif
     ! Check for exceeding wall time.
     if (self_%systemClockMaximum > 0_kind_int8) then
        call System_Clock(systemClockCount)
@@ -834,6 +850,13 @@ contains
        dydt=0.0d0
        return
     end if
+#ifdef DEBUGGING
+    if (isDebugging()) then
+       write (label,'(f9.4)') time
+       message=var_str("step: ")//trim(adjustl(label))//' [treeIndex: '//self_%activeNode%hostTree%index//' ; nodeIndex '//self_%activeNode%index()//']'
+       call debugLog(message)
+    end if
+#endif
     ! Set derivatives to zero initially.
     call self_%activeNode%odeStepRatesInitialize()
     if (self_%interruptFirstFound .and. time >= self_%timeInterruptFirst) then
@@ -859,13 +882,27 @@ contains
              self_%interruptFirstFound    =  .true.
              self_%timeInterruptFirst     =  time
              self_%functionInterruptFirst => functionInterrupt
-             ! Let the ODE solver know that an interrupt occured, and when it happened.
+             ! Let the ODE solver know that an interrupt occurred, and when it happened.
              standardODEs                 =  odeSolverInterrupt
              interruptedAtX               =  time
              return
           end if
        end select
     end if
+#ifdef DEBUGGING
+    if (isDebugging()) then
+       call self_%activeNode%serializeValues(valuesDebug,self_%propertyTypeODE)
+       call self_%activeNode%serializeRates (ratesDebug ,self_%propertyTypeODE)
+       do iProperty=1,self_%propertyCountActive
+          write (label,'(e12.6)') valuesDebug(iProperty)
+          message="  value: "        //self_%activeNode%nameFromIndex(int(iProperty),self_%propertyTypeODE)//" "//trim(adjustl(label))
+          call debugLog(message)          
+          write (label,'(e12.6)') ratesDebug(iProperty)
+          message="   rate: (total) "//self_%activeNode%nameFromIndex(int(iProperty),self_%propertyTypeODE)//" "//trim(adjustl(label))
+          call debugLog(message)          
+       end do
+    end if
+#endif
     return
   end function standardODEs
 
@@ -922,11 +959,11 @@ contains
              propertyValues1   =+propertyValues0
              propertyValues1(i)=+propertyValues1           (i) &
                   &             +propertyValueDelta
-             call self_%activeNode%deserializeValues     (propertyValues1                                         ,self_%propertyTypeODE)
-             call self_%activeNode%odeStepRatesInitialize(                                                                              )
-             call self_%galacticStructureSolver_%revert  (self_%activeNode                                                              )
-             call standardDerivativesCompute                    (self_%activeNode     ,interrupt,functionInterrupt,self_%propertyTypeODE)
-             call self_%activeNode%serializeRates        (propertyRates1                                          ,self_%propertyTypeODE)
+             call self_%activeNode%deserializeValues     (propertyValues1                             ,self_%propertyTypeODE)
+             call self_%activeNode%odeStepRatesInitialize(                                                                  )
+             call self_%galacticStructureSolver_%revert  (self_%activeNode                                                  )
+             call standardDerivativesCompute             (self_%activeNode,interrupt,functionInterrupt,self_%propertyTypeODE)
+             call self_%activeNode%serializeRates        (propertyRates1                              ,self_%propertyTypeODE)
              jacobian(i,:)=+(                  &
                   &          +propertyRates1   &
                   &          -propertyRates0   &
@@ -996,18 +1033,18 @@ contains
     use, intrinsic :: ISO_C_Binding  , only : c_double           , c_int
     use            :: String_Handling, only : operator(//)
     implicit none
-    integer         (kind=c_int                   ), intent(in   )                                              :: status
-    real            (kind=c_double                ), intent(in   )                                              :: time
-    real            (kind=c_double                ), intent(in   ), dimension(:                               ) :: y
+    integer         (kind=c_int                   ), intent(in   )                                       :: status
+    real            (kind=c_double                ), intent(in   )                                       :: time
+    real            (kind=c_double                ), intent(in   ), dimension(:                        ) :: y
     real            (kind=c_double                )               , dimension(self_%propertyCountActive) :: dydt          , yError, &
-         &                                                                                                         yTolerance
-    type            (varying_string               )                                                             :: message       , line
-    integer                                                                                                     :: lengthMaximum
-    type            (enumerationVerbosityLevelType)                                                             :: verbosityLevel
-    integer         (c_size_t                     )                                                             :: i
-    character       (len =12                      )                                                             :: label
-    integer         (kind=c_int                   )                                                             :: odeStatus
-    double precision                                                                                            :: stepFactor
+         &                                                                                                  yTolerance
+    type            (varying_string               )                                                      :: message       , line
+    integer                                                                                              :: lengthMaximum
+    type            (enumerationVerbosityLevelType)                                                      :: verbosityLevel
+    integer         (c_size_t                     )                                                      :: i
+    character       (len =12                      )                                                      :: label
+    integer         (kind=c_int                   )                                                      :: odeStatus
+    double precision                                                                                     :: stepFactor
 
     ! Check if this is the final trial for this node.
     if (self_%trialCount == trialCountMaximum-1) then
@@ -1071,7 +1108,7 @@ contains
 
     forall(i=1:self_%propertyCountActive)
        standardODEStepTolerances(i)=+    self_%odeToleranceRelative     &
-            &                       *abs(propertyValues                   (i)) &
+            &                       *abs(      propertyValues      (i)) &
             &                       +    self_%odeToleranceAbsolute     &
             &                       *    self_%propertyScalesActive(i)
     end forall

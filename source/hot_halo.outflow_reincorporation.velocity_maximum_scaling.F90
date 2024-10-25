@@ -1,5 +1,5 @@
 !! Copyright 2009, 2010, 2011, 2012, 2013, 2014, 2015, 2016, 2017, 2018,
-!!           2019, 2020, 2021, 2022, 2023
+!!           2019, 2020, 2021, 2022, 2023, 2024
 !!    Andrew Benson <abenson@carnegiescience.edu>
 !!
 !! This file is part of Galacticus.
@@ -207,18 +207,21 @@ contains
     return
   end subroutine velocityMaximumScalingDestructor
 
-  subroutine velocityMaximumScalingCalculationReset(self,node)
+  subroutine velocityMaximumScalingCalculationReset(self,node,uniqueID)
     !!{
     Reset the halo scales calculation.
     !!}
+    use :: Kind_Numbers, only : kind_int8
     implicit none
-    class(hotHaloOutflowReincorporationVelocityMaximumScaling), intent(inout) :: self
-    type (treeNode                                           ), intent(inout) :: node
+    class  (hotHaloOutflowReincorporationVelocityMaximumScaling), intent(inout) :: self
+    type   (treeNode                                           ), intent(inout) :: node
+    integer(kind_int8                                          ), intent(in   ) :: uniqueID
+    !$GLC attributes unused :: node
 
     self%velocityMaximumComputed=.false.
     self%expansionFactorComputed=.false.
     self%rateComputed           =.false.
-    self%lastUniqueID           =node%uniqueID()
+    self%lastUniqueID           =uniqueID
     return
   end subroutine velocityMaximumScalingCalculationReset
 
@@ -226,26 +229,32 @@ contains
     !!{
     Return the rate of mass reincorporation for outflowed gas in the hot halo.
     !!}
-    use :: Galacticus_Nodes, only : nodeComponentBasic, nodeComponentHotHalo, treeNode
+    use :: Galacticus_Nodes  , only : nodeComponentBasic   , nodeComponentHotHalo, treeNode
+    use :: Mass_Distributions, only : massDistributionClass
     implicit none
     class           (hotHaloOutflowReincorporationVelocityMaximumScaling), intent(inout) :: self
     type            (treeNode                                           ), intent(inout) :: node
     class           (nodeComponentBasic                                 ), pointer       :: basic
     class           (nodeComponentHotHalo                               ), pointer       :: hotHalo
+    class           (massDistributionClass                              ), pointer       :: massDistribution_
     double precision                                                                     :: timeScale
 
     ! Check if node differs from previous one for which we performed calculations.
-    if (node%uniqueID() /= self%lastUniqueID) call self%calculationReset(node)
+    if (node%uniqueID() /= self%lastUniqueID) call self%calculationReset(node,node%uniqueID())
     ! Get required components.
     ! Compute velocity maximum factor.
     if (.not.self%velocityMaximumComputed) then
-       self%velocityMaximumFactor   =        self%velocityExponentiator       %exponentiate(self%darkMatterProfileDMO_ %circularVelocityMaximum(node        ))
+       massDistribution_            =>       self%darkMatterProfileDMO_       %get         (node                                                                        )
+       self%velocityMaximumFactor   =        self%velocityExponentiator       %exponentiate(massDistribution_%velocityRotationCurveMaximum                (            ))
        self%velocityMaximumComputed = .true.
+       !![
+       <objectDestructor name="massDistribution_"/>
+       !!]
     end if
     ! Compute expansion factor factor.
     if (.not.self%expansionFactorComputed) then
-       basic                        =>                                                      node                       %basic                  (            )
-       self%expansionFactorFactor   =  1.0d0/self%expansionFactorExponentiator%exponentiate(self%cosmologyFunctions_   %expansionFactor        (basic%time()))
+       basic                        =>                                                      node                                          %basic          (            )
+       self%expansionFactorFactor   =  1.0d0/self%expansionFactorExponentiator%exponentiate(self             %cosmologyFunctions_         %expansionFactor(basic%time()))
        self%expansionFactorComputed = .true.
     end if
     ! Compute the rate.

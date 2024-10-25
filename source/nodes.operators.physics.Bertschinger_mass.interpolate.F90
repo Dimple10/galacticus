@@ -1,5 +1,5 @@
 !! Copyright 2009, 2010, 2011, 2012, 2013, 2014, 2015, 2016, 2017, 2018,
-!!           2019, 2020, 2021, 2022, 2023
+!!           2019, 2020, 2021, 2022, 2023, 2024
 !!    Andrew Benson <abenson@carnegiescience.edu>
 !!
 !! This file is part of Galacticus.
@@ -41,7 +41,6 @@
      private
      class  (cosmologyParametersClass  ), pointer :: cosmologyParameters_        => null()
      class  (cosmologyFunctionsClass   ), pointer :: cosmologyFunctions_         => null()
-     class  (darkMatterProfileDMOClass ), pointer :: darkMatterProfileDMO_       => null()
      class  (virialDensityContrastClass), pointer :: virialDensityContrast_      => null()
      integer                                      :: massBertschingerID                   , massBertschingerTargetID, &
           &                                          accretionRateBertschingerID
@@ -75,27 +74,24 @@ contains
     type (inputParameters             ), intent(inout) :: parameters
     class(cosmologyParametersClass    ), pointer       :: cosmologyParameters_
     class(cosmologyFunctionsClass     ), pointer       :: cosmologyFunctions_
-    class(darkMatterProfileDMOClass   ), pointer       :: darkMatterProfileDMO_
     class(virialDensityContrastClass  ), pointer       :: virialDensityContrast_
 
     !![
     <objectBuilder class="cosmologyParameters"   name="cosmologyParameters_"   source="parameters"/>
     <objectBuilder class="cosmologyFunctions"    name="cosmologyFunctions_"    source="parameters"/>
-    <objectBuilder class="darkMatterProfileDMO"  name="darkMatterProfileDMO_"  source="parameters"/>
     <objectBuilder class="virialDensityContrast" name="virialDensityContrast_" source="parameters"/>
     !!]
-    self=nodeOperatorBertschingerMass(cosmologyParameters_,cosmologyFunctions_,darkMatterProfileDMO_,virialDensityContrast_)
+    self=nodeOperatorBertschingerMass(cosmologyParameters_,cosmologyFunctions_,virialDensityContrast_)
     !![
     <inputParametersValidate source="parameters"/>
     <objectDestructor name="cosmologyParameters_"  />
     <objectDestructor name="cosmologyFunctions_"   />
-    <objectDestructor name="darkMatterProfileDMO_" />
     <objectDestructor name="virialDensityContrast_"/>
     !!]
     return
   end function bertschingerMassConstructorParameters
 
-  function bertschingerMassConstructorInternal(cosmologyParameters_,cosmologyFunctions_,darkMatterProfileDMO_,virialDensityContrast_) result(self)
+  function bertschingerMassConstructorInternal(cosmologyParameters_,cosmologyFunctions_,virialDensityContrast_) result(self)
     !!{
     Internal constructor for the {\normalfont \ttfamily bertschingerMass} node operator class.
     !!}
@@ -103,10 +99,9 @@ contains
     type (nodeOperatorBertschingerMass)                        :: self
     class(cosmologyParametersClass    ), intent(in   ), target :: cosmologyParameters_
     class(cosmologyFunctionsClass     ), intent(in   ), target :: cosmologyFunctions_
-    class(darkMatterProfileDMOClass   ), intent(in   ), target :: darkMatterProfileDMO_
     class(virialDensityContrastClass  ), intent(in   ), target :: virialDensityContrast_
     !![
-    <constructorAssign variables="*cosmologyParameters_, *cosmologyFunctions_, *darkMatterProfileDMO_, *virialDensityContrast_"/>
+    <constructorAssign variables="*cosmologyParameters_, *cosmologyFunctions_, *virialDensityContrast_"/>
     !!]
     
     !![
@@ -127,7 +122,6 @@ contains
     !![
     <objectDestructor name="self%cosmologyParameters_"  />
     <objectDestructor name="self%cosmologyFunctions_"   />
-    <objectDestructor name="self%darkMatterProfileDMO_" />
     <objectDestructor name="self%virialDensityContrast_"/>
     !!]
     return
@@ -152,7 +146,7 @@ contains
     use :: Dark_Matter_Profile_Mass_Definitions, only : Dark_Matter_Profile_Mass_Definition
     use :: Galacticus_Nodes                    , only : nodeComponentBasic
     implicit none
-    class           (nodeOperatorBertschingerMass), intent(inout)          :: self
+    class           (nodeOperatorBertschingerMass), intent(inout), target  :: self
     type            (treeNode                    ), intent(inout), target  :: node
     type            (treeNode                    )               , pointer :: nodeChild          , nodeParent
     class           (nodeComponentBasic          )               , pointer :: basicChild         , basicParent   , &
@@ -173,7 +167,6 @@ contains
          &                                                                                                                                     )                        , &
          &                                                                   cosmologyParameters_  =self%cosmologyParameters_                                           , &
          &                                                                   cosmologyFunctions_   =self%cosmologyFunctions_                                            , &
-         &                                                                   darkMatterProfileDMO_ =self%darkMatterProfileDMO_                                          , &
          &                                                                   virialDensityContrast_=self%virialDensityContrast_                                           &
          &                                                                  )                                                                                             &
          &                              )
@@ -228,7 +221,6 @@ contains
                &                                                                                                                     )                              , &
                &                                                   cosmologyParameters_  =self%cosmologyParameters_                                                 , &
                &                                                   cosmologyFunctions_   =self%cosmologyFunctions_                                                  , &
-               &                                                   darkMatterProfileDMO_ =self%darkMatterProfileDMO_                                                , &
                &                                                   virialDensityContrast_=self%virialDensityContrast_                                                 &
                &                                                  )                                                                                                   &
                &              -massUnresolved

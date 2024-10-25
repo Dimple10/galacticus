@@ -58,22 +58,6 @@ if ( $emailConfig->{'method'} eq "smtp" && exists($emailConfig->{'passwordFrom'}
 	print "Please enter your e-mail SMTP password:\n";
 	$smtpPassword = &getPassword;
     }
-    elsif ( $emailConfig->{'passwordFrom'} eq "kdewallet" ) {
-	my $appName          = "Galacticus";
-	my $folderName       = "glc-test-all";
-	require Net::DBus;
-	my $bus           = Net::DBus->find;
-	my $walletService = $bus->get_service("org.kde.kwalletd");
-	my $walletObject  = $walletService->get_object("/modules/kwalletd");
-	my $walletID      = $walletObject->open("kdewallet",0,$appName);
-	if ( $walletObject->hasEntry($walletID,$folderName,"smtpPassword",$appName) == 1 ) {
-	    $smtpPassword = $walletObject->readPassword($walletID,$folderName,"smtpPassword",$appName); 
-	} else {
-	    print "Please enter your e-mail SMTP password:\n";
-	    $smtpPassword = &getPassword;
-	    $walletObject->writePassword($walletID,$folderName,"smtpPassword",$smtpPassword,$appName); 
-	}
-    }
 }
 
 # Read any existing timing data.
@@ -571,6 +555,11 @@ my @executablesToRun = (
     },
     {
 	name     => "tests.dark_matter_profiles.finite_resolution.exe",                   # Tests of finite resolution dark matter profiles.
+	valgrind => 0,
+	mpi      => 0
+    },
+    {
+	name     => "tests.dark_matter_profiles.Zhao1996.exe",                            # Tests of Zhao1996 dark matter profiles.
 	valgrind => 0,
 	mpi      => 0
     },

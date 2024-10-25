@@ -1,5 +1,5 @@
 !! Copyright 2009, 2010, 2011, 2012, 2013, 2014, 2015, 2016, 2017, 2018,
-!!           2019, 2020, 2021, 2022, 2023
+!!           2019, 2020, 2021, 2022, 2023, 2024
 !!    Andrew Benson <abenson@carnegiescience.edu>
 !!
 !! This file is part of Galacticus.
@@ -148,7 +148,7 @@ contains
              ! Find which node we should prune.
              nodeListCurrent => nodeListHead
              if (hierarchyDepth > self%hierarchyDepth) then
-                do i=1,self%hierarchyDepth-hierarchyDepth
+                do i=1,hierarchyDepth-self%hierarchyDepth
                    nodeListCurrent => nodeListCurrent%next
                 end do
              end if

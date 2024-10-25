@@ -4,9 +4,7 @@
   <!-- Logging -->
   <verbosityLevel value="standard"/>
 
-  <task value="evolveForests">
-    <evolveSingleForest value="false"/>
-  </task>
+  <task value="evolveForests"/>
   <evolveForestsWorkShare value="cyclic"/>
 
   <!-- Cosmological model -->
@@ -188,7 +186,6 @@
       <timescaleMultiplier value="1.0"/>
     </satelliteMergingTimescales>
   </satelliteMergingTimescales>
-  <satelliteOrbitStoreOrbitalParameters value="true"/>
 
   <!-- Disable all baryonic physics -->
   <hotHaloMassDistribution value="null"/>
@@ -210,7 +207,6 @@
   <outputAnalysis value="spinDistributionBett2007">
     <errorTolerant value="true"/>
     <logNormalRange value="1.44411312812926"/>
-    <timeRecent value="0.533408761742939"/>
   </outputAnalysis>
   <outputTimes value="list">
     <redshifts value="0.0"/>
@@ -236,7 +232,7 @@
     <nodeOperator value="satelliteMassLoss"   />
     <!-- Halo angular momentum -->
     <nodeOperator value="haloAngularMomentumVitvitska2002"  >
-      <exponentMass value="0.274460218346487"/>
+      <exponentMass value="1.274460218346487"/>
     </nodeOperator>
     <nodeOperator value="haloAngularMomentumInterpolate"/>
     <!-- Star formation -->

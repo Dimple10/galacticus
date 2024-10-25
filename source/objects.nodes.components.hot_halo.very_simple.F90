@@ -1,5 +1,5 @@
 !! Copyright 2009, 2010, 2011, 2012, 2013, 2014, 2015, 2016, 2017, 2018,
-!!           2019, 2020, 2021, 2022, 2023
+!!           2019, 2020, 2021, 2022, 2023, 2024
 !!    Andrew Benson <abenson@carnegiescience.edu>
 !!
 !! This file is part of Galacticus.
@@ -94,6 +94,10 @@ module Node_Component_Hot_Halo_Very_Simple
       <attributes isSettable="false" isGettable="true" isEvolvable="false" isDeferred="get" isVirtual="true" />
     </property>
    </properties>
+   <bindings>
+    <binding method="massBaryonic" function="Node_Component_Hot_Halo_Very_Simple_Mass_Baryonic" bindsTo="component"/>
+   </bindings>
+   <functions>objects.nodes.components.hot_halo.very_simple.bound_functions.inc</functions>
   </component>
   !!]
 
@@ -107,6 +111,10 @@ module Node_Component_Hot_Halo_Very_Simple
   logical          :: gotCoolingRate   =.false.
   double precision :: rateCooling
   !$omp threadprivate(gotCoolingRate,rateCooling)
+
+  ! A threadprivate object used to track to which thread events are attached.
+  integer :: thread
+  !$omp threadprivate(thread)
 
 contains
 
@@ -153,9 +161,9 @@ contains
        <objectBuilder class="accretionHalo"       name="accretionHalo_"       source="subParameters"/>
        !!]
        dependencies(1)=dependencyRegEx(dependencyDirectionAfter,'^remnantStructure:')
-       call nodePromotionEvent  %attach(defaultHotHaloComponent,nodePromotion  ,openMPThreadBindingAtLevel,label='nodeComponentHotHaloVerySimple'                          )
-       call satelliteMergerEvent%attach(defaultHotHaloComponent,satelliteMerger,openMPThreadBindingAtLevel,label='nodeComponentHotHaloVerySimple',dependencies=dependencies)
-       call postEvolveEvent     %attach(defaultHotHaloComponent,postEvolve     ,openMPThreadBindingAtLevel,label='nodeComponentHotHaloVerySimple'                          )
+       call nodePromotionEvent  %attach(thread,nodePromotion  ,openMPThreadBindingAtLevel,label='nodeComponentHotHaloVerySimple'                          )
+       call satelliteMergerEvent%attach(thread,satelliteMerger,openMPThreadBindingAtLevel,label='nodeComponentHotHaloVerySimple',dependencies=dependencies)
+       call postEvolveEvent     %attach(thread,postEvolve     ,openMPThreadBindingAtLevel,label='nodeComponentHotHaloVerySimple'                          )
     end if
     return
   end subroutine Node_Component_Hot_Halo_Very_Simple_Thread_Initialize
@@ -179,9 +187,9 @@ contains
        <objectDestructor name="coolingRate_"        />
        <objectDestructor name="accretionHalo_"      />
        !!]
-       if (nodePromotionEvent  %isAttached(defaultHotHaloComponent,nodePromotion  )) call nodePromotionEvent  %detach(defaultHotHaloComponent,nodePromotion  )
-       if (satelliteMergerEvent%isAttached(defaultHotHaloComponent,satelliteMerger)) call satelliteMergerEvent%detach(defaultHotHaloComponent,satelliteMerger)
-       if (postEvolveEvent     %isAttached(defaultHotHaloComponent,postEvolve     )) call postEvolveEvent     %detach(defaultHotHaloComponent,postEvolve     )
+       if (nodePromotionEvent  %isAttached(thread,nodePromotion  )) call nodePromotionEvent  %detach(thread,nodePromotion  )
+       if (satelliteMergerEvent%isAttached(thread,satelliteMerger)) call satelliteMergerEvent%detach(thread,satelliteMerger)
+       if (postEvolveEvent     %isAttached(thread,postEvolve     )) call postEvolveEvent     %detach(thread,postEvolve     )
     end if
     return
   end subroutine Node_Component_Hot_Halo_Very_Simple_Thread_Uninitialize
@@ -191,14 +199,16 @@ contains
   <unitName>Node_Component_Hot_Halo_Very_Simple_Reset</unitName>
   </calculationResetTask>
   !!]
-  subroutine Node_Component_Hot_Halo_Very_Simple_Reset(node)
+  subroutine Node_Component_Hot_Halo_Very_Simple_Reset(node,uniqueID)
     !!{
     Remove memory of stored computed values as we're about to begin computing derivatives anew.
     !!}
     use :: Galacticus_Nodes, only : treeNode
+    use :: Kind_Numbers    , only : kind_int8
     implicit none
-    type(treeNode), intent(inout) :: node
-    !$GLC attributes unused :: node
+    type   (treeNode ), intent(inout) :: node
+    integer(kind_int8), intent(in   ) :: uniqueID
+    !$GLC attributes unused :: node, uniqueID
 
     gotCoolingRate=.false.
     return

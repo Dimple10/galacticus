@@ -1,5 +1,5 @@
 !! Copyright 2009, 2010, 2011, 2012, 2013, 2014, 2015, 2016, 2017, 2018,
-!!           2019, 2020, 2021, 2022, 2023
+!!           2019, 2020, 2021, 2022, 2023, 2024
 !!    Andrew Benson <abenson@carnegiescience.edu>
 !!
 !! This file is part of Galacticus.
@@ -464,12 +464,13 @@ contains
     return
   end subroutine crossCorrelator1DReduce
 
-  subroutine crossCorrelator1DFinalize(self)
+  subroutine crossCorrelator1DFinalize(self,groupName)
     !!{
     Implement a crossCorrelator1D output analysis finalization.
     !!}
     implicit none
-    class(outputAnalysisCrossCorrelator1D), intent(inout) :: self
+    class(outputAnalysisCrossCorrelator1D), intent(inout)           :: self
+    type (varying_string                 ), intent(in   ), optional :: groupName
 
     ! Finalize analysis.
     call self%finalizeAnalysis()
