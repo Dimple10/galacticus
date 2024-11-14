@@ -50,8 +50,10 @@ sub Parse_Declarations {
 		# Accumulate raw text.
 		if ( $isDeclaration == 1 ) {
 		    $rawDeclaration .= $rawLine;
-		    push(@declarations,$declaration)
-			if ( $declaration );
+		    if ( $declaration ) {
+			$declaration->{'line'} = $lineNumber;
+			push(@declarations,$declaration);
+		    }
 		} else {
 		    $rawCode        .= $rawLine;
 		}
@@ -133,7 +135,10 @@ sub BuildDeclarations {
     my $node =   shift() ;
     $node->{'firstChild'}->{'content'} = $node->{'implicitNone'} ? "implicit none\n" : "";
     foreach my $declaration ( @{$node->{'declarations'}} ) {
-	my $declarationCode  = "  ";
+	my $declarationCode  = "";
+	$declarationCode    .= "#ifdef ".$declaration->{'preprocessor'}."\n"
+	    if ( exists($declaration->{'preprocessor'}) );
+	$declarationCode    .= "  ";
 	$declarationCode    .= "!\$ "
 	    if ( exists($declaration->{'openMP'}) && $declaration->{'openMP'} );
 	$declarationCode    .= $declaration->{'intrinsic'};
@@ -150,6 +155,8 @@ sub BuildDeclarations {
 	$declarationCode    .= " :: ".join(", ",@{$declaration->{'variables'}})."\n";
 	$declarationCode    .= " !\$omp threadprivate(".join(",",map {$_ =~ s/([a-zA-Z0-9_]+).*/$1/; $_} @{$declaration->{'variables'}}).")\n"
 	    if ( exists($declaration->{'threadprivate'}) && $declaration->{'threadprivate'} );
+	$declarationCode    .= "#endif\n"
+	    if ( exists($declaration->{'preprocessor'}) );
 	$node->{'firstChild'}->{'content'} .= $declarationCode;
     }
 }
@@ -301,7 +308,7 @@ sub parseDeclaration {
     # Parse an individual declaration line.
     my $line = shift();
     my $declaration;
-    foreach ( keys(%Fortran::Utils::intrinsicDeclarations) ) {
+    foreach ( sort(keys(%Fortran::Utils::intrinsicDeclarations)) ) {
 	if ( my @matches = ( $line =~ $Fortran::Utils::intrinsicDeclarations{$_}->{'regEx'} ) ) {
 	    my $intrinsic  = $Fortran::Utils::intrinsicDeclarations{$_}->{'intrinsic'};
 	    my $type;

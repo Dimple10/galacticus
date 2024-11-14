@@ -35,11 +35,39 @@ if ( -e $sourceDirectoryDescriptors[0]->{'path'} ) {
 # Initialize data structure to hold per-file information.
 my $modulesPerFile;
 my $havePerFile = -e $workDirectoryName."Makefile_Module_Dependencies.blob";
+my $forceRescan = 0;
 my $updateTime;
 if ( $havePerFile ) {
     $modulesPerFile = retrieve($workDirectoryName."Makefile_Module_Dependencies.blob");
     $updateTime     = -M       $workDirectoryName."Makefile_Module_Dependencies.blob" ;
+    # Look for changes in source files. Force a rescan of all files if anything has changed.
+    my @fileIdentifiers;
+    # Iterate over source directories.
+    foreach my $sourceDirectoryDescriptor ( @sourceDirectoryDescriptors ) {
+	# Find all source files to process in this directory.
+	opendir(my $sourceDirectory,$sourceDirectoryDescriptor->{'path'})
+	    or die "moduleDepedencies.pl: can not open the source directory: #!";
+	my @sourceFileNames = grep {$_ =~ m/\.(f|f90)$/i && $_ !~ m/^\.\#/} readdir($sourceDirectory);
+	closedir($sourceDirectory);
+	foreach my $sourceFileName ( @sourceFileNames ) {
+	    (my $fileIdentifier = $sourceDirectoryDescriptor->{'path'}."/".$sourceFileName) =~ s/\//_/g;
+	    push(@fileIdentifiers,$fileIdentifier);
+	}
+    }
+    # Check for new files.
+    foreach my $fileIdentifier ( @fileIdentifiers ) {
+	unless ( exists($modulesPerFile->{$fileIdentifier}) ) {
+	    $forceRescan = 1;
+	}
+    }
+    # Check for removed files.
+    foreach my $fileIdentifier ( keys(%{$modulesPerFile}) ) {
+	unless ( grep {$_ eq $fileIdentifier} @fileIdentifiers ) {
+	    $forceRescan = 1;
+	}
+    }
 }
+
 # Iterate over source directories.
 foreach my $sourceDirectoryDescriptor ( @sourceDirectoryDescriptors ) {
     # Find all source files to process in this directory.
@@ -60,7 +88,7 @@ foreach my $sourceDirectoryDescriptor ( @sourceDirectoryDescriptors ) {
 		unless ( grep {-M $_ < $updateTime} &List::ExtraUtils::as_array($modulesPerFile->{$fileIdentifier}->{'files'}) );
 	}
 	next
-	    unless ( $rescan );
+	    unless ( $rescan || $forceRescan );
 	delete($modulesPerFile->{$fileIdentifier})
     	    if ( $havePerFile && exists($modulesPerFile->{$fileIdentifier}) );
 	# Extract list of functionClass directives from this file which require special handling.
@@ -204,10 +232,15 @@ foreach my $fileIdentifier ( sort(keys(%{$modulesPerFile})) ) {
 			 foreach my $availableSubmodule ( @{$submodules{lc($moduleFileName)}} ) {
 			     print "\t\t'".$availableSubmodule->{'name'}."'\n";
 			 }
-			 die('moduleDependencies.pl: no matching submodule found');
+			 die('ERROR: moduleDependencies.pl: no matching submodule found');
 		     }
-		     die('moduleDependencies.pl: multiple matching submodules found')
-			 if ( scalar(@match) >  1 );
+		     if ( scalar(@match) >  1 ) {
+			 print "ERROR: class '".$submodule->{'name'}."' is an extension of class '".$submodule->{'extends'}."' which is multiply defined in files:\n";
+			 foreach ( @match ) {
+			     print "\t".$_->{'source'}."\n";
+			 }
+			 die('moduleDependencies.pl: multiple matching submodules found');
+		     }
 		     $dependsOn = $match[0]->{'fileName'}.".o";
 		 } else {
 		     $dependsOn = $modulesPerFile->{$fileIdentifier}->{'sourceDirectoryDescriptor'}->{'leaf'}.$objectFileName;

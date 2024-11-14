@@ -1,5 +1,5 @@
 !! Copyright 2009, 2010, 2011, 2012, 2013, 2014, 2015, 2016, 2017, 2018,
-!!           2019, 2020, 2021, 2022, 2023
+!!           2019, 2020, 2021, 2022, 2023, 2024
 !!    Andrew Benson <abenson@carnegiescience.edu>
 !!
 !! This file is part of Galacticus.
@@ -35,7 +35,8 @@ module Hypergeometric_Functions
   use            :: Interface_GSL, only : gsl_sf_result, gsl_success
   implicit none
   private
-  public :: Hypergeometric_1F1, Hypergeometric_2F1, Hypergeometric_pFq, Hypergeometric_pFq_Regularized
+  public :: Hypergeometric_1F1            , Hypergeometric_2F1, Hypergeometric_pFq, Hypergeometric_pFq_Regularized, &
+       &    Hypergeometric_2F1_Regularized
 
   interface Hypergeometric_pFq
      module procedure :: Hypergeometric_pFq_Real
@@ -221,6 +222,20 @@ contains
     end if
     return
   end function Hypergeometric_2F1
+
+  double precision function Hypergeometric_2F1_Regularized(a,b,x)
+    !!{
+    Evaluate the regularized generalized hypergeometric function
+    $_2F_1(a_1,a_2;b_1;x)/\Gamma(b_1)$ for real arguments.
+    !!}
+    implicit none
+    double precision, intent(in   ), dimension(2) :: a
+    double precision, intent(in   ), dimension(1) :: b
+    double precision, intent(in   )               :: x
+
+    Hypergeometric_2F1_Regularized=Hypergeometric_2F1(a,b,x)/Gamma(b(1))
+    return
+  end function Hypergeometric_2F1_Regularized
 
   double complex function Hypergeometric_pFq_Complex(a,b,x,toleranceRelative)
     !!{

@@ -1,5 +1,5 @@
 !! Copyright 2009, 2010, 2011, 2012, 2013, 2014, 2015, 2016, 2017, 2018,
-!!           2019, 2020, 2021, 2022, 2023
+!!           2019, 2020, 2021, 2022, 2023, 2024
 !!    Andrew Benson <abenson@carnegiescience.edu>
 !!
 !! This file is part of Galacticus.
@@ -162,12 +162,13 @@ contains
     self=mergerTreeEvolverThreaded(allTreesExistAtFinalTime,dumpTreeStructure,timestepHostRelative,timestepHostAbsolute,fractionTimestepSatelliteMinimum,profileSteps,reportTiming,cosmologyFunctions_,mergerTreeNodeEvolver_,mergerTreeEvolveTimestep_,mergerTreeInitializor_,mergerTreeEvolveConcurrency_,galacticStructureSolver_,mergerTreeEvolveProfiler_,parameters_)
     !![
     <inputParametersValidate source="parameters"/>
-    <objectDestructor name="cosmologyFunctions_"      />
-    <objectDestructor name="mergerTreeEvolveTimestep_"/>
-    <objectDestructor name="mergerTreeNodeEvolver_"   />
-    <objectDestructor name="galacticStructureSolver_" />
-    <objectDestructor name="mergerTreeInitializor_"   />
-    <objectDestructor name="mergerTreeEvolveProfiler_"/>
+    <objectDestructor name="cosmologyFunctions_"         />
+    <objectDestructor name="mergerTreeEvolveTimestep_"   />
+    <objectDestructor name="mergerTreeNodeEvolver_"      />
+    <objectDestructor name="galacticStructureSolver_"    />
+    <objectDestructor name="mergerTreeInitializor_"      />
+    <objectDestructor name="mergerTreeEvolveProfiler_"   />
+    <objectDestructor name="mergerTreeEvolveConcurrency_"/>
     !!]
     return
   end function threadedConstructorParameters
@@ -402,7 +403,7 @@ contains
     parameters=inputParameters(self%parameters)
     call parameters%parametersGroupCopy(self%parameters)
     call Node_Components_Thread_Initialize(parameters)   
-    ! Determine out worker number.
+    ! Determine our worker number.
     numberWorker=OMP_Get_Thread_Num()
     if (self%reportTiming) then
        call timer_%stop()

@@ -1,5 +1,5 @@
 !! Copyright 2009, 2010, 2011, 2012, 2013, 2014, 2015, 2016, 2017, 2018,
-!!           2019, 2020, 2021, 2022, 2023
+!!           2019, 2020, 2021, 2022, 2023, 2024
 !!    Andrew Benson <abenson@carnegiescience.edu>
 !!
 !! This file is part of Galacticus.
@@ -19,13 +19,13 @@
 
 !!{
 Contains a program which tests the \cite{tinker_towardhalo_2008} mass function by comparing to Jeremy Tinker's
-\href{https://cosmo.nyu.edu/~tinker/massfunction/MF_code.tar}{code}.
+\href{http://web.archive.org/web/20220313133942/https://cosmo.nyu.edu/~tinker/massfunction/MF_code.tar}{code}.
 !!}
 
 program Tests_Halo_Mass_Function_Tinker
   !!{
   Tests the \cite{tinker_towardhalo_2008} mass function by comparing to Jeremy Tinker's
-  \href{https://cosmo.nyu.edu/~tinker/massfunction/MF_code.tar}{code}.
+  \href{http://web.archive.org/web/20220313133942/https://cosmo.nyu.edu/~tinker/massfunction/MF_code.tar}{code}.
   !!}
   use :: Cosmological_Density_Field          , only : criticalOverdensitySphericalCollapseClsnlssMttrCsmlgclCnstnt, cosmologicalMassVarianceFilteredPower
   use :: Cosmology_Functions                 , only : cosmologyFunctionsMatterLambda

@@ -1,5 +1,5 @@
 !! Copyright 2009, 2010, 2011, 2012, 2013, 2014, 2015, 2016, 2017, 2018,
-!!           2019, 2020, 2021, 2022, 2023
+!!           2019, 2020, 2021, 2022, 2023, 2024
 !!    Andrew Benson <abenson@carnegiescience.edu>
 !!
 !! This file is part of Galacticus.
@@ -45,3 +45,14 @@ double precision function Node_Component_Hot_Halo_Standard_Mass_Total(self)
   return
 end function Node_Component_Hot_Halo_Standard_Mass_Total
 
+double precision function Node_Component_Hot_Halo_Standard_Mass_Baryonic(self) result(massBaryonic)
+  !!{
+  Return the baryonic mass for the hot halo standard component.
+  !!}
+  implicit none
+  class(nodeComponentHotHaloStandard), intent(inout) :: self
+
+  massBaryonic=+max(0.0d0,self%mass         ()) &
+       &       +max(0.0d0,self%outflowedMass())
+  return
+end function Node_Component_Hot_Halo_Standard_Mass_Baryonic

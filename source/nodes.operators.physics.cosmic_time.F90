@@ -1,5 +1,5 @@
 !! Copyright 2009, 2010, 2011, 2012, 2013, 2014, 2015, 2016, 2017, 2018,
-!!           2019, 2020, 2021, 2022, 2023
+!!           2019, 2020, 2021, 2022, 2023, 2024
 !!    Andrew Benson <abenson@carnegiescience.edu>
 !!
 !! This file is part of Galacticus.
@@ -35,7 +35,8 @@
      private
    contains
      procedure :: differentialEvolutionAnalytics      => cosmicTimeDifferentialEvolutionAnalytics
-     procedure :: differentialEvolutionSolveAnalytics => cosmicTimeDifferentialEvolutionSolveAnalytics
+     procedure :: preDeterminedSolveAnalytics         => cosmicTimeSolveAnalytics
+     procedure :: differentialEvolutionSolveAnalytics => cosmicTimeSolveAnalytics
      procedure :: nodesMerge                          => cosmicTimeNodesMerge
   end type nodeOperatorCosmicTime
   
@@ -79,7 +80,7 @@ contains
     return
   end subroutine cosmicTimeDifferentialEvolutionAnalytics
 
-  subroutine cosmicTimeDifferentialEvolutionSolveAnalytics(self,node,time)
+  subroutine cosmicTimeSolveAnalytics(self,node,time)
     !!{
     Set values of analytically-solvable properties.
     !!}
@@ -94,7 +95,7 @@ contains
     basic => node%basic()
     call basic%timeSet(time)
     return
-  end subroutine cosmicTimeDifferentialEvolutionSolveAnalytics
+  end subroutine cosmicTimeSolveAnalytics
 
   subroutine cosmicTimeNodesMerge(self,node)
     !!{

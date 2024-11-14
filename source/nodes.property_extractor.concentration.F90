@@ -1,5 +1,5 @@
 !! Copyright 2009, 2010, 2011, 2012, 2013, 2014, 2015, 2016, 2017, 2018,
-!!           2019, 2020, 2021, 2022, 2023
+!!           2019, 2020, 2021, 2022, 2023, 2024
 !!    Andrew Benson <abenson@carnegiescience.edu>
 !!
 !! This file is part of Galacticus.
@@ -42,8 +42,8 @@ Contains a module which implements a concentration output analysis property extr
      private
      class  (cosmologyParametersClass  ), pointer :: cosmologyParameters_   => null()
      class  (cosmologyFunctionsClass   ), pointer :: cosmologyFunctions_    => null()
-     class  (darkMatterProfileDMOClass ), pointer :: darkMatterProfileDMO_  => null()
      class  (virialDensityContrastClass), pointer :: virialDensityContrast_ => null(), virialDensityContrastDefinition_ => null()
+     class  (darkMatterProfileDMOClass ), pointer :: darkMatterProfileDMO_  => null()
      logical                                      :: useLastIsolatedTime
    contains
      final     ::                concentrationDestructor
@@ -144,7 +144,7 @@ contains
     use :: Dark_Matter_Profile_Mass_Definitions, only : Dark_Matter_Profile_Mass_Definition
     use :: Galacticus_Nodes                    , only : nodeComponentBasic                 , nodeComponentDarkMatterProfile, treeNode
     implicit none
-    class           (nodePropertyExtractorConcentration), intent(inout)           :: self
+    class           (nodePropertyExtractorConcentration), intent(inout), target   :: self
     type            (treeNode                          ), intent(inout), target   :: node
     type            (multiCounter                      ), intent(inout), optional :: instance
     class           (nodeComponentBasic                ), pointer                 :: basic
@@ -166,8 +166,8 @@ contains
          &                                                       radius                =     radiusHalo                                                         , &
          &                                                       cosmologyParameters_  =self%cosmologyParameters_                                               , &
          &                                                       cosmologyFunctions_   =self%cosmologyFunctions_                                                , &
-         &                                                       darkMatterProfileDMO_ =self%darkMatterProfileDMO_                                              , &
          &                                                       virialDensityContrast_=self%virialDensityContrast_                                             , &
+         &                                                       darkMatterProfileDMO_ =self%darkMatterProfileDMO_                                              , &
          &                                                       useLastIsolatedTime   =self%useLastIsolatedTime                                                  &
          &                                                      )
     concentrationExtract =  +                  radiusHalo   &

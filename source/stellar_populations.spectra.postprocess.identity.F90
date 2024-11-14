@@ -1,5 +1,5 @@
 !! Copyright 2009, 2010, 2011, 2012, 2013, 2014, 2015, 2016, 2017, 2018,
-!!           2019, 2020, 2021, 2022, 2023
+!!           2019, 2020, 2021, 2022, 2023, 2024
 !!    Andrew Benson <abenson@carnegiescience.edu>
 !!
 !! This file is part of Galacticus.
@@ -34,7 +34,8 @@
      !!}
      private
    contains
-     procedure :: multiplier => identityMultiplier
+     procedure :: multiplier          => identityMultiplier
+     procedure :: isRedshiftDependent => identityIsRedshiftDependent
   end type stellarPopulationSpectraPostprocessorIdentity
 
   interface stellarPopulationSpectraPostprocessorIdentity
@@ -75,3 +76,15 @@ contains
     identityMultiplier=1.0d0
     return
   end function identityMultiplier
+
+  logical function identityIsRedshiftDependent(self) result(isRedshiftDependent)
+    !!{
+    Return false indicating that the postprocessor is redshift independent.
+    !!}
+    implicit none
+    class(stellarPopulationSpectraPostprocessorIdentity), intent(inout) :: self
+    !$GLC attributes unused :: self
+
+    isRedshiftDependent=.false.
+    return
+  end function identityIsRedshiftDependent

@@ -2,6 +2,7 @@
 <!-- Dark matter subhalo evolution model -->
 <parameters>
   <formatVersion>2</formatVersion>
+  <lastModified revision="165490f4968c699f7e5bb73ef60bcb7e626f51e6"/>
 
   <verbosityLevel value="working"/>
 
@@ -73,7 +74,9 @@
   <powerSpectrumPrimordialTransferred value="simple"  />
 
   <!-- Structure formation options -->
-  <linearGrowth          value="baryonsDarkMatter"                    />
+  <linearGrowth          value="baryonsDarkMatter"                     >
+    <cambCountPerDecade value="100"/>
+  </linearGrowth>
   <criticalOverdensity   value="sphericalCollapseBrynsDrkMttrDrkEnrgy"/>
   <virialDensityContrast value="sphericalCollapseBrynsDrkMttrDrkEnrgy"/>
   <haloMassFunction      value="shethTormen"                           >
@@ -212,7 +215,6 @@
       <sigmaRatioLow          value="+0.07458 +0.09040 +0.06981"/>
     </virialOrbit>
   </virialOrbit>
-  <satelliteOrbitStoreOrbitalParameters value="true"/>
 
   <!-- Orbiting model of satellites -->
   <!-- Values taken from Yang et al. (2020) for their gamma=0 case using the Caterpillar simulations as calibration target -->
@@ -238,7 +240,7 @@
     <nodeOperator value="darkMatterProfileScaleInterpolate"/>
     <!-- Halo angular momentum -->
     <nodeOperator value="haloAngularMomentumVitvitska2002"  >
-      <exponentMass value="0.10475"/> <!-- Best fit value from Benson, Behrens, & Lu (2020) -->
+      <exponentMass value="1.10475"/> <!-- Best fit value from Benson, Behrens, & Lu (2020) offset for fix to Keplerian orbit propagation -->
     </nodeOperator>
     <nodeOperator value="haloAngularMomentumInterpolate"/>
     <!-- Subhalo hierarchy -->

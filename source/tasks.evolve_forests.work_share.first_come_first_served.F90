@@ -1,5 +1,5 @@
 !! Copyright 2009, 2010, 2011, 2012, 2013, 2014, 2015, 2016, 2017, 2018,
-!!           2019, 2020, 2021, 2022, 2023
+!!           2019, 2020, 2021, 2022, 2023, 2024
 !!    Andrew Benson <abenson@carnegiescience.edu>
 !!
 !! This file is part of Galacticus.
@@ -30,7 +30,7 @@
      !!}
      private
      integer(c_size_t), allocatable, dimension(:) :: activeProcessRanks
-     logical                                      :: doPing            , reportWaitTime
+     logical                                      :: doPing            =.false., reportWaitTime
    contains
      final     ::                 fcfsDestructor
      procedure :: forestNumber => fcfsForestNumber
@@ -193,7 +193,7 @@ contains
     return
   end function fcfsForestNumber
 
-  subroutine fcfsPing(self,node)
+  subroutine fcfsPing(self,node,uniqueID)
     !!{
     Return the number of the next forest to process.
     !!}
@@ -201,13 +201,15 @@ contains
     use :: MPI_Utilities   , only : mpiSelf
 #endif
     use :: Galacticus_Nodes, only : treeNode
+    use :: Kind_Numbers    , only : kind_int8
     implicit none
-    class  (*       ), intent(inout) :: self
-    type   (treeNode), intent(inout) :: node
+    class  (*        ), intent(inout) :: self
+    type   (treeNode ), intent(inout) :: node
+    integer(kind_int8), intent(in   ) :: uniqueID
 #ifdef USEMPI
-    integer(c_size_t)                :: forestNumber
+    integer(c_size_t )                :: forestNumber
 #endif
-    !$GLC attributes unused :: self, node
+    !$GLC attributes unused :: self, node, uniqueID
 
 #ifdef USEMPI
     !$omp master

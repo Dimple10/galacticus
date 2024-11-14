@@ -1,5 +1,5 @@
 !! Copyright 2009, 2010, 2011, 2012, 2013, 2014, 2015, 2016, 2017, 2018,
-!!           2019, 2020, 2021, 2022, 2023
+!!           2019, 2020, 2021, 2022, 2023, 2024
 !!    Andrew Benson <abenson@carnegiescience.edu>
 !!
 !! This file is part of Galacticus.
@@ -16,6 +16,8 @@
 !!
 !!    You should have received a copy of the GNU General Public License
 !!    along with Galacticus.  If not, see <http://www.gnu.org/licenses/>.
+
+  !+    Contributions to this file made by: Andrew Benson, Xiaolong Du.
 
   !!{
   Implements an output analysis class that computes subhalo $V_\mathrm{max}$ vs. $M_\mathrm{bound}$ tidal tracks.
@@ -37,8 +39,9 @@
      class           (darkMatterProfileDMOClass), pointer                   :: darkMatterProfileDMO_         => null(), darkMatterProfileDMOUnheated => null()
      !$ integer      (omp_lock_kind            )                            :: accumulateLock
      integer                                                                :: countPointsOnTrack
+     double precision                                                       :: mu                                     , eta
      double precision                                                       :: logLikelihood_
-     double precision                           , dimension(:), allocatable :: fractionMassBound                      ,fractionVelocityMaximum                , &
+     double precision                           , dimension(:), allocatable :: fractionMassBound                      , fractionVelocityMaximum               , &
           &                                                                    fractionVelocityMaximumTarget
    contains
      final     ::                  tidalTracksVelocityMaximumDestructor
@@ -64,15 +67,28 @@ contains
     !!}
     use :: Input_Parameters, only : inputParameter, inputParameters
     implicit none
-    type (outputAnalysisTidalTracksVelocityMaximum)                :: self
-    type (inputParameters                         ), intent(inout) :: parameters
-    class(darkMatterProfileDMOClass               ), pointer       :: darkMatterProfileDMO_, darkMatterProfileDMOUnheated
+    type            (outputAnalysisTidalTracksVelocityMaximum)                :: self
+    type            (inputParameters                         ), intent(inout) :: parameters
+    class           (darkMatterProfileDMOClass               ), pointer       :: darkMatterProfileDMO_, darkMatterProfileDMOUnheated
+    double precision                                                          :: mu                   , eta
     
     !![
+    <inputParameter>
+      <name>mu</name>
+      <source>parameters</source>
+      <defaultValue>0.4d0</defaultValue>
+      <description>The parameter $\mu$ in the \cite{penarrubia_impact_2010} tidal track fitting function.</description>
+    </inputParameter>
+    <inputParameter>
+      <name>eta</name>
+      <source>parameters</source>
+      <defaultValue>0.3d0</defaultValue>
+      <description>The parameter $\eta$ in the \cite{penarrubia_impact_2010} tidal track fitting function.</description>
+    </inputParameter>
     <objectBuilder class="darkMatterProfileDMO"  name="darkMatterProfileDMO_"        source="parameters"                                               />
     <objectBuilder class="darkMatterProfileDMO"  name="darkMatterProfileDMOUnheated" source="parameters"   parameterName="darkMatterProfileDMOUnheated"/>
     !!]
-    self=outputAnalysisTidalTracksVelocityMaximum(darkMatterProfileDMO_,darkMatterProfileDMOUnheated)
+    self=outputAnalysisTidalTracksVelocityMaximum(mu,eta,darkMatterProfileDMO_,darkMatterProfileDMOUnheated)
     !![
     <inputParametersValidate source="parameters"/>
     <objectDestructor name="darkMatterProfileDMO_"       />
@@ -81,15 +97,16 @@ contains
     return
   end function tidalTracksVelocityMaximumConstructorParameters
   
-  function tidalTracksVelocityMaximumConstructorInternal(darkMatterProfileDMO_,darkMatterProfileDMOUnheated) result (self)
+  function tidalTracksVelocityMaximumConstructorInternal(mu,eta,darkMatterProfileDMO_,darkMatterProfileDMOUnheated) result (self)
     !!{
     Constructor for the ``tidalTracksVelocityMaximum'' output analysis class for internal use.
     !!}
     implicit none
     type            (outputAnalysisTidalTracksVelocityMaximum)                         :: self
     class           (darkMatterProfileDMOClass               ), intent(in   ) , target :: darkMatterProfileDMO_, darkMatterProfileDMOUnheated
+    double precision                                          , intent(in   )          :: mu                   , eta
     !![
-    <constructorAssign variables="*darkMatterProfileDMO_, *darkMatterProfileDMOUnheated"/>
+    <constructorAssign variables="mu, eta, *darkMatterProfileDMO_, *darkMatterProfileDMOUnheated"/>
     !!]
 
     !$ call OMP_Init_Lock(self%accumulateLock)
@@ -118,31 +135,38 @@ contains
     !!{
     Analyze the maximum velocity tidal track.
     !!}
-    use    :: Galacticus_Nodes, only : nodeComponentBasic, nodeComponentSatellite
-    !$ use :: OMP_Lib         , only : OMP_Set_Lock      , OMP_Unset_Lock
+    use    :: Galacticus_Nodes  , only : nodeComponentBasic   , nodeComponentSatellite
+    use    :: Mass_Distributions, only : massDistributionClass
+    !$ use :: OMP_Lib           , only : OMP_Set_Lock         , OMP_Unset_Lock
     implicit none
     class           (outputAnalysisTidalTracksVelocityMaximum), intent(inout)             :: self
     type            (treeNode                                ), intent(inout)             :: node
     integer         (c_size_t                                ), intent(in   )             :: iOutput
     class           (nodeComponentBasic                      ), pointer                   :: basic
     class           (nodeComponentSatellite                  ), pointer                   :: satellite
+    class           (massDistributionClass                   ), pointer                   :: massDistribution_             , massDistributionUnheated
     double precision                                          , dimension(:), allocatable :: fractionMassBound_            , fractionVelocityMaximum_             , &
          &                                                                                   fractionVelocityMaximumTarget_
-    double precision                                                                      :: mu                            , eta                                  , &
-         &                                                                                   fractionMassBound             , fractionVelocityMaximum              , &
+    double precision                                                                      :: fractionMassBound             , fractionVelocityMaximum              , &
          &                                                                                   fractionVelocityMaximumTarget , varianceFractionVelocityMaximumTarget
 
     ! Skip non-satellites.
     if (.not.node%isSatellite()) return
     ! Extract the bound mass and maximum velocity fractions.
-    basic                   => node%basic()
-    satellite               => node%satellite()
-    fractionMassBound       =  satellite                      %boundMass              (    )/basic                             %mass                   (    )
-    fractionVelocityMaximum =  self     %darkMatterProfileDMO_%circularVelocityMaximum(node)/self %darkMatterProfileDMOUnheated%circularVelocityMaximum(node)
-    ! Evaluate the target value. Uses the Penarrubia et al. (2010) results for now - replace with something more up to date.
-    mu                                   =0.4d0
-    eta                                  =0.3d0
-    fractionVelocityMaximumTarget        =2.0d0**mu*fractionMassBound**eta/(1.0d0+fractionMassBound)**mu
+    basic                    => node             %basic                           (    )
+    satellite                => node             %satellite                       (    )
+    massDistribution_        => self             %darkMatterProfileDMO_       %get(node)
+    massDistributionUnheated => self             %darkMatterProfileDMOUnheated%get(node)
+    fractionMassBound        =  satellite        %boundMass                       (    )/basic                   %mass                        ()
+    fractionVelocityMaximum  =  massDistribution_%velocityRotationCurveMaximum    (    )/massDistributionUnheated%velocityRotationCurveMaximum()
+    !![
+    <objectDestructor name="massDistribution_"       />
+    <objectDestructor name="massDistributionUnheated"/>
+    !!]
+    ! Evaluate the target value. Uses the Penarrubia et al. (2010) fitting function.
+    fractionVelocityMaximumTarget        =+ 2.0d0                   **self%mu  &
+         &                                *       fractionMassBound **self%eta &
+         &                                /(1.0d0+fractionMassBound)**self%mu
     varianceFractionVelocityMaximumTarget=(0.1d0*fractionVelocityMaximumTarget)**2
     !$ call OMP_Set_Lock(self%accumulateLock)
     self%countPointsOnTrack=self%countPointsOnTrack+1
@@ -221,7 +245,7 @@ contains
     return
   end subroutine tidalTracksVelocityMaximumReduce
 
-  subroutine tidalTracksVelocityMaximumFinalize(self)
+  subroutine tidalTracksVelocityMaximumFinalize(self,groupName)
     !!{
     Output results of the maximum velocity tidal track output analysis.
     !!}
@@ -233,8 +257,10 @@ contains
     use :: IO_HDF5      , only : hdf5Object
     implicit none
     class           (outputAnalysisTidalTracksVelocityMaximum), intent(inout)              :: self
-    type            (hdf5Object                              )                             :: analysesGroup                 , analysisGroup           , &
-         &                                                                                    dataset
+    type            (varying_string                          ), intent(in   ), optional    :: groupName
+    type            (hdf5Object                              )               , target      :: analysesGroup                 , subGroup
+    type            (hdf5Object                              )               , pointer     :: inGroup
+    type            (hdf5Object                              )                             :: analysisGroup                 , dataset
 #ifdef USEMPI
     integer                                                                                :: offset
     integer                                                   , dimension(:) , allocatable :: countPointsOnTrack
@@ -279,8 +305,13 @@ contains
     self%countPointsOnTrack=        sum(     countPointsOnTrack)
 #endif
     !$ call hdf5Access%set()
-    analysesGroup=outputFile   %openGroup('analyses'                                                                                                     )
-    analysisGroup=analysesGroup%openGroup('tidalTrackVelocityMaximum','Analysis of the peak rotation curve velocity vs. bound mass fraction tidal track.')
+    analysesGroup =  outputFile   %openGroup('analyses'     )
+    inGroup       => analysesGroup
+    if (present(groupName)) then
+       subGroup   =  analysesGroup%openGroup(char(groupName))
+       inGroup    => subGroup
+    end if
+    analysisGroup=inGroup%openGroup('tidalTrackVelocityMaximum','Analysis of the peak rotation curve velocity vs. bound mass fraction tidal track.')
     ! Write metadata describing this analysis.
     call analysisGroup%writeAttribute('Subhalo peak rotation curve velocity vs. bound mass fraction tidal track.','description'                          )
     call analysisGroup%writeAttribute("function1D"                                                               ,'type'                                 )
@@ -306,6 +337,8 @@ contains
     call dataset      %writeAttribute(1.0d0                             ,'unitsInSI'                                                                                          )
     call dataset      %close         (                                                                                                                                        )
     call analysisGroup%close         (                                                                                                                                        )
+    if (present(groupName)) &
+         & call subGroup%close       (                                                                                                                                        )
     call analysesGroup%close         (                                                                                                                                        )
     !$ call hdf5Access%unset()
     return

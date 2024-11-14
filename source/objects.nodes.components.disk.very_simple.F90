@@ -1,5 +1,5 @@
 !! Copyright 2009, 2010, 2011, 2012, 2013, 2014, 2015, 2016, 2017, 2018,
-!!           2019, 2020, 2021, 2022, 2023
+!!           2019, 2020, 2021, 2022, 2023, 2024
 !!    Andrew Benson <abenson@carnegiescience.edu>
 !!
 !! This file is part of Galacticus.
@@ -27,7 +27,6 @@ module Node_Component_Disk_Very_Simple
   !!}
   use :: Cosmology_Functions             , only : cosmologyFunctionsClass
   use :: Dark_Matter_Halo_Scales         , only : darkMatterHaloScaleClass
-  use :: Dark_Matter_Profiles_DMO        , only : darkMatterProfileDMOClass
   use :: Galacticus_Nodes                , only : treeNode
   use :: Math_Exponentiation             , only : fastExponentiator
   use :: Satellite_Merging_Mass_Movements, only : mergerMassMovementsClass
@@ -97,8 +96,8 @@ module Node_Component_Disk_Very_Simple
     </property>
    </properties>
    <bindings>
-    <binding method="attachPipe"     function="Node_Component_Disk_Very_Simple_Attach_Pipe" description="Attach pipes to the very simple disk component." bindsTo="component" returnType="\void" arguments="" />
-    <binding method="enclosedMass"   function="Node_Component_Disk_Very_Simple_Enclosed_Mass"   bindsTo="component" />
+    <binding method="attachPipe"   function="Node_Component_Disk_Very_Simple_Attach_Pipe"   description="Attach pipes to the very simple disk component." bindsTo="component" returnType="\void" arguments=""/>
+    <binding method="massBaryonic" function="Node_Component_Disk_Very_Simple_Mass_Baryonic"                                                               bindsTo="component"                                />
    </bindings>
    <functions>objects.nodes.components.disk.very_simple.bound_functions.inc</functions>
   </component>
@@ -110,9 +109,8 @@ module Node_Component_Disk_Very_Simple
   class(darkMatterHaloScaleClass        ), pointer :: darkMatterHaloScale_
   class(stellarFeedbackOutflowsClass    ), pointer :: stellarFeedbackOutflows_
   class(starFormationRateDisksClass     ), pointer :: starFormationRateDisks_
-  class(darkMatterProfileDMOClass       ), pointer :: darkMatterProfileDMO_
   class(mergerMassMovementsClass        ), pointer :: mergerMassMovements_
-  !$omp threadprivate(cosmologyFunctions_,stellarPopulationProperties_,darkMatterHaloScale_,stellarFeedbackOutflows_,starFormationRateDisks_,darkMatterProfileDMO_,mergerMassMovements_)
+  !$omp threadprivate(cosmologyFunctions_,stellarPopulationProperties_,darkMatterHaloScale_,stellarFeedbackOutflows_,starFormationRateDisks_,mergerMassMovements_)
 
   ! Record of whether to use the simple disk analytic solver.
   logical                             :: useAnalyticSolver
@@ -122,6 +120,10 @@ module Node_Component_Disk_Very_Simple
   ! Parameters controlling the physical implementation.
   double precision                    :: scaleAbsoluteMass
   logical                             :: trackAbundances         , trackLuminosities
+
+  ! A threadprivate object used to track to which thread events are attached.
+  integer :: thread
+  !$omp threadprivate(thread)
 
 contains
 
@@ -210,15 +212,14 @@ contains
 
     if (defaultDiskComponent%verySimpleIsActive()) then
        dependencies(1)=dependencyRegEx(dependencyDirectionAfter,'^remnantStructure:')
-       call satelliteMergerEvent%attach(defaultDiskComponent,satelliteMerger,openMPThreadBindingAtLevel,label='nodeComponentDiskVerySimple',dependencies=dependencies)
-       call postEvolveEvent     %attach(defaultDiskComponent,postEvolve     ,openMPThreadBindingAtLevel,label='nodeComponentDiskVerySimple'                          )
+       call satelliteMergerEvent%attach(thread,satelliteMerger,openMPThreadBindingAtLevel,label='nodeComponentDiskVerySimple',dependencies=dependencies)
+       call postEvolveEvent     %attach(thread,postEvolve     ,openMPThreadBindingAtLevel,label='nodeComponentDiskVerySimple'                          )
        ! Find our parameters.
        subParameters=parameters%subParameters('componentDisk')
        !![
        <objectBuilder class="cosmologyFunctions"          name="cosmologyFunctions_"          source="subParameters"/>
        <objectBuilder class="stellarPopulationProperties" name="stellarPopulationProperties_" source="subParameters"/>
        <objectBuilder class="darkMatterHaloScale"         name="darkMatterHaloScale_"         source="subParameters"/>
-       <objectBuilder class="darkMatterProfileDMO"        name="darkMatterProfileDMO_"        source="subParameters"/>
        <objectBuilder class="stellarFeedbackOutflows"     name="stellarFeedbackOutflows_"     source="subParameters"/>
        <objectBuilder class="starFormationRateDisks"      name="starFormationRateDisks_"      source="subParameters"/>
        <objectBuilder class="mergerMassMovements"         name="mergerMassMovements_"         source="subParameters"/>
@@ -249,13 +250,12 @@ contains
        <objectDestructor name="cosmologyFunctions_"         />
        <objectDestructor name="stellarPopulationProperties_"/>
        <objectDestructor name="darkMatterHaloScale_"        />
-       <objectDestructor name="darkMatterProfileDMO_"       />
        <objectDestructor name="stellarFeedbackOutflows_"    />
        <objectDestructor name="starFormationRateDisks_"     />
        <objectDestructor name="mergerMassMovements_"        />
        !!]
-       if (satelliteMergerEvent%isAttached(defaultDiskComponent,satelliteMerger)) call satelliteMergerEvent%detach(defaultDiskComponent,satelliteMerger)
-       if (postEvolveEvent     %isAttached(defaultDiskComponent,postEvolve     )) call postEvolveEvent     %detach(defaultDiskComponent,postEvolve     )
+       if (satelliteMergerEvent%isAttached(thread,satelliteMerger)) call satelliteMergerEvent%detach(thread,satelliteMerger)
+       if (postEvolveEvent     %isAttached(thread,postEvolve     )) call postEvolveEvent     %detach(thread,postEvolve     )
     end if
     return
   end subroutine Node_Component_Disk_Very_Simple_Thread_Uninitialize
@@ -759,17 +759,19 @@ contains
     use :: Abundances_Structure            , only : zeroAbundances
     use :: Error                           , only : Error_Report
     use :: Galacticus_Nodes                , only : nodeComponentDisk      , nodeComponentDiskVerySimple, nodeComponentSpheroid           , treeNode
+    use :: Histories                       , only : history
     use :: Satellite_Merging_Mass_Movements, only : destinationMergerDisk  , destinationMergerSpheroid  , enumerationDestinationMergerType
     use :: Stellar_Luminosities_Structure  , only : zeroStellarLuminosities
     implicit none
-    class  (*                              ), intent(inout) :: self
-    type   (treeNode                       ), intent(inout) :: node
-    type   (treeNode                       ), pointer       :: nodeHost
-    class  (nodeComponentDisk              ), pointer       :: diskHost               , disk
-    class  (nodeComponentSpheroid          ), pointer       :: spheroidHost
-    type  (enumerationDestinationMergerType)                :: destinationGasSatellite, destinationGasHost       , &
-         &                                                     destinationStarsHost   , destinationStarsSatellite
-    logical                                                 :: mergerIsMajor
+    class  (*                               ), intent(inout) :: self
+    type   (treeNode                        ), intent(inout) :: node
+    type   (treeNode                        ), pointer       :: nodeHost
+    class  (nodeComponentDisk               ), pointer       :: diskHost               , disk
+    class  (nodeComponentSpheroid           ), pointer       :: spheroidHost
+    type   (enumerationDestinationMergerType)                :: destinationGasSatellite, destinationGasHost       , &
+         &                                                      destinationStarsHost   , destinationStarsSatellite
+    type   (history                         )                :: historyHost            , historyNode
+    logical                                                  :: mergerIsMajor
     !$GLC attributes unused :: self
 
     ! Check that the disk is of the verySimple class.
@@ -834,7 +836,14 @@ contains
                &                                    diskHost    %luminositiesStellar() &
                &                                   +disk        %luminositiesStellar() &
                &                                  )
-       case (destinationMergerSpheroid%ID)
+          ! Also add stellar properties histories.
+          historyNode=disk    %stellarPropertiesHistory()
+          historyHost=diskHost%stellarPropertiesHistory()
+          call historyHost%interpolatedIncrement      (historyNode)
+          call historyNode%reset                      (           )
+          call diskHost   %stellarPropertiesHistorySet(historyHost)
+          call disk       %stellarPropertiesHistorySet(historyNode)
+        case (destinationMergerSpheroid%ID)
           call spheroidHost%massStellarSet        (                                    &
                &                                    spheroidHost%  massStellar      () &
                &                                   +disk        %  massStellar      () &
@@ -847,6 +856,13 @@ contains
                &                                    spheroidHost%luminositiesStellar() &
                &                                   +disk        %luminositiesStellar() &
                &                                  )
+          ! Also add stellar properties histories.
+          historyNode=disk    %stellarPropertiesHistory()
+          historyHost=spheroidHost%stellarPropertiesHistory()
+          call historyHost %interpolatedIncrement      (historyNode)
+          call historyNode %reset                      (           )
+          call spheroidHost%stellarPropertiesHistorySet(historyHost)
+          call disk        %stellarPropertiesHistorySet(historyNode)
        case default
           call Error_Report(                                    &
                &            'unrecognized movesTo descriptor'// &
@@ -884,7 +900,7 @@ contains
 
     call displayMessage('Storing state for: componentDisk -> verySimple',verbosity=verbosityLevelInfo)
     !![
-    <stateStore variables="cosmologyFunctions_ stellarPopulationProperties_ darkMatterHaloScale_ stellarFeedbackOutflows_ starFormationRateDisks_ darkMatterProfileDMO_ mergerMassMovements_"/>
+    <stateStore variables="cosmologyFunctions_ stellarPopulationProperties_ darkMatterHaloScale_ stellarFeedbackOutflows_ starFormationRateDisks_ mergerMassMovements_"/>
     !!]
     return
   end subroutine Node_Component_Disk_Very_Simple_State_Store
@@ -907,7 +923,7 @@ contains
 
     call displayMessage('Retrieving state for: componentDisk -> verySimple',verbosity=verbosityLevelInfo)
     !![
-    <stateRestore variables="cosmologyFunctions_ stellarPopulationProperties_ darkMatterHaloScale_ stellarFeedbackOutflows_ starFormationRateDisks_ darkMatterProfileDMO_ mergerMassMovements_"/>
+    <stateRestore variables="cosmologyFunctions_ stellarPopulationProperties_ darkMatterHaloScale_ stellarFeedbackOutflows_ starFormationRateDisks_ mergerMassMovements_"/>
     !!]
     return
   end subroutine Node_Component_Disk_Very_Simple_State_Restore

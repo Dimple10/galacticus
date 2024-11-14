@@ -1,5 +1,5 @@
 !! Copyright 2009, 2010, 2011, 2012, 2013, 2014, 2015, 2016, 2017, 2018,
-!!           2019, 2020, 2021, 2022, 2023
+!!           2019, 2020, 2021, 2022, 2023, 2024
 !!    Andrew Benson <abenson@carnegiescience.edu>
 !!
 !! This file is part of Galacticus.
@@ -29,8 +29,8 @@ Implements the survey geometry of the SDSS sample used by \cite{li_distribution_
     A survey geometry class that describes the survey geometry of \cite{li_distribution_2009}. 
     
     For the angular mask, we make use of the catalog of random points within the survey footprint provided by the
-    NYU-VAGC\footnote{Specifically,
-    \href{http://sdss.physics.nyu.edu/lss/dr72/random/lss_random-0.dr72.dat}{http://sdss.physics.nyu.edu/lss/dr72/random/lss\_random-0.dr72.dat}.}
+    NYU-VAGC\footnote{Specifically, \href{https://zenodo.org/records/10257229/files/lss_random-0.dr72.dat}{https://zenodo.org/records/10257229/files/lss\_random-0.dr72.dat}
+     (which is a copy of the dataset originally found at the, now defunct, URL {\normalfont \ttfamily http://sdss.physics.nyu.edu/lss/dr72/random/lss\_random-0.dr72.dat}).}
     (\citealt{blanton_new_2005}; see also
     \citealt{adelman-mccarthy_sixth_2008,padmanabhan_improved_2008}). \cite{li_distribution_2009} consider only the main,
     contiguous region and so we keep only those points which satisfy RA$>100^\circ$, RA$&lt;300^\circ$, and RA$&lt;247^\circ$ or
@@ -178,21 +178,22 @@ contains
     return
   end subroutine liWhite2009SDSSDestructor
 
-  double precision function liWhite2009SDSSDistanceMinimum(self,mass,magnitudeAbsolute,luminosity,field)
+  double precision function liWhite2009SDSSDistanceMinimum(self,mass,magnitudeAbsolute,luminosity,starFormationRate,field)
     !!{
     Compute the minimum distance at which a galaxy is visible.
     !!}
     implicit none
     class           (surveyGeometryLiWhite2009SDSS), intent(inout)           :: self
-    double precision                               , intent(in   ), optional :: mass , magnitudeAbsolute, luminosity
+    double precision                               , intent(in   ), optional :: mass      , magnitudeAbsolute, &
+         &                                                                      luminosity, starFormationRate
     integer                                        , intent(in   ), optional :: field
-    !$GLC attributes unused :: mass, field, magnitudeAbsolute, luminosity
+    !$GLC attributes unused :: mass, field, magnitudeAbsolute, luminosity, starFormationRate
 
     liWhite2009SDSSDistanceMinimum=self%limitDistanceMinimum
     return
   end function liWhite2009SDSSDistanceMinimum
 
-  double precision function liWhite2009SDSSDistanceMaximum(self,mass,magnitudeAbsolute,luminosity,field)
+  double precision function liWhite2009SDSSDistanceMaximum(self,mass,magnitudeAbsolute,luminosity,starFormationRate,field)
     !!{
     Compute the maximum distance at which a galaxy is visible.
     !!}
@@ -200,45 +201,53 @@ contains
     use :: Error                      , only : Error_Report
     implicit none
     class           (surveyGeometryLiWhite2009SDSS), intent(inout)           :: self
-    double precision                               , intent(in   ), optional :: mass    , magnitudeAbsolute, luminosity
+    double precision                               , intent(in   ), optional :: mass      , magnitudeAbsolute, &
+         &                                                                      luminosity, starFormationRate
     integer                                        , intent(in   ), optional :: field
     double precision                                                         :: redshift, logarithmicMass
-    !$GLC attributes unused :: self, magnitudeAbsolute, luminosity
 
     ! Validate field.
     if (present(field).and.field /= 1) call Error_Report('field = 1 required'//{introspection:location})
+    ! Validate arguments.
+    if (present(magnitudeAbsolute)) call Error_Report('`magnitudeAbsolute` is not supported'//{introspection:location})
+    if (present(luminosity       )) call Error_Report(       '`luminosity` is not supported'//{introspection:location})
+    if (present(starFormationRate)) call Error_Report('`starFormationRate` is not supported'//{introspection:location})
     ! Find the limiting redshift for this mass using a fit derived from Millennium Simulation SAMs. (See
     ! constraints/dataAnalysis/stellarMassFunction_SDSS_z0.07/massLuminosityRelation.pl for details.)
-    logarithmicMass=log10(mass)
-    redshift=                                   &
-         & max(                                 &
-         &     -5.9502006195004d0               &
-         &     +logarithmicMass                 &
-         &     *(                               &
-         &       +2.63793788603951d0            &
-         &       +logarithmicMass               &
-         &       *(                             &
-         &         -0.421075858899237d0         &
-         &         +logarithmicMass             &
-         &         *(                           &
-         &           +0.0285198776926787d0      &
-         &           +logarithmicMass           &
-         &           *(                         &
-         &             -0.000678327494720407d0  &
-         &            )                         &
-         &          )                           &
-         &        )                             &
-         &      )                             , &
-         &     +0.0d0                           &
-         &    )
-    ! Convert from redshift to comoving distance.
-    liWhite2009SDSSDistanceMaximum=min(                                                                                &
-         &                             self%limitDistanceMaximum                                                     , &
-         &                             self%cosmologyFunctions_%distanceComovingConvert(                               &
-         &                                                                              output  =distanceTypeComoving, &
-         &                                                                              redshift=redshift              &
-         &                                                                             )                               &
-         &                            )
+    if (present(mass)) then
+       logarithmicMass=log10(mass)
+       redshift=                                   &
+            & max(                                 &
+            &     -5.9502006195004d0               &
+            &     +logarithmicMass                 &
+            &     *(                               &
+            &       +2.63793788603951d0            &
+            &       +logarithmicMass               &
+            &       *(                             &
+            &         -0.421075858899237d0         &
+            &         +logarithmicMass             &
+            &         *(                           &
+            &           +0.0285198776926787d0      &
+            &           +logarithmicMass           &
+            &           *(                         &
+            &             -0.000678327494720407d0  &
+            &            )                         &
+            &          )                           &
+            &        )                             &
+            &      )                             , &
+            &     +0.0d0                           &
+            &    )
+       ! Convert from redshift to comoving distance.
+       liWhite2009SDSSDistanceMaximum=min(                                                                                &
+            &                             self%limitDistanceMaximum                                                     , &
+            &                             self%cosmologyFunctions_%distanceComovingConvert(                               &
+            &                                                                              output  =distanceTypeComoving, &
+            &                                                                              redshift=redshift              &
+            &                                                                             )                               &
+            &                            )
+    else
+       liWhite2009SDSSDistanceMaximum=    self%limitDistanceMaximum
+    end if
     return
   end function liWhite2009SDSSDistanceMaximum
 
@@ -264,9 +273,10 @@ contains
     Compute the window function for the survey.
     !!}
     use :: Display                 , only : displayMessage
-    use :: File_Utilities          , only : Count_Lines_In_File    , Directory_Make     , File_Exists
+    use :: File_Utilities          , only : Count_Lines_In_File, Directory_Make     , File_Exists, File_Lock, &
+         &                                  File_Unlock        , lockDescriptor
     use :: Error                   , only : Error_Report
-    use :: Input_Paths             , only : inputPath              , pathTypeDataDynamic
+    use :: Input_Paths             , only : inputPath          , pathTypeDataDynamic
     use :: ISO_Varying_String      , only : varying_string
     use :: Numerical_Constants_Math, only : Pi
     use :: String_Handling         , only : operator(//)
@@ -278,13 +288,18 @@ contains
          &                                                                        i             , randomUnit
     double precision                                                           :: rightAscension, declination
     type            (varying_string               )                            :: message
+    type            (lockDescriptor               )                            :: lock
     integer                                                                    :: status
 
     ! Randoms file obtained from:  http://sdss.physics.nyu.edu/lss/dr72/random/
     if (.not.File_Exists(inputPath(pathTypeDataDynamic)//"surveyGeometry/lss_random-0.dr72.dat")) then
        call Directory_Make(inputPath(pathTypeDataDynamic)//"surveyGeometry")
-       call download("http://sdss.physics.nyu.edu/lss/dr72/random/lss_random-0.dr72.dat",char(inputPath(pathTypeDataDynamic))//"surveyGeometry/lss_random-0.dr72.dat",status)
-       if (status /= 0 .or. .not.File_Exists(inputPath(pathTypeDataDynamic)//"surveyGeometry/lss_random-0.dr72.dat")) call Error_Report('unable to download SDSS survey geometry randoms file'//{introspection:location})
+       call File_Lock  (char(inputPath(pathTypeDataDynamic)//"surveyGeometry/lss_random-0.dr72.dat"),lock,lockIsShared=.false.)
+       if (.not.File_Exists(inputPath(pathTypeDataDynamic)//"surveyGeometry/lss_random-0.dr72.dat")) then
+          call download("https://zenodo.org/records/10257229/files/lss_random-0.dr72.dat",char(inputPath(pathTypeDataDynamic))//"surveyGeometry/lss_random-0.dr72.dat",status=status)
+          if (status /= 0 .or. .not.File_Exists(inputPath(pathTypeDataDynamic)//"surveyGeometry/lss_random-0.dr72.dat")) call Error_Report('unable to download SDSS survey geometry randoms file'//{introspection:location})
+       end if
+       call File_Unlock(                     lock                     )
     end if
     randomsCount=Count_Lines_In_File(inputPath(pathTypeDataDynamic)//"surveyGeometry/lss_random-0.dr72.dat")
     allocate(self%randomTheta(randomsCount))

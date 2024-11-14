@@ -1,5 +1,5 @@
 !! Copyright 2009, 2010, 2011, 2012, 2013, 2014, 2015, 2016, 2017, 2018,
-!!           2019, 2020, 2021, 2022, 2023
+!!           2019, 2020, 2021, 2022, 2023, 2024
 !!    Andrew Benson <abenson@carnegiescience.edu>
 !!
 !! This file is part of Galacticus.
@@ -379,7 +379,7 @@ contains
     if (self%fileNameInitialized) return
     ! Build an automatic file name based on the descriptor for this object.
     if (self%fileName == "auto") &
-         & self%fileName=inputPath(pathTypeDataDynamic)//'largeScaleStructure/excursionSets/'//self%objectType()//'_'//self%hashedDescriptor(includeSourceDigest=.true.)//'.hdf5'
+         & self%fileName=inputPath(pathTypeDataDynamic)//'largeScaleStructure/excursionSets/'//self%objectType()//'_'//self%hashedDescriptor(includeSourceDigest=.true.,includeFileModificationTimes=.true.)//'.hdf5'
     ! Expand file name.
     self%fileName=File_Name_Expand(char(self%fileName))
     ! Ensure directory exists.
@@ -407,13 +407,14 @@ contains
     !!{
     Return the excursion set barrier at the given variance and time.
     !!}
-    use :: Display          , only : displayCounter              , displayCounterClear  , displayIndent       , displayMessage, &
-          &                          displayUnindent             , verbosityLevelWorking
-    use :: Error_Functions  , only : Error_Function_Complementary
-    use :: File_Utilities   , only : File_Lock                   , File_Unlock          , lockDescriptor
-    use :: Kind_Numbers     , only : kind_dble                   , kind_quad
-    use :: MPI_Utilities    , only : mpiBarrier                  , mpiSelf
-    use :: Numerical_Ranges , only : Make_Range                  , rangeTypeLinear      , rangeTypeLogarithmic
+    use :: Display         , only : displayCounter              , displayCounterClear  , displayIndent       , displayMessage, &
+          &                         displayUnindent             , verbosityLevelWorking
+    use :: Error_Functions , only : Error_Function_Complementary
+    use :: File_Utilities  , only : File_Lock                   , File_Unlock          , lockDescriptor
+    use :: Kind_Numbers    , only : kind_dble                   , kind_quad
+    use :: MPI_Utilities   , only : mpiBarrier                  , mpiSelf
+    use :: Numerical_Ranges, only : Make_Range                  , rangeTypeLinear      , rangeTypeLogarithmic
+    use :: Table_Labels    , only : extrapolationTypeFix
     implicit none
     class           (excursionSetFirstCrossingFarahi), intent(inout)                 :: self
     double precision                                 , intent(in   )                 :: variance                        , time
@@ -643,8 +644,8 @@ contains
           if (allocated(self%interpolatorTime    )) deallocate(self%interpolatorTime    )
           allocate(self%interpolatorVariance)
           allocate(self%interpolatorTime    )
-          self%interpolatorVariance=interpolator(self%variance)
-          self%interpolatorTime    =interpolator(self%time    )
+          self%interpolatorVariance=interpolator(self%variance,extrapolationType=extrapolationTypeFix)
+          self%interpolatorTime    =interpolator(self%time    ,extrapolationType=extrapolationTypeFix)
           ! Record that the table is now built.
           self%tableInitialized=.true.
           ! Write the table to file if possible.
@@ -851,13 +852,14 @@ contains
     !!{
     Tabulate the excursion set crossing rate.
     !!}
-    use :: Display          , only : displayCounter              , displayCounterClear  , displayIndent       , displayMessage, &
-          &                          displayUnindent             , verbosityLevelWorking
-    use :: Error_Functions  , only : Error_Function_Complementary
-    use :: File_Utilities   , only : File_Lock                   , File_Unlock          , lockDescriptor
-    use :: Kind_Numbers     , only : kind_dble                   , kind_quad
-    use :: MPI_Utilities    , only : mpiBarrier                  , mpiSelf
-    use :: Numerical_Ranges , only : Make_Range                  , rangeTypeLinear      , rangeTypeLogarithmic
+    use :: Display         , only : displayCounter              , displayCounterClear  , displayIndent       , displayMessage, &
+          &                         displayUnindent             , verbosityLevelWorking
+    use :: Error_Functions , only : Error_Function_Complementary
+    use :: File_Utilities  , only : File_Lock                   , File_Unlock          , lockDescriptor
+    use :: Kind_Numbers    , only : kind_dble                   , kind_quad
+    use :: MPI_Utilities   , only : mpiBarrier                  , mpiSelf
+    use :: Numerical_Ranges, only : Make_Range                  , rangeTypeLinear      , rangeTypeLogarithmic
+    use :: Table_Labels    , only : extrapolationTypeFix
     implicit none
     class           (excursionSetFirstCrossingFarahi), intent(inout)               :: self
     double precision                                 , intent(in   )               :: time                             , varianceProgenitor
@@ -1256,10 +1258,10 @@ contains
           allocate(self%interpolatorVarianceCurrentRate           )
           allocate(self%interpolatorVarianceCurrentRateNonCrossing)
           allocate(self%interpolatorTimeRate                      )
-          self%interpolatorVarianceRate                  =interpolator(self%varianceProgenitorRate        )
-          self%interpolatorVarianceCurrentRate           =interpolator(self%varianceCurrentRate           )
-          self%interpolatorVarianceCurrentRateNonCrossing=interpolator(self%varianceCurrentRateNonCrossing)
-          self%interpolatorTimeRate                      =interpolator(self%timeRate                      )
+          self%interpolatorVarianceRate                  =interpolator(self%varianceProgenitorRate        ,extrapolationType=extrapolationTypeFix)
+          self%interpolatorVarianceCurrentRate           =interpolator(self%varianceCurrentRate           ,extrapolationType=extrapolationTypeFix)
+          self%interpolatorVarianceCurrentRateNonCrossing=interpolator(self%varianceCurrentRateNonCrossing,extrapolationType=extrapolationTypeFix)
+          self%interpolatorTimeRate                      =interpolator(self%timeRate                      ,extrapolationType=extrapolationTypeFix)
           ! Set previous variance and time to unphysical values to force recompute of interpolation factors on next call.
           self%variancePreviousRate=-1.0d0
           self%timePreviousRate    =-1.0d0
@@ -1288,12 +1290,13 @@ contains
     !!{
     Read tabulated data on excursion set first crossing probabilities from file.
     !!}
-    use :: Display           , only : displayIndent, displayMessage  , displayUnindent, verbosityLevelWorking
-    use :: File_Utilities    , only : File_Exists  , File_Name_Expand
+    use :: Display           , only : displayIndent       , displayMessage  , displayUnindent, verbosityLevelWorking
+    use :: File_Utilities    , only : File_Exists         , File_Name_Expand
     use :: HDF5_Access       , only : hdf5Access
     use :: IO_HDF5           , only : hdf5Object
-    use :: ISO_Varying_String, only : operator(//) , var_str         , varying_string
+    use :: ISO_Varying_String, only : operator(//)        , var_str         , varying_string
     use :: String_Handling   , only : operator(//)
+    use :: Table_Labels      , only : extrapolationTypeFix
     implicit none
     class           (excursionSetFirstCrossingFarahi), intent(inout)                   :: self
     type            (hdf5Object                     )                                  :: dataFile                     , dataGroup
@@ -1346,8 +1349,8 @@ contains
        if (allocated(self%interpolatorTime    )) deallocate(self%interpolatorTime    )
        allocate(self%interpolatorVariance)
        allocate(self%interpolatorTime    )
-       self%interpolatorVariance=interpolator(self%variance)
-       self%interpolatorTime    =interpolator(self%time    )
+       self%interpolatorVariance=interpolator(self%variance,extrapolationType=extrapolationTypeFix)
+       self%interpolatorTime    =interpolator(self%time    ,extrapolationType=extrapolationTypeFix)
        ! Report.
        message=var_str('read excursion set first crossing probability from: ')//char(self%fileName)
        call displayIndent  (message,verbosityLevelWorking)
@@ -1422,10 +1425,10 @@ contains
        allocate(self%interpolatorVarianceCurrentRate           )
        allocate(self%interpolatorVarianceCurrentRateNonCrossing)
        allocate(self%interpolatorTimeRate                      )
-       self%interpolatorVarianceRate                  =interpolator(self%varianceProgenitorRate        )
-       self%interpolatorVarianceCurrentRate           =interpolator(self%varianceCurrentRate           )
-       self%interpolatorVarianceCurrentRateNonCrossing=interpolator(self%varianceCurrentRateNonCrossing)
-       self%interpolatorTimeRate                      =interpolator(self%timeRate                      )
+       self%interpolatorVarianceRate                  =interpolator(self%varianceProgenitorRate        ,extrapolationType=extrapolationTypeFix)
+       self%interpolatorVarianceCurrentRate           =interpolator(self%varianceCurrentRate           ,extrapolationType=extrapolationTypeFix)
+       self%interpolatorVarianceCurrentRateNonCrossing=interpolator(self%varianceCurrentRateNonCrossing,extrapolationType=extrapolationTypeFix)
+       self%interpolatorTimeRate                      =interpolator(self%timeRate                      ,extrapolationType=extrapolationTypeFix)
        ! Report.
        message=var_str('read excursion set first crossing rates from: ')//char(self%fileName)
        call displayIndent  (message,verbosityLevelWorking)
@@ -1589,7 +1592,7 @@ contains
     return
   end function farahiVarianceLimit
 
-  function farahiVarianceResidual(self,time,varianceCurrent,varianceIntermediate,varianceProgenitor,cosmologicalMassVariance_) result(varianceResidual)
+  function farahiVarianceResidual(self,time,varianceCurrent,varianceProgenitor,varianceIntermediate,cosmologicalMassVariance_) result(varianceResidual)
     !!{
     Return the residual variance between two points for a standard Weiner process.
     !!}
@@ -1633,12 +1636,12 @@ contains
     !   "Current"      - refers to the current halo being considered for branching, i.e. the halo existing at point (S₁,δ₁);
     !   "Progenitor"   - refers to the potential progenitor halo being considered, i.e. the halo corresponding to some variance S > S₁;
     !   "Intermediate" - refers to the intermediate variance, S̃ (with S₁ < S̃ < S).
-    varianceResidual=+varianceIntermediate &
-         &           -varianceProgenitor
+    varianceResidual=+varianceProgenitor   &
+         &           -varianceIntermediate
     return
   end function farahiVarianceResidual
 
-  function farahiOffsetEffective(self,time,varianceCurrent,varianceIntermediate,varianceProgenitor,deltaCurrent,deltaIntermediate,deltaProgenitor,cosmologicalMassVariance_) result(offsetEffective)
+  function farahiOffsetEffective(self,time,varianceCurrent,varianceProgenitor,varianceIntermediate,deltaCurrent,deltaProgenitor,deltaIntermediate,cosmologicalMassVariance_) result(offsetEffective)
     !!{
     Return the residual variance between two points for a standard Weiner process.
     !!}
@@ -1680,7 +1683,7 @@ contains
     !   "Current"      - refers to the current halo being considered for branching, i.e. the halo existing at point (S₁,δ₁);
     !   "Progenitor"   - refers to the potential progenitor halo being considered, i.e. the halo corresponding to some variance S > S₁;
     !   "Intermediate" - refers to the intermediate variance, S̃ (with S₁ < S̃ < S).
-    offsetEffective=+deltaIntermediate &
-         &          -deltaProgenitor
+    offsetEffective=+deltaProgenitor   &
+         &          -deltaIntermediate
     return
   end function farahiOffsetEffective

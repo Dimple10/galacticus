@@ -1,5 +1,5 @@
 !! Copyright 2009, 2010, 2011, 2012, 2013, 2014, 2015, 2016, 2017, 2018,
-!!           2019, 2020, 2021, 2022, 2023
+!!           2019, 2020, 2021, 2022, 2023, 2024
 !!    Andrew Benson <abenson@carnegiescience.edu>
 !!
 !! This file is part of Galacticus.
@@ -125,8 +125,8 @@ contains
     !!}
     use            :: Error                  , only : Error_Report
     use, intrinsic :: ISO_C_Binding          , only : c_size_t
-    use            :: Output_Analyses_Options, only : outputAnalysisPropertyQuantityLuminosity, outputAnalysisPropertyQuantityMass, outputAnalysisPropertyTypeLinear, outputAnalysisPropertyTypeLog10, &
-          &                                           outputAnalysisPropertyTypeMagnitude
+    use            :: Output_Analyses_Options, only : outputAnalysisPropertyQuantityLuminosity, outputAnalysisPropertyQuantityStarFormationRate,outputAnalysisPropertyQuantityMass, outputAnalysisPropertyTypeLinear, &
+          &                                           outputAnalysisPropertyTypeMagnitude     , outputAnalysisPropertyTypeLog10
     implicit none
     class           (outputAnalysisWeightOperatorCsmlgyVolume     ), intent(inout) :: self
     type            (treeNode                                     ), intent(inout) :: node
@@ -200,6 +200,29 @@ contains
                   &                                                                    )
              distanceDataMaximum   =+self%surveyGeometry_       %distanceMaximum       (                                           &
                   &                                                                      magnitudeAbsolute=propertyValue         , &
+                  &                                                                      field            =field                   &
+                  &                                                                    )
+          case default
+             call Error_Report('unsupported property type'//{introspection:location})
+          end select
+       case (outputAnalysisPropertyQuantityStarFormationRate%ID)
+          select case (propertyType%ID)
+          case (outputAnalysisPropertyTypeLinear   %ID)
+             distanceDataMinimum   =+self%surveyGeometry_       %distanceMinimum       (                                           &
+                  &                                                                      starFormationRate=propertyValue         , &
+                  &                                                                      field            =field                   &
+                  &                                                                    )
+             distanceDataMaximum   =+self%surveyGeometry_       %distanceMaximum       (                                           &
+                  &                                                                      starFormationRate=propertyValue         , &
+                  &                                                                      field            =field                   &
+                  &                                                                    )
+          case (outputAnalysisPropertyTypeLog10    %ID)
+             distanceDataMinimum   =+self%surveyGeometry_       %distanceMinimum       (                                           &
+                  &                                                                      starFormationRate=propertyValueIntrinsic, &
+                  &                                                                      field            =field                   &
+                  &                                                                    )
+             distanceDataMaximum   =+self%surveyGeometry_       %distanceMaximum       (                                           &
+                  &                                                                      starFormationRate=propertyValueIntrinsic, &
                   &                                                                      field            =field                   &
                   &                                                                    )
           case default

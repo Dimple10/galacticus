@@ -4,7 +4,7 @@
 <!-- running Galacticus on Bolshoi merger trees -->
 <parameters>
   <formatVersion>2</formatVersion>
-  <version>0.9.4</version>
+  <lastModified revision="165490f4968c699f7e5bb73ef60bcb7e626f51e6"/>
 
   <!-- Component selection -->
   <componentBasic value="standard"/>
@@ -14,7 +14,6 @@
     <heatsHotHalo value="true"/>
     <efficiencyWind value="0.001"/>
     <efficiencyWindScalesWithEfficiencyRadiative value="true"/>
-    <outputAccretion value="true"/>
     <outputMergers value="true"/>
     <bondiHoyleAccretionEnhancementHotHalo value="1.0"/>
     <bondiHoyleAccretionEnhancementSpheroid value="1.0"/>
@@ -213,9 +212,8 @@
   </accretionDisks>
 
   <!-- Black hole options -->
-  <blackHoleBinaryMergers value="rezzolla2008"/>
+  <blackHoleBinaryMerger value="rezzolla2008"/>
   <!-- Satellite orbit options -->
-  <satelliteOrbitStoreOrbitalParameters value="true"/>
 
   <!-- Galaxy merger options -->
   <virialOrbit value="benson2005"/>
@@ -241,6 +239,8 @@
     <nodeOperator value="darkMatterProfileScaleInterpolate"/>
     <!-- Halo spin -->
     <nodeOperator value="haloAngularMomentumInterpolate"/>
+    <!-- Halo positions -->
+    <nodeOperator value="positionDiscrete"/>
     <!-- Star formation -->
     <nodeOperator value="starFormationDisks"/>
     <nodeOperator value="starFormationSpheroids"/>
@@ -292,7 +292,13 @@
     <nodePropertyExtractor value="nodeIndices"/>
     <nodePropertyExtractor value="presetNamedReals">
       <presetNames value="velocityMaximum velocityDispersion"/>
-    </nodePropertyExtractor> 
+    </nodePropertyExtractor>
+    <nodePropertyExtractor value="massBlackHoles"/>
+    <nodePropertyExtractor value="spinBlackHoles"/>
+    <nodePropertyExtractor value="radiativeEfficiencyBlackHoles"/>
+    <nodePropertyExtractor value="radiusBlackHoles"/>
+    <nodePropertyExtractor value="massAccretionRateBlackHoles"/>
+    <nodePropertyExtractor value="jetPowerBlackHoles"/>
   </nodePropertyExtractor>
 
   <luminosityFilter value="SDSS_g SDSS_u SDSS_r bJ UKIRT_K RGO_I 2MASS_Ks SDSS_z SDSS_i"/>

@@ -2,6 +2,7 @@
 <!-- Dark matter subhalo evolution model -->
 <parameters>
   <formatVersion>2</formatVersion>
+  <lastModified revision="165490f4968c699f7e5bb73ef60bcb7e626f51e6"/>
 
   <verbosityLevel value="standard"/>
 
@@ -217,7 +218,7 @@
     <nodeOperator value="darkMatterProfileScaleInterpolate"/>
     <!-- Halo angular momentum -->
     <nodeOperator value="haloAngularMomentumVitvitska2002"  >
-      <exponentMass value="0.10475"/> <!-- Best fit value from Benson, Behrens, & Lu (2020) -->
+      <exponentMass value="1.10475"/> <!-- Best fit value from Benson, Behrens, & Lu (2020) offset for fix to Keplerian orbit propagation -->
     </nodeOperator>
     <nodeOperator value="haloAngularMomentumInterpolate"/>
     <!-- Subhalo hierarchy -->

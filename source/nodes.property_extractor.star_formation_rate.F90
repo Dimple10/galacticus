@@ -1,5 +1,5 @@
 !! Copyright 2009, 2010, 2011, 2012, 2013, 2014, 2015, 2016, 2017, 2018,
-!!           2019, 2020, 2021, 2022, 2023
+!!           2019, 2020, 2021, 2022, 2023, 2024
 !!    Andrew Benson <abenson@carnegiescience.edu>
 !!
 !! This file is part of Galacticus.
@@ -46,6 +46,7 @@ Contains a module which implements a star formation rate property extractor clas
    contains
      final     ::                starFormationRateDestructor
      procedure :: extract     => starFormationRateExtract
+     procedure :: quantity    => starFormationRateQuantity
      procedure :: name        => starFormationRateName
      procedure :: description => starFormationRateDescription
      procedure :: unitsInSI   => starFormationRateUnitsInSI
@@ -144,7 +145,7 @@ contains
     Destructor for the ``starFormationRate'' property extractor class.
     !!}
     implicit none
-    type   (nodePropertyExtractorStarFormationRate), intent(inout) :: self
+    type(nodePropertyExtractorStarFormationRate), intent(inout) :: self
   
     !![
     <objectDestructor name="self%starFormationRateDisks_"    />
@@ -158,7 +159,7 @@ contains
     Implement a star formation rate output analysis property extractor.
     !!}
     implicit none
-    class(nodePropertyExtractorStarFormationRate), intent(inout)           :: self
+    class(nodePropertyExtractorStarFormationRate), intent(inout), target   :: self
     type (treeNode                              ), intent(inout), target   :: node
     type (multiCounter                          ), intent(inout), optional :: instance
     !$GLC attributes unused :: instance
@@ -169,6 +170,19 @@ contains
     return
   end function starFormationRateExtract
 
+  function starFormationRateQuantity(self)
+    !!{
+    Return the class of the stellar luminosity property.
+    !!}
+    use :: Output_Analyses_Options, only : outputAnalysisPropertyQuantityStarFormationRate
+    implicit none
+    type (enumerationOutputAnalysisPropertyQuantityType)                :: starFormationRateQuantity
+    class(nodePropertyExtractorStarFormationRate       ), intent(inout) :: self
+    !$GLC attributes unused :: self
+
+    starFormationRateQuantity=outputAnalysisPropertyQuantityStarFormationRate
+    return
+  end function starFormationRateQuantity
 
   function starFormationRateName(self)
     !!{

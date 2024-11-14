@@ -1,5 +1,5 @@
 !! Copyright 2009, 2010, 2011, 2012, 2013, 2014, 2015, 2016, 2017, 2018,
-!!           2019, 2020, 2021, 2022, 2023
+!!           2019, 2020, 2021, 2022, 2023, 2024
 !!    Andrew Benson <abenson@carnegiescience.edu>
 !!
 !! This file is part of Galacticus.
@@ -36,7 +36,8 @@
      private
      double precision :: timeLimit
    contains
-     procedure :: multiplier => recentMultiplier
+     procedure :: multiplier          => recentMultiplier
+     procedure :: isRedshiftDependent => recentIsRedshiftDependent
   end type stellarPopulationSpectraPostprocessorRecent
 
   interface stellarPopulationSpectraPostprocessorRecent
@@ -105,3 +106,15 @@ contains
     end if
     return
   end function recentMultiplier
+
+  logical function recentIsRedshiftDependent(self) result(isRedshiftDependent)
+    !!{
+    Return false indicating that the postprocessor is redshift independent.
+    !!}
+    implicit none
+    class(stellarPopulationSpectraPostprocessorRecent), intent(inout) :: self
+    !$GLC attributes unused :: self
+
+    isRedshiftDependent=.false.
+    return
+  end function recentIsRedshiftDependent

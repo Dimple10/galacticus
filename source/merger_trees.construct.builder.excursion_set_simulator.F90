@@ -1,5 +1,5 @@
 !! Copyright 2009, 2010, 2011, 2012, 2013, 2014, 2015, 2016, 2017, 2018,
-!!           2019, 2020, 2021, 2022, 2023
+!!           2019, 2020, 2021, 2022, 2023, 2024
 !!    Andrew Benson <abenson@carnegiescience.edu>
 !!
 !! This file is part of Galacticus.
@@ -196,7 +196,7 @@
         use :: Kind_Numbers       , only : kind_int8
         use :: Merger_Tree_Walkers, only : mergerTreeWalkerTreeConstruction
         implicit none
-        class           (mergerTreeBuilderExcursionSetSimulator), intent(inout)          :: self
+        class           (mergerTreeBuilderExcursionSetSimulator), intent(inout), target  :: self
         type            (mergerTree                            ), intent(inout), target  :: tree
         type            (treeNode                              )               , pointer :: node                   , nodeNew              , &
              &                                                                              nodePrior              , nodeProgenitorPrimary

@@ -1,5 +1,5 @@
 !! Copyright 2009, 2010, 2011, 2012, 2013, 2014, 2015, 2016, 2017, 2018,
-!!           2019, 2020, 2021, 2022, 2023
+!!           2019, 2020, 2021, 2022, 2023, 2024
 !!    Andrew Benson <abenson@carnegiescience.edu>
 !!
 !! This file is part of Galacticus.
@@ -26,29 +26,29 @@ module Node_Component_Disk_Standard_Data
   Stores data for the standard disk node component.
   !!}
   use :: Kind_Numbers      , only : kind_int8
-  use :: Mass_Distributions, only : massDistributionClass, massDistributionCylindrical
+  use :: Mass_Distributions, only : massDistributionClass, kinematicsDistributionLocal
   implicit none
   public
 
   ! Record of unique ID of node which we last computed results for.
-  integer         (kind=kind_int8  )          :: lastUniqueID                    =-1
+  integer         (kind=kind_int8             )          :: lastUniqueID                    =-1
   !$omp threadprivate(lastUniqueID)
   ! Records of previously computed and stored quantities.
-  logical                                     :: surfaceDensityCentralGasComputed   , surfaceDensityCentralStellarComputed, &
-       &                                         surfaceDensityCentralTotalComputed
+  logical                                                :: surfaceDensityCentralGasComputed   , surfaceDensityCentralStellarComputed, &
+       &                                                    surfaceDensityCentralTotalComputed
   !$omp threadprivate(surfaceDensityCentralGasComputed,surfaceDensityCentralStellarComputed,surfaceDensityCentralTotalComputed)
-  double precision                            :: surfaceDensityCentralGas           , surfaceDensityCentralStellar        , &
-       &                                         surfaceDensityCentralTotal
+  double precision                                       :: surfaceDensityCentralGas           , surfaceDensityCentralStellar        , &
+       &                                                    surfaceDensityCentralTotal
   !$omp threadprivate(surfaceDensityCentralGas,surfaceDensityCentralStellar,surfaceDensityCentralTotal)
-  logical                                     :: radiusScaleDiskComputed
+  logical                                                :: radiusScaleDiskComputed
   !$omp threadprivate(radiusScaleDiskComputed)
-  double precision                            :: radiusScaleDisk
+  double precision                                       :: radiusScaleDisk
   !$omp threadprivate(radiusScaleDisk)
 
-  ! The mass distribution object.
-  class           (massDistributionClass      ), pointer :: massDistributionDisk_
-  class           (massDistributionCylindrical), pointer :: massDistributionDisk
-  !$omp threadprivate(massDistributionDisk_,massDistributionDisk)
+  ! The mass distribution objects.
+  class           (massDistributionClass      ), pointer :: massDistributionStellar_           , massDistributionGas_
+  type            (kinematicsDistributionLocal), pointer :: kinematicDistribution_
+  !$omp threadprivate(massDistributionStellar_,massDistributionGas_,kinematicDistribution_)
 
 contains
 

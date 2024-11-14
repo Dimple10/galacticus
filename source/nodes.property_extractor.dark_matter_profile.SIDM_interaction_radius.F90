@@ -1,5 +1,5 @@
 !! Copyright 2009, 2010, 2011, 2012, 2013, 2014, 2015, 2016, 2017, 2018,
-!!           2019, 2020, 2021, 2022, 2023
+!!           2019, 2020, 2021, 2022, 2023, 2024
 !!    Andrew Benson <abenson@carnegiescience.edu>
 !!
 !! This file is part of Galacticus.
@@ -103,23 +103,25 @@ contains
     !!{
     Implement a {\normalfont \ttfamily darkMatterProfileRadiusInteractionSIDM} output analysis.
     !!}
-    use :: Dark_Matter_Profiles_DMO, only : darkMatterProfileDMOSIDM
-    use :: Galacticus_Nodes        , only : nodeComponentBasic
+    use :: Mass_Distributions, only : massDistributionSphericalSIDM, massDistributionClass
     implicit none
-    class(nodePropertyExtractorDarkMatterProfileRadiusInteractionSIDM), intent(inout)           :: self
+    class(nodePropertyExtractorDarkMatterProfileRadiusInteractionSIDM), intent(inout), target   :: self
     type (treeNode                                                   ), intent(inout), target   :: node
     type (multiCounter                                               ), intent(inout), optional :: instance
-    class(nodeComponentBasic                                         ), pointer                 :: basic
+    class(massDistributionClass                                      ), pointer                 :: massDistribution_
     !$GLC attributes unused :: instance
 
-    select type (darkMatterProfileDMO_ => self%darkMatterProfileDMO_)
-    class is (darkMatterProfileDMOSIDM)
-       basic                                         => node                 %basic            (                 )
-       darkMatterProfileRadiusInteractionSIDMExtract =  darkMatterProfileDMO_%radiusInteraction(node,basic%time())
+    massDistribution_ => self%darkMatterProfileDMO_%get(node)
+    select type (massDistribution_)
+    class is (massDistributionSphericalSIDM)
+       darkMatterProfileRadiusInteractionSIDMExtract=massDistribution_%radiusInteraction()
     class default
-       darkMatterProfileRadiusInteractionSIDMExtract =  0.0d0
+       darkMatterProfileRadiusInteractionSIDMExtract=0.0d0
     end select
     return
+    !![
+    <objectDestructor name="massDistribution_"/>
+    !!]
   end function darkMatterProfileRadiusInteractionSIDMExtract
 
   function darkMatterProfileRadiusInteractionSIDMName(self)

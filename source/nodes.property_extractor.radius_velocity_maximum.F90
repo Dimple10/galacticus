@@ -1,5 +1,5 @@
 !! Copyright 2009, 2010, 2011, 2012, 2013, 2014, 2015, 2016, 2017, 2018,
-!!           2019, 2020, 2021, 2022, 2023
+!!           2019, 2020, 2021, 2022, 2023, 2024
 !!    Andrew Benson <abenson@carnegiescience.edu>
 !!
 !! This file is part of Galacticus.
@@ -116,14 +116,20 @@ contains
     !!{
     Implement a radius of maximum velocity output analysis.
     !!}
-    use :: Galacticus_Nodes, only : nodeComponentBasic, treeNode
+    use :: Galacticus_Nodes  , only : nodeComponentBasic   , treeNode
+    use :: Mass_Distributions, only : massDistributionClass
     implicit none
-    class(nodePropertyExtractorRadiusVelocityMaximum), intent(inout)           :: self
+    class(nodePropertyExtractorRadiusVelocityMaximum), intent(inout), target   :: self
     type (treeNode                                  ), intent(inout), target   :: node
     type (multiCounter                              ), intent(inout), optional :: instance
+    class(massDistributionClass                     )               , pointer  :: massDistribution_
     !$GLC attributes unused :: instance
 
-    radiusVelocityMaximumExtract=self%darkMatterProfileDMO_%radiusCircularVelocityMaximum(node)
+    massDistribution_            => self             %darkMatterProfileDMO_%get                       (node)
+    radiusVelocityMaximumExtract =  massDistribution_                      %radiusRotationCurveMaximum(    )
+    !![
+    <objectDestructor name="massDistribution_"/>
+    !!]
     return
   end function radiusVelocityMaximumExtract
 

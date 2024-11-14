@@ -1,5 +1,5 @@
 !! Copyright 2009, 2010, 2011, 2012, 2013, 2014, 2015, 2016, 2017, 2018,
-!!           2019, 2020, 2021, 2022, 2023
+!!           2019, 2020, 2021, 2022, 2023, 2024
 !!    Andrew Benson <abenson@carnegiescience.edu>
 !!
 !! This file is part of Galacticus.
@@ -34,7 +34,8 @@
      !!}
      private
    contains
-     procedure :: multiplier => lycSuppressMultiplier
+     procedure :: multiplier          => lycSuppressMultiplier
+     procedure :: isRedshiftDependent => lycSuppressIsRedshiftDependent
   end type stellarPopulationSpectraPostprocessorLycSuppress
 
   interface stellarPopulationSpectraPostprocessorLycSuppress
@@ -80,3 +81,15 @@ contains
     end if
     return
   end function lycSuppressMultiplier
+
+  logical function lycSuppressIsRedshiftDependent(self) result(isRedshiftDependent)
+    !!{
+    Return false indicating that the postprocessor is redshift independent.
+    !!}
+    implicit none
+    class(stellarPopulationSpectraPostprocessorLycSuppress), intent(inout) :: self
+    !$GLC attributes unused :: self
+
+    isRedshiftDependent=.false.
+    return
+  end function lycSuppressIsRedshiftDependent

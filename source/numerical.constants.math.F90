@@ -1,5 +1,5 @@
 !! Copyright 2009, 2010, 2011, 2012, 2013, 2014, 2015, 2016, 2017, 2018,
-!!           2019, 2020, 2021, 2022, 2023
+!!           2019, 2020, 2021, 2022, 2023, 2024
 !!    Andrew Benson <abenson@carnegiescience.edu>
 !!
 !! This file is part of Galacticus.
@@ -57,5 +57,9 @@ module Numerical_Constants_Math
   ! Riemann zeta-function values.
   !! ζ(3) - https://oeis.org/A002117
   double precision, public, parameter :: riemannZeta3=1.20205690315959428539973816151144999076d0
+  
+  ! Catalan's constant
+  !! G - https://oeis.org/A006752
+  double precision, public, parameter :: catalan     =0.91596559417721901505460351493238411077d0
   
 end module Numerical_Constants_Math

@@ -1,5 +1,5 @@
 !! Copyright 2009, 2010, 2011, 2012, 2013, 2014, 2015, 2016, 2017, 2018,
-!!           2019, 2020, 2021, 2022, 2023
+!!           2019, 2020, 2021, 2022, 2023, 2024
 !!    Andrew Benson <abenson@carnegiescience.edu>
 !!
 !! This file is part of Galacticus.
@@ -1503,8 +1503,9 @@ contains
     !!{
     Output a set of merger trees to an HDF5 file.
     !!}
-    use :: Error, only : Error_Report
-    use :: HDF5 , only : hsize_t
+    use :: Error         , only : Error_Report
+    use :: HDF5          , only : hsize_t
+    use :: File_Utilities, only : lockDescriptor, File_Lock, File_Unlock
     implicit none
     integer  (kind=hsize_t                   ), intent(in   )           :: hdfChunkSize
     integer                                   , intent(in   )           :: hdfCompressionLevel
@@ -1512,6 +1513,7 @@ contains
     class    (mergerTreeData                 ), intent(inout)           :: mergerTrees
     character(len=*                          ), intent(in   )           :: outputFileName
     logical                                   , intent(in   ), optional :: append
+    type     (lockDescriptor                 )                          :: fileLock
 
     ! Validate the merger tree.
     call Merger_Tree_Data_Validate_Trees            (mergerTrees)
@@ -1519,6 +1521,7 @@ contains
     ! If we have most-bound particle indices and particle data has been read, construct arrays giving position of particle data for each node.
     call Merger_Tree_Data_Construct_Particle_Indices(mergerTrees)
 
+    call File_Lock(outputFileName,fileLock,lockIsShared=.false.)
     select case (outputFormat%ID)
     case (mergerTreeFormatGalacticus%ID)
        call Merger_Tree_Data_Structure_Export_Galacticus(mergerTrees,outputFileName,hdfChunkSize,hdfCompressionLevel,append)
@@ -1527,6 +1530,7 @@ contains
     case default
        call Error_Report('output format is not recognized'//{introspection:location})
     end select
+    call File_Unlock(fileLock)
     return
   end subroutine Merger_Tree_Data_Structure_Export
 
@@ -1584,7 +1588,7 @@ contains
     if (mergerTrees%hasNodeMass                ) call forestHalos%writeDataset(mergerTrees%nodeMass                ,"nodeMass"           ,"The mass of each node."                             ,appendTo=appendActual                  )
     if (mergerTrees%hasRedshift                ) call forestHalos%writeDataset(mergerTrees%redshift                ,"redshift"           ,"The redshift of each node."                         ,appendTo=appendActual                  )
     if (mergerTrees%hasNodeMass200Mean         ) call forestHalos%writeDataset(mergerTrees%nodeMass200Mean         ,"nodeMass200Mean"    ,"The M200 mass of each node (200 * mean density)."   ,appendTo=appendActual                  )
-    if (mergerTrees%hasNodeMass200Crit         ) call forestHalos%writeDataset(mergerTrees%nodeMass200Crit         ,"nodeMass200Crit"    ,"The M200 mass of each node (200 * crit density(."   ,appendTo=appendActual                  )
+    if (mergerTrees%hasNodeMass200Crit         ) call forestHalos%writeDataset(mergerTrees%nodeMass200Crit         ,"nodeMass200Crit"    ,"The M200 mass of each node (200 * crit density)."   ,appendTo=appendActual                  )
     if (mergerTrees%hasScaleFactor             ) call forestHalos%writeDataset(mergerTrees%scaleFactor             ,"scaleFactor"        ,"The scale factor of each node."                     ,appendTo=appendActual                  )
     if (mergerTrees%hasPositionX               ) call forestHalos%writeDataset(mergerTrees%position                ,"position"           ,"The position of each node."                         ,appendTo=appendActual,appendDimension=2)
     if (mergerTrees%hasVelocityX               ) call forestHalos%writeDataset(mergerTrees%velocity                ,"velocity"           ,"The velocity of each node."                         ,appendTo=appendActual,appendDimension=2)
@@ -1970,8 +1974,8 @@ contains
     ! Output merger tree datasets.
     call                               mergerTreesGroup%writeDataset(mergerTrees%snapshot          ,"HaloSnapshot"      ,"The snapshot of each halo."           ,appendTo=appendActual)
     call                               mergerTreesGroup%writeDataset(mergerTrees%nodeIndex         ,"HaloID"            ,"The index of each halo."              ,appendTo=appendActual)
-    call                               mergerTreesGroup%writeDataset(mergerTrees%descendantIndex   ,"DescendantID"      ,"The index of each descendant halo."   ,appendTo=appendActual)
-    call                               mergerTreesGroup%writeDataset(            descendantSnapshot,"DescendantSnapshot","The snapshot of each descendant halo.",appendTo=appendActual)
+    call                               mergerTreesGroup%writeDataset(mergerTrees%descendantIndex   ,"DescendentID"      ,"The index of each descendant halo."   ,appendTo=appendActual)
+    call                               mergerTreesGroup%writeDataset(            descendantSnapshot,"DescendentSnapshot","The snapshot of each descendant halo.",appendTo=appendActual)
     if (mergerTrees%hasHostIndex) call mergerTreesGroup%writeDataset(mergerTrees%hostIndex         ,"HostID"            ,"The index of each host halo."         ,appendTo=appendActual)
     call                               mergerTreesGroup%writeDataset(mergerTrees%treeNodeCount     ,"HalosPerTree"      ,"Number of halos in each tree."        ,appendTo=appendActual)
     call                               mergerTreesGroup%writeDataset(mergerTrees%forestID          ,"TreeID"            ,"Unique index of tree."                ,appendTo=appendActual)

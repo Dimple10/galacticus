@@ -1,5 +1,5 @@
 !! Copyright 2009, 2010, 2011, 2012, 2013, 2014, 2015, 2016, 2017, 2018,
-!!           2019, 2020, 2021, 2022, 2023
+!!           2019, 2020, 2021, 2022, 2023, 2024
 !!    Andrew Benson <abenson@carnegiescience.edu>
 !!
 !! This file is part of Galacticus.
@@ -24,6 +24,7 @@
   !![
   <accretionDiskSpectra name="accretionDiskSpectraFile">
    <description>Accretion disk spectra are interpolated from tables read from file.</description>
+   <runTimeFileDependencies paths="fileName"/>
   </accretionDiskSpectra>
   !!]
 
@@ -142,9 +143,10 @@ contains
     !!{
     Load a file of AGN spectra.
     !!}
-    use :: Error      , only : Error_Report
-    use :: HDF5_Access, only : hdf5Access
-    use :: IO_HDF5    , only : hdf5Object
+    use :: Error       , only : Error_Report
+    use :: HDF5_Access , only : hdf5Access
+    use :: IO_HDF5     , only : hdf5Object
+    use :: Table_Labels, only : extrapolationTypeZero, extrapolationTypeFix
     implicit none
     class    (accretionDiskSpectraFile), intent(inout) :: self
     character(len=*                   ), intent(in   ) :: fileName
@@ -167,8 +169,8 @@ contains
     ! Convert luminosities to logarithmic form for interpolation.
     self%luminosity=log(self%luminosity)
     ! Build interpolators.
-    self%interpolatorLuminosity=interpolator(self%luminosity)
-    self%interpolatorWavelength=interpolator(self%wavelength)
+    self%interpolatorLuminosity=interpolator(self%luminosity,extrapolationType=extrapolationTypeFix )
+    self%interpolatorWavelength=interpolator(self%wavelength,extrapolationType=extrapolationTypeZero)
     return
   end subroutine fileLoadFile
 

@@ -1,5 +1,5 @@
 !! Copyright 2009, 2010, 2011, 2012, 2013, 2014, 2015, 2016, 2017, 2018,
-!!           2019, 2020, 2021, 2022, 2023
+!!           2019, 2020, 2021, 2022, 2023, 2024
 !!    Andrew Benson <abenson@carnegiescience.edu>
 !!
 !! This file is part of Galacticus.
@@ -25,6 +25,7 @@ program Test_Fail
   !!{
   Tests that failures are detected.
   !!}
-
-  write (0,*) "FAILED: failed intentionally"
+  use, intrinsic :: ISO_Fortran_Env, only : output_unit
+  
+  write (output_unit,*) "FAILED: failed intentionally"
 end program Test_Fail

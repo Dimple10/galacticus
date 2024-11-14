@@ -1,5 +1,5 @@
 !! Copyright 2009, 2010, 2011, 2012, 2013, 2014, 2015, 2016, 2017, 2018,
-!!           2019, 2020, 2021, 2022, 2023
+!!           2019, 2020, 2021, 2022, 2023, 2024
 !!    Andrew Benson <abenson@carnegiescience.edu>
 !!
 !! This file is part of Galacticus.
@@ -74,6 +74,7 @@
    <stateStorable>
     <exclude variables="spectra, forceZeroMetallicity, fileName, fileRead"/>
    </stateStorable>
+   <runTimeFileDependencies paths="fileName"/>
   </stellarPopulationSpectra>
   !!]
   type, extends(stellarPopulationSpectraClass) :: stellarPopulationSpectraFile
@@ -180,7 +181,8 @@ contains
     integer                                                                  :: jWavelength                , jMetallicity, &
          &                                                                      jAge
     double precision                                                         :: metallicity
-    type            (varying_string              )                           :: message
+    type            (varying_string              ), save                     :: message
+    !$omp threadprivate(message)
     character       (len=12                      )                           :: metallicityLabel           , label
 
     ! Ensure that the file has been read.
@@ -271,6 +273,7 @@ contains
     use :: Error         , only : Error_Report
     use :: HDF5_Access   , only : hdf5Access
     use :: IO_HDF5       , only : hdf5Object
+    use :: Table_Labels  , only : extrapolationTypeExtrapolate, extrapolationTypeZero, extrapolationTypeFix
     implicit none
     class  (stellarPopulationSpectraFile), intent(inout) :: self
     integer                                              :: fileFormatVersion
@@ -300,9 +303,9 @@ contains
        !$ call hdf5Access%unset()
        self%fileRead=.true.
        ! Build interpolators.
-       self%spectra%interpolatorAge        =interpolator(self%spectra%ages         )
-       self%spectra%interpolatorWavelength =interpolator(self%spectra%wavelengths  )
-       self%spectra%interpolatorMetallicity=interpolator(self%spectra%metallicities)
+       self%spectra%interpolatorAge        =interpolator(self%spectra%ages         ,extrapolationType=extrapolationTypeExtrapolate)
+       self%spectra%interpolatorWavelength =interpolator(self%spectra%wavelengths  ,extrapolationType=extrapolationTypeZero       )
+       self%spectra%interpolatorMetallicity=interpolator(self%spectra%metallicities,extrapolationType=extrapolationTypeFix        )
     end if
     return
   end subroutine fileReadFile

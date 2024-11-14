@@ -1,5 +1,5 @@
 !! Copyright 2009, 2010, 2011, 2012, 2013, 2014, 2015, 2016, 2017, 2018,
-!!           2019, 2020, 2021, 2022, 2023
+!!           2019, 2020, 2021, 2022, 2023, 2024
 !!    Andrew Benson <abenson@carnegiescience.edu>
 !!
 !! This file is part of Galacticus.
@@ -115,13 +115,14 @@ contains
     !!{
     Return the excursion set barrier at the given variance and time.
     !!}
-    use :: Display          , only : displayCounter              , displayCounterClear  , displayIndent       , displayMessage, &
-          &                          displayUnindent             , verbosityLevelWorking
-    use :: Error_Functions  , only : Error_Function_Complementary
-    use :: File_Utilities   , only : File_Lock                   , File_Unlock          , lockDescriptor
-    use :: Kind_Numbers     , only : kind_dble                   , kind_quad
-    use :: MPI_Utilities    , only : mpiBarrier                  , mpiSelf
-    use :: Numerical_Ranges , only : Make_Range                  , rangeTypeLinear      , rangeTypeLogarithmic
+    use :: Display         , only : displayCounter              , displayCounterClear  , displayIndent       , displayMessage, &
+          &                         displayUnindent             , verbosityLevelWorking
+    use :: Error_Functions , only : Error_Function_Complementary
+    use :: File_Utilities  , only : File_Lock                   , File_Unlock          , lockDescriptor
+    use :: Kind_Numbers    , only : kind_dble                   , kind_quad
+    use :: MPI_Utilities   , only : mpiBarrier                  , mpiSelf
+    use :: Numerical_Ranges, only : Make_Range                  , rangeTypeLinear      , rangeTypeLogarithmic
+    use :: Table_Labels    , only : extrapolationTypeFix
     implicit none
     class           (excursionSetFirstCrossingFarahiMidpoint), intent(inout)                 :: self
     double precision                                         , intent(in   )                 :: variance                       , time
@@ -387,8 +388,8 @@ contains
           if (allocated(self%interpolatorTime    )) deallocate(self%interpolatorTime    )
           allocate(self%interpolatorVariance)
           allocate(self%interpolatorTime    )
-          self%interpolatorVariance=interpolator(self%variance)
-          self%interpolatorTime    =interpolator(self%time    )
+          self%interpolatorVariance=interpolator(self%variance,extrapolationType=extrapolationTypeFix)
+          self%interpolatorTime    =interpolator(self%time    ,extrapolationType=extrapolationTypeFix)
           ! Record that the table is now built.
           self%tableInitialized=.true.
           ! Write the table to file if possible.
@@ -426,14 +427,15 @@ contains
     !!{
     Tabulate the excursion set crossing rate.
     !!}
-    use :: Display          , only : displayCounter              , displayCounterClear  , displayIndent       , displayMagenta  , &
-          &                          displayMessage              , displayReset         , displayUnindent     , displayVerbosity, &
-          &                          verbosityLevelWarn          , verbosityLevelWorking
-    use :: Error_Functions  , only : Error_Function_Complementary
-    use :: File_Utilities   , only : File_Lock                   , File_Unlock          , lockDescriptor
-    use :: Kind_Numbers     , only : kind_dble                   , kind_quad
-    use :: MPI_Utilities    , only : mpiBarrier                  , mpiSelf
-    use :: Numerical_Ranges , only : Make_Range                  , rangeTypeLinear      , rangeTypeLogarithmic
+    use :: Display         , only : displayCounter              , displayCounterClear  , displayIndent       , displayMagenta  , &
+          &                         displayMessage              , displayReset         , displayUnindent     , displayVerbosity, &
+          &                         verbosityLevelWarn          , verbosityLevelWorking
+    use :: Error_Functions , only : Error_Function_Complementary
+    use :: File_Utilities  , only : File_Lock                   , File_Unlock          , lockDescriptor
+    use :: Kind_Numbers    , only : kind_dble                   , kind_quad
+    use :: MPI_Utilities   , only : mpiBarrier                  , mpiSelf
+    use :: Numerical_Ranges, only : Make_Range                  , rangeTypeLinear      , rangeTypeLogarithmic
+    use :: Table_Labels    , only : extrapolationTypeFix
     implicit none
     class           (excursionSetFirstCrossingFarahiMidpoint), intent(inout)                   :: self
     double precision                                         , intent(in   )                   :: time                                         , varianceProgenitor
@@ -741,7 +743,7 @@ contains
                    else
                       varianceMaximumRateLimit=self%varianceMaximumRate
                    end if
-                   ! For computing non-crossing rates, the resutls are tabulated with respect to $S_{\rm max}-S$ so that interpolation
+                   ! For computing non-crossing rates, the results are tabulated with respect to $S_{\rm max}-S$ so that interpolation
                    ! is more accurate when $S$ approaches $S_{\rm max}$.
                    do iVariance=0,countVarianceCurrentRate
                       varianceCurrentRateQuad(iVariance)=max(varianceMaximumRateLimit-self%varianceCurrentRateNonCrossing(iVariance),0.0d0)
@@ -790,9 +792,9 @@ contains
                    if (varianceProgenitorRateQuad(1)+varianceCurrentRateQuad(iVariance) >= varianceMaximumRateLimit) then
                       firstCrossingRateQuad(1)= 0.0_kind_quad
                    else
-                      offsetEffective              =self%offsetEffective (self%timeRate(iTime),varianceCurrentRateQuad(iVariance),varianceProgenitorRateQuad(1),varianceMidpointRateQuad(1),0.0_kind_quad,barrierRateQuad(1),barrierMidpointRateQuad(1),cosmologicalMassVariance_)
-                      varianceResidual             =self%varianceResidual(self%timeRate(iTime),varianceCurrentRateQuad(iVariance),varianceProgenitorRateQuad(1),varianceMidpointRateQuad(1)                                                            ,cosmologicalMassVariance_)
-                      integralKernelRate_=integralKernelRate(varianceResidual,offsetEffective)
+                      offsetEffective         =+self%offsetEffective (self%timeRate(iTime),varianceCurrentRateQuad(iVariance),varianceProgenitorRateQuad(1),varianceMidpointRateQuad(1),0.0_kind_quad,barrierRateQuad(1),barrierMidpointRateQuad(1),cosmologicalMassVariance_)
+                      varianceResidual        =+self%varianceResidual(self%timeRate(iTime),varianceCurrentRateQuad(iVariance),varianceProgenitorRateQuad(1),varianceMidpointRateQuad(1)                                                            ,cosmologicalMassVariance_)
+                      integralKernelRate_     =+integralKernelRate(varianceResidual,offsetEffective)
                       ! If the integral kernel is zero (to machine precision) then simply assume no crossing rate.
                       if (integralKernelRate_ <= 0.0d0) then
                          firstCrossingRateQuad=0.0d0
@@ -801,11 +803,8 @@ contains
                       ! Compute the first crossing rate at the first grid point.
                       offsetEffective         =+self%offsetEffective (self%timeRate(iTime),varianceCurrentRateQuad(iVariance),varianceProgenitorRateQuad(1),0.0_kind_quad,0.0_kind_quad,barrierRateQuad(1),barrier,cosmologicalMassVariance_)
                       varianceResidual        =+self%varianceResidual(self%timeRate(iTime),varianceCurrentRateQuad(iVariance),varianceProgenitorRateQuad(1),0.0_kind_quad                                         ,cosmologicalMassVariance_)
-                      firstCrossingRateQuad(1)=+Error_Function_Complementary(                                      &
-                           &                                                 +offsetEffective                      &
-                           &                                                 /sqrt(2.0_kind_quad*varianceResidual) &
-                           &                                                )                                      &
-                           &                   /varianceStepRate                                                   &
+                      firstCrossingRateQuad(1)=+integralKernelRate(varianceResidual,offsetEffective) &
+                           &                   /varianceStepRate                                     &
                            &                   /integralKernelRate_
                    end if
                    varianceStepRate=+varianceProgenitorRateQuad(1) &
@@ -830,30 +829,18 @@ contains
                             do j=1,i-1
                                offsetEffective        =self%offsetEffective (self%timeRate(iTime),varianceCurrentRateQuad(iVariance),varianceProgenitorRateQuad(i),varianceMidpointRateQuad(j),barrier,effectiveBarrierInitial,barrierMidpointRateQuad(j)-barrier,cosmologicalMassVariance_)
                                varianceResidual       =self%varianceResidual(self%timeRate(iTime),varianceCurrentRateQuad(iVariance),varianceProgenitorRateQuad(i),varianceMidpointRateQuad(j)                                                                   ,cosmologicalMassVariance_)
-                               erfcArgumentNumerator  =offsetEffective
-                               erfcArgumentDenominator=sqrt(2.0_kind_quad*varianceResidual)
-                               if (erfcArgumentNumerator == 0.0_kind_quad .or. exponent(erfcArgumentNumerator)-exponent(erfcArgumentDenominator) > maxExponent(0.0_kind_quad)) then
-                                  erfcValue=1.0_kind_quad
-                               else
-                                  erfcValue              =Error_Function_Complementary(erfcArgumentNumerator/erfcArgumentDenominator)
-                               end if
-                               if (erfcValue > 0.0_kind_quad) then
-                                  varianceStepRate        =+varianceProgenitorRateQuad(j  ) &
-                                       &                   -varianceProgenitorRateQuad(j-1)
-                                  probabilityCrossingPrior=+probabilityCrossingPrior        &
-                                       &                   +firstCrossingRateQuad     (j  ) &
-                                       &                   *varianceStepRate                &
-                                       &                   *erfcValue
-                               end if
+                               varianceStepRate        =+varianceProgenitorRateQuad(j  )                      &
+                                    &                   -varianceProgenitorRateQuad(j-1)
+                               probabilityCrossingPrior=+probabilityCrossingPrior                             &
+                                    &                   +firstCrossingRateQuad     (j  )                      &
+                                    &                   *varianceStepRate                                     &
+                                    &                   *integralKernelRate(varianceResidual,offsetEffective)
                             end do
                             varianceStepRate        =+varianceProgenitorRateQuad(i  ) &
                                  &                   -varianceProgenitorRateQuad(i-1)
                             offsetEffective         =+self%offsetEffective (self%timeRate(iTime),varianceCurrentRateQuad(iVariance),varianceProgenitorRateQuad(i),0.0_kind_quad,barrier,effectiveBarrierInitial,0.0_kind_quad,cosmologicalMassVariance_)
                             varianceResidual        =+self%varianceResidual(self%timeRate(iTime),varianceCurrentRateQuad(iVariance),varianceProgenitorRateQuad(i),0.0_kind_quad                                              ,cosmologicalMassVariance_)
-                            firstCrossingRateQuad(i)=+Error_Function_Complementary(                                      &
-                                 &                                                 +offsetEffective                      &
-                                 &                                                 /sqrt(2.0_kind_quad*varianceResidual) &
-                                 &                                                )                                      &
+                            firstCrossingRateQuad(i)=+integralKernelRate(varianceResidual,offsetEffective) &
                                  &                   -probabilityCrossingPrior
                             if     (                                                                                                                          &
                                  &   firstCrossingRateQuad(i)                                                                   > 0.0d0                       &
@@ -996,10 +983,10 @@ contains
           allocate(self%interpolatorVarianceCurrentRate           )
           allocate(self%interpolatorVarianceCurrentRateNonCrossing)
           allocate(self%interpolatorTimeRate                      )
-          self%interpolatorVarianceRate                  =interpolator(self%varianceProgenitorRate        )
-          self%interpolatorVarianceCurrentRate           =interpolator(self%varianceCurrentRate           )
-          self%interpolatorVarianceCurrentRateNonCrossing=interpolator(self%varianceCurrentRateNonCrossing)
-          self%interpolatorTimeRate                      =interpolator(self%timeRate                      )
+          self%interpolatorVarianceRate                  =interpolator(self%varianceProgenitorRate        ,extrapolationType=extrapolationTypeFix)
+          self%interpolatorVarianceCurrentRate           =interpolator(self%varianceCurrentRate           ,extrapolationType=extrapolationTypeFix)
+          self%interpolatorVarianceCurrentRateNonCrossing=interpolator(self%varianceCurrentRateNonCrossing,extrapolationType=extrapolationTypeFix)
+          self%interpolatorTimeRate                      =interpolator(self%timeRate                      ,extrapolationType=extrapolationTypeFix)
           ! Set previous variance and time to unphysical values to force recompute of interpolation factors on next call.
           self%variancePreviousRate=-1.0d0
           self%timePreviousRate    =-1.0d0
@@ -1032,6 +1019,7 @@ contains
     implicit none
     real(kind_quad)                :: integralKernelRate
     real(kind_quad), intent(in   ) :: varianceResidual  , offsetEffective
+    real(kind_quad)                :: denominator
 
     if      (varianceResidual <  0.0_kind_quad) then
        integralKernelRate=0.0_kind_quad
@@ -1040,13 +1028,18 @@ contains
        if (offsetEffective > 0.0_kind_quad) then
           integralKernelRate=0.0_kind_quad
        else
-          integralKernelRate=1.0_kind_quad
+          integralKernelRate=2.0_kind_quad
        end if
     else
-       integralKernelRate   =Error_Function_Complementary(                                      &
-            &                                             +offsetEffective                      &
-            &                                             /sqrt(2.0_kind_quad*varianceResidual) &
-            &                                            )
+       denominator=sqrt(2.0_kind_quad*varianceResidual)
+       if (offsetEffective == 0.0_kind_quad .or. exponent(offsetEffective)-exponent(denominator) > maxExponent(0.0_kind_quad)) then
+          integralKernelRate=1.0_kind_quad
+       else
+          integralKernelRate=Error_Function_Complementary(                 &
+               &                                          +offsetEffective &
+               &                                          /denominator     &
+               &                                         )
+       end if
     end if
     return
   end function integralKernelRate

@@ -1,5 +1,5 @@
 !! Copyright 2009, 2010, 2011, 2012, 2013, 2014, 2015, 2016, 2017, 2018,
-!!           2019, 2020, 2021, 2022, 2023
+!!           2019, 2020, 2021, 2022, 2023, 2024
 !!    Andrew Benson <abenson@carnegiescience.edu>
 !!
 !! This file is part of Galacticus.
@@ -23,7 +23,6 @@
 
   use :: Kind_Numbers                           , only : kind_int8
   use :: Satellite_Merging_Progenitor_Properties, only : mergerProgenitorPropertiesClass
-  use :: Galactic_Structure                     , only : galacticStructureClass
 
   !![
   <mergerRemnantSize name="mergerRemnantSizeCole2000">
@@ -73,7 +72,6 @@
      A merger remnant size class which uses the \cite{cole_hierarchical_2000} algorithm.
      !!}
      private
-     class           (galacticStructureClass         ), pointer :: galacticStructure_          => null()
      class           (mergerProgenitorPropertiesClass), pointer :: mergerProgenitorProperties_ => null()
      double precision                                           :: energyOrbital
      integer         (kind=kind_int8                 )          :: lastUniqueID
@@ -105,7 +103,6 @@ contains
     type            (mergerRemnantSizeCole2000      )                :: self
     type            (inputParameters                ), intent(inout) :: parameters
     class           (mergerProgenitorPropertiesClass), pointer       :: mergerProgenitorProperties_
-    class           (galacticStructureClass         ), pointer       :: galacticStructure_
     double precision                                                 :: energyOrbital
 
     !![
@@ -116,18 +113,16 @@ contains
       <source>parameters</source>
     </inputParameter>
     <objectBuilder class="mergerProgenitorProperties" name="mergerProgenitorProperties_" source="parameters"/>
-    <objectBuilder class="galacticStructure"          name="galacticStructure_"          source="parameters"/>
     !!]
-    self=mergerRemnantSizeCole2000(energyOrbital,mergerProgenitorProperties_,galacticStructure_)
+    self=mergerRemnantSizeCole2000(energyOrbital,mergerProgenitorProperties_)
     !![
     <inputParametersValidate source="parameters"/>
     <objectDestructor name="mergerProgenitorProperties_"/>
-    <objectDestructor name="galacticStructure_"         />
     !!]
     return
   end function cole2000ConstructorParameters
 
-  function cole2000ConstructorInternal(energyOrbital,mergerProgenitorProperties_,galacticStructure_) result(self)
+  function cole2000ConstructorInternal(energyOrbital,mergerProgenitorProperties_) result(self)
     !!{
     Internal constructor for the {\normalfont \ttfamily cole2000} merger remnant size class.
     !!}
@@ -135,9 +130,8 @@ contains
     type            (mergerRemnantSizeCole2000      )                        :: self
     double precision                                 , intent(in   )         :: energyOrbital
     class           (mergerProgenitorPropertiesClass), intent(in   ), target :: mergerProgenitorProperties_
-    class           (galacticStructureClass         ), intent(in   ), target :: galacticStructure_
     !![
-    <constructorAssign variables="energyOrbital, *mergerProgenitorProperties_, *galacticStructure_"/>
+    <constructorAssign variables="energyOrbital, *mergerProgenitorProperties_"/>
     !!]
 
     self%propertiesCalculated   =.false.
@@ -170,26 +164,28 @@ contains
 
     !![
     <objectDestructor name="self%mergerProgenitorProperties_"/>
-    <objectDestructor name="self%galacticStructure_"         />
     !!]
     if (calculationResetEvent%isAttached(self,cole2000CalculationReset)) call calculationResetEvent%detach(self,cole2000CalculationReset)
     if (satelliteMergerEvent %isAttached(self,cole2000GetHook         )) call satelliteMergerEvent %detach(self,cole2000GetHook         )
     return
   end subroutine cole2000Destructor
 
-  subroutine cole2000CalculationReset(self,node)
+  subroutine cole2000CalculationReset(self,node,uniqueID)
     !!{
     Reset the dark matter profile calculation.
     !!}
-    use :: Error, only : Error_Report
+    use :: Error       , only : Error_Report
+    use :: Kind_Numbers, only : kind_int8
     implicit none
-    class(*       ), intent(inout) :: self
-    type (treeNode), intent(inout) :: node
+    class  (*        ), intent(inout) :: self
+    type   (treeNode ), intent(inout) :: node
+    integer(kind_int8), intent(in   ) :: uniqueID
+    !$GLC attributes unused :: node
 
     select type (self)
     class is (mergerRemnantSizeCole2000)
        self%propertiesCalculated=.false.
-       self%lastUniqueID       =node%uniqueID()
+       self%lastUniqueID       =uniqueID
     class default
        call Error_Report('incorrect class'//{introspection:location})
     end select
@@ -223,6 +219,7 @@ contains
     use :: Display                         , only : displayMessage
     use :: Galactic_Structure_Options      , only : massTypeDark
     use :: Error                           , only : Error_Report
+    use :: Mass_Distributions              , only : massDistributionClass
     use :: Numerical_Comparison            , only : Values_Agree
     use :: Numerical_Constants_Astronomical, only : gravitationalConstantGalacticus
     use :: String_Handling                 , only : operator(//)
@@ -232,6 +229,7 @@ contains
     double precision                           , intent(  out) :: radius                           , velocityCircular         , &
          &                                                        angularMomentumSpecific
     type            (treeNode                 ), pointer       :: nodeHost
+    class           (massDistributionClass    ), pointer       :: massDistributionSatellite        , massDistributionHost
     double precision                           , parameter     :: formFactorEnergyBinding   =0.5d+0
     double precision                           , parameter     :: toleranceMassAbsolute     =1.0d+0
     double precision                           , parameter     :: toleranceMassRelative     =1.0d-9
@@ -251,7 +249,7 @@ contains
     ! The calculation of remnant size is computed when first needed and then stored. This ensures that the results are determined
     ! by the properties of the merge target prior to any modification that will occur as node components are modified in response
     ! to the merger.
-    if (node%uniqueID() /= self%lastUniqueID) call cole2000CalculationReset(self,node)
+    if (node%uniqueID() /= self%lastUniqueID) call cole2000CalculationReset(self,node,node%uniqueID())
     if (.not.self%propertiesCalculated) then
        self%propertiesCalculated=.true.
        nodeHost => node%mergesWith()
@@ -344,8 +342,14 @@ contains
           ! Check if host has finite mass.
           if (massSpheroidSatellite+massSpheroidHost > 0.0d0) then
              ! Compute masses of dark matter within the host and satellite radii.
-             massDarkMatterHost     =self%galacticStructure_%massEnclosed(nodeHost,radiusHost     ,massType=massTypeDark)
-             massDarkMatterSatellite=self%galacticStructure_%massEnclosed(node    ,radiusSatellite,massType=massTypeDark)
+             massDistributionHost      => nodeHost%massDistribution(massType=massTypeDark)
+             massDistributionSatellite => node    %massDistribution(massType=massTypeDark)
+             massDarkMatterHost        =  massDistributionHost     %massEnclosedBySphere(radiusHost     )
+             massDarkMatterSatellite   =  massDistributionSatellite%massEnclosedBySphere(radiusSatellite)
+             !![
+	     <objectDestructor name="massDistributionHost"     />
+	     <objectDestructor name="massDistributionSatellite"/>
+	     !!]
              ! Combine baryonic and dark matter masses.
              massSpheroidHostTotal     =+massSpheroidHost     +2.0d0*massDarkMatterHost
              massSpheroidTotalSatellite=+massSpheroidSatellite+2.0d0*massDarkMatterSatellite

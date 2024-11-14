@@ -1,5 +1,5 @@
 !! Copyright 2009, 2010, 2011, 2012, 2013, 2014, 2015, 2016, 2017, 2018,
-!!           2019, 2020, 2021, 2022, 2023
+!!           2019, 2020, 2021, 2022, 2023, 2024
 !!    Andrew Benson <abenson@carnegiescience.edu>
 !!
 !! This file is part of Galacticus.
@@ -45,6 +45,7 @@
   !![
   <posteriorSampleLikelihood name="posteriorSampleLikelihoodHaloMassFunction">
    <description>A posterior sampling likelihood class which implements a likelihood for halo mass functions.</description>
+   <runTimeFileDependencies paths="fileName"/>
   </posteriorSampleLikelihood>
   !!]
   type, extends(posteriorSampleLikelihoodBaseParameters) :: posteriorSampleLikelihoodHaloMassFunction
@@ -704,7 +705,7 @@ contains
     implicit none
     class           (posteriorSampleLikelihoodHaloMassFunction), intent(inout)               :: self
     class           (posteriorSampleStateClass                ), intent(inout)               :: simulationState
-    type            (modelParameterList                       ), intent(in   ), dimension(:) :: modelParametersActive_                       , modelParametersInactive_
+    type            (modelParameterList                       ), intent(inout), dimension(:) :: modelParametersActive_        , modelParametersInactive_
     class           (posteriorSampleConvergenceClass          ), intent(inout)               :: simulationConvergence
     double precision                                           , intent(in   )               :: temperature                                  , logLikelihoodCurrent    , &
          &                                                                                      logPriorCurrent                              , logPriorProposed

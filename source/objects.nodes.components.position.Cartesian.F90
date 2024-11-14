@@ -1,5 +1,5 @@
 !! Copyright 2009, 2010, 2011, 2012, 2013, 2014, 2015, 2016, 2017, 2018,
-!!           2019, 2020, 2021, 2022, 2023
+!!           2019, 2020, 2021, 2022, 2023, 2024
 !!    Andrew Benson <abenson@carnegiescience.edu>
 !!
 !! This file is part of Galacticus.
@@ -40,7 +40,6 @@ module Node_Component_Position_Cartesian
       <type>double</type>
       <rank>1</rank>
       <attributes isSettable="true" isGettable="true" isEvolvable="true" />
-      <getFunction bindsTo="component">PositionCartesianPosition</getFunction>
       <output labels="[X,Y,Z]" unitsInSI="megaParsec" comment="Position of the node (in physical coordinates)."/>
       <classDefault>[0.0d0,0.0d0,0.0d0]</classDefault>
     </property>
@@ -49,7 +48,6 @@ module Node_Component_Position_Cartesian
       <type>double</type>
       <rank>1</rank>
       <attributes isSettable="true" isGettable="true" isEvolvable="true" />
-      <getFunction bindsTo="component">PositionCartesianVelocity</getFunction>
       <output labels="[X,Y,Z]" unitsInSI="kilo" comment="Velocity of the node (in physical coordinates)."/>
       <classDefault>[0.0d0,0.0d0,0.0d0]</classDefault>
     </property>
@@ -60,9 +58,12 @@ module Node_Component_Position_Cartesian
       <attributes isSettable="true" isGettable="true" isEvolvable="false" />
     </property>
    </properties>
-   <functions>objects.nodes.components.position.Cartesian.bound_functions.inc</functions>
   </component>
   !!]
+
+  ! A threadprivate object used to track to which thread events are attached.
+  integer :: thread
+  !$omp threadprivate(thread)
 
 contains
 
@@ -83,7 +84,7 @@ contains
     !$GLC attributes unused :: parameters_
 
     if (defaultPositionComponent%cartesianIsActive()) &
-         call nodePromotionEvent%attach(defaultPositionComponent,nodePromotion,openMPThreadBindingAtLevel,label='nodeComponentPositionCartesian')
+         call nodePromotionEvent%attach(thread,nodePromotion,openMPThreadBindingAtLevel,label='nodeComponentPositionCartesian')
     return
   end subroutine Node_Component_Position_Cartesian_Thread_Initialize
 
@@ -100,8 +101,8 @@ contains
     use :: Galacticus_Nodes, only : defaultPositionComponent
     implicit none
 
-    if (defaultPositionComponent%cartesianIsActive() .and. nodePromotionEvent%isAttached(defaultPositionComponent,nodePromotion)) &
-         & call nodePromotionEvent%detach(defaultPositionComponent,nodePromotion)
+    if (defaultPositionComponent%cartesianIsActive() .and. nodePromotionEvent%isAttached(thread,nodePromotion)) &
+         & call nodePromotionEvent%detach(thread,nodePromotion)
     return
   end subroutine Node_Component_Position_Cartesian_Thread_Uninitialize
 

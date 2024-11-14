@@ -1,5 +1,5 @@
 !! Copyright 2009, 2010, 2011, 2012, 2013, 2014, 2015, 2016, 2017, 2018,
-!!           2019, 2020, 2021, 2022, 2023
+!!           2019, 2020, 2021, 2022, 2023, 2024
 !!    Andrew Benson <abenson@carnegiescience.edu>
 !!
 !! This file is part of Galacticus.
@@ -35,7 +35,8 @@
      private
      double precision :: timescale
    contains
-     procedure :: multiplier => birthCloudsLacey2016Multiplier
+     procedure :: multiplier          => birthCloudsLacey2016Multiplier
+     procedure :: isRedshiftDependent => birthCloudsLacey2016IsRedshiftDependent
   end type stellarPopulationSpectraPostprocessorBirthCloudsLacey2016
 
   interface stellarPopulationSpectraPostprocessorBirthCloudsLacey2016
@@ -107,3 +108,15 @@ contains
     end if
     return
   end function birthCloudsLacey2016Multiplier
+
+  logical function birthCloudsLacey2016IsRedshiftDependent(self) result(isRedshiftDependent)
+    !!{
+    Return false indicating that the postprocessor is redshift independent.
+    !!}
+    implicit none
+    class(stellarPopulationSpectraPostprocessorBirthCloudsLacey2016), intent(inout) :: self
+    !$GLC attributes unused :: self
+
+    isRedshiftDependent=.false.
+    return
+  end function birthCloudsLacey2016IsRedshiftDependent

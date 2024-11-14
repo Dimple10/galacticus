@@ -1,5 +1,5 @@
 !! Copyright 2009, 2010, 2011, 2012, 2013, 2014, 2015, 2016, 2017, 2018,
-!!           2019, 2020, 2021, 2022, 2023
+!!           2019, 2020, 2021, 2022, 2023, 2024
 !!    Andrew Benson <abenson@carnegiescience.edu>
 !!
 !! This file is part of Galacticus.
@@ -192,7 +192,8 @@ contains
     !!{
     Internal constructor for the {\normalfont \ttfamily intergalacticBackgroundInternal} radiation field class.
     !!}
-    use :: Numerical_Ranges , only : Make_Range   , rangeTypeLogarithmic
+    use :: Numerical_Ranges, only : Make_Range          , rangeTypeLogarithmic
+    use :: Table_Labels    , only : extrapolationTypeFix, extrapolationTypeZero
     implicit none
     type            (radiationFieldIntergalacticBackgroundInternal)                        :: self
     integer                                                        , intent(in   )         :: wavelengthCountPerDecade          , timeCountPerDecade
@@ -280,8 +281,8 @@ contains
        self%crossSectionSinglyIonizedHelium(iWavelength)=self%atomicCrossSectionIonizationPhoto_%crossSection(2,2,1,self%wavelength(iWavelength))
     end do
     ! Build interpolators.
-    self%interpolatorWavelength=interpolator(self%wavelength)
-    self%interpolatorTime      =interpolator(self%time_     )
+    self%interpolatorWavelength=interpolator(self%wavelength,extrapolationType=extrapolationTypeZero)
+    self%interpolatorTime      =interpolator(self%time_     ,extrapolationType=extrapolationTypeFix )
     ! Initialize state.
     self%statePrevious            => null()
     self%timePrevious             =  -1.0d0

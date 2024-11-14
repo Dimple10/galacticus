@@ -1,5 +1,5 @@
 !! Copyright 2009, 2010, 2011, 2012, 2013, 2014, 2015, 2016, 2017, 2018,
-!!           2019, 2020, 2021, 2022, 2023
+!!           2019, 2020, 2021, 2022, 2023, 2024
 !!    Andrew Benson <abenson@carnegiescience.edu>
 !!
 !! This file is part of Galacticus.
@@ -132,14 +132,15 @@ contains
     return
   end subroutine heatedLikelihoodAnalyze
 
-  subroutine heatedLikelihoodFinalize(self)
+  subroutine heatedLikelihoodFinalize(self,groupName)
     !!{
     Finalize all analyses.
     !!}
     implicit none
-    class(outputAnalysisHeatedLikelihood), intent(inout) :: self
+    class(outputAnalysisHeatedLikelihood), intent(inout)           :: self
+    type (varying_string                ), intent(in   ), optional :: groupName
 
-    call self%outputAnalysis_%finalize()
+    call self%outputAnalysis_%finalize(groupName)
     return
   end subroutine heatedLikelihoodFinalize
 
