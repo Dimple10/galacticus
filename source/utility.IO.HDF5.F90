@@ -7181,7 +7181,7 @@ attributeValue=trim(attributeValue)
     end if
 
     return
-  end subroutine IO_HDF5_Write_Dataset_Integer8_3D
+  end subroutine IO_HDF5_Write_Dataset_Integer8_4D
 
   subroutine IO_HDF5_Read_Dataset_Integer8_1D_Array_Static(self,datasetName,datasetValue,readBegin,readCount,readSelection)
     !!{
