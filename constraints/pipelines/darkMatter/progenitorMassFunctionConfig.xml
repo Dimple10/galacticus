@@ -21,9 +21,11 @@
     <parameterMap         value="mergerTreeBranchingProbability::G0 mergerTreeBranchingProbability::gamma1 mergerTreeBranchingProbability::gamma2 mergerTreeBranchingProbability::gamma3 progenitorMassFunctionParameters::rootVarianceTargetFractional"/>
     <parameterInactiveMap value=""                                                                                                                                                       />
     <posteriorSampleLikelihood value="galaxyPopulation">
-    <baseParametersFileName value="%EXECPATH%/constraints/pipelines/darkMatter/progenitorMassFunctionBaseHugeMDPL.xml"/>
+      <baseParametersFileName value="%EXECPATH%/constraints/pipelines/darkMatter/progenitorMassFunctionBaseHugeMDPL.xml"/>
       <randomize              value="false"                                                                            />
       <evolveForestsVerbosity value="silent"                                                                           />
+      <reportFileName value="true"/>
+      <reportState    value="true"/>
     </posteriorSampleLikelihood> 
 
     <!-- BigMDPL -->
@@ -33,6 +35,8 @@
       <baseParametersFileName value="%EXECPATH%/constraints/pipelines/darkMatter/progenitorMassFunctionBaseBigMDPL.xml"/>
       <randomize              value="false"                                                                           />
       <evolveForestsVerbosity value="silent"                                                                          />
+      <reportFileName value="true" />
+      <reportState    value="true"/>
     </posteriorSampleLikelihood>
 
     <!-- MDPL2 -->
@@ -42,6 +46,8 @@
       <baseParametersFileName value="%EXECPATH%/constraints/pipelines/darkMatter/progenitorMassFunctionBaseMDPL2.xml"/>
       <randomize              value="false"                                                                         /> 
       <evolveForestsVerbosity value="silent"                                                                          /> 
+      <reportFileName value="true" />
+      <reportState    value="true" />
     </posteriorSampleLikelihood> 
 
     <!-- SMDPL -->
@@ -51,6 +57,8 @@
       <baseParametersFileName value="%EXECPATH%/constraints/pipelines/darkMatter/progenitorMassFunctionBaseSMDPL.xml"/>
       <randomize              value="false"                                                                         /> 
       <evolveForestsVerbosity value="silent"                                                                          /> 
+      <reportFileName value="true" />
+      <reportState    value="true" />
     </posteriorSampleLikelihood>
 
     <!-- VSMDPL -->
@@ -60,6 +68,8 @@
       <baseParametersFileName value="%EXECPATH%/constraints/pipelines/darkMatter/progenitorMassFunctionBaseVSMDPL.xml"/>
       <randomize              value="false"                                                                          /> 
       <evolveForestsVerbosity value="silent"                                                                         /> 
+      <reportFileName value="true" />
+      <reportState    value="true" />
     </posteriorSampleLikelihood>
 
     <!-- Symphony Milky Way -->
@@ -69,6 +79,8 @@
       <baseParametersFileName value="%EXECPATH%/constraints/pipelines/darkMatter/progenitorMassFunctionBaseSymphonyMilkyWay.xml"/>
       <randomize              value="false"                                                                                    />
       <evolveForestsVerbosity value="silent"                                                                                   />
+      <reportFileName value="true" />
+      <reportState    value="true" />
     </posteriorSampleLikelihood>
 
     <!-- Symphony WDM3 -->
@@ -78,6 +90,8 @@
       <baseParametersFileName value="%EXECPATH%/constraints/pipelines/darkMatter/progenitorMassFunctionBaseSymphonyWDM3.xml"/>
       <randomize              value="false"                                                                                    />
       <evolveForestsVerbosity value="silent"                                                                                   />
+      <reportFileName value="true" />
+      <reportState    value="true" />
     </posteriorSampleLikelihood>
 
 
@@ -88,6 +102,8 @@
       <baseParametersFileName value="%EXECPATH%/constraints/pipelines/darkMatter/progenitorMassFunctionBaseSymphonyIDM1e-4GeV_halfmode.xml"/>
       <randomize              value="false"/>
       <evolveForestsVerbosity value="silent"/>
+      <reportFileName value="true" />
+      <reportState    value="true" />
     </posteriorSampleLikelihood>
 
   <!-- Symphony IDM1e-2GeV_halfmode -->
@@ -97,6 +113,8 @@
       <baseParametersFileName value="%EXECPATH%/constraints/pipelines/darkMatter/progenitorMassFunctionBaseSymphonyIDM1e-2GeV_halfmode.xml"/>
       <randomize              value="false"/>
       <evolveForestsVerbosity value="silent"/>
+      <reportFileName value="true" />
+      <reportState    value="true" />
     </posteriorSampleLikelihood>
 
   <!-- Symphony IDM1GeV_halfmode -->
@@ -106,6 +124,8 @@
       <baseParametersFileName value="%EXECPATH%/constraints/pipelines/darkMatter/progenitorMassFunctionBaseSymphonyIDM1GeV_halfmode.xml"/>
       <randomize              value="false"/>
       <evolveForestsVerbosity value="silent"/>
+      <reportFileName value="true" />
+      <reportState    value="true" />
     </posteriorSampleLikelihood>
 
   <!-- Symphony IDM1e-4GeV_envelope -->
@@ -115,6 +135,8 @@
       <baseParametersFileName value="%EXECPATH%/constraints/pipelines/darkMatter/progenitorMassFunctionBaseSymphonyIDM1e-4GeV_envelope.xml"/>
       <randomize              value="false"/>
       <evolveForestsVerbosity value="silent"/>
+      <reportFileName value="true" />
+      <reportState    value="true" />
     </posteriorSampleLikelihood>
 
   <!-- Symphony IDM1e-2GeV_envelope -->
@@ -124,6 +146,8 @@
       <baseParametersFileName value="%EXECPATH%/constraints/pipelines/darkMatter/progenitorMassFunctionBaseSymphonyIDM1e-2GeV_envelope.xml"/>
       <randomize              value="false"/>
       <evolveForestsVerbosity value="silent"/>
+      <reportFileName value="true" />
+      <reportState    value="true" />
     </posteriorSampleLikelihood>
 
   <!-- Symphony IDM1GeV_envelope -->
@@ -133,6 +157,8 @@
       <baseParametersFileName value="%EXECPATH%/constraints/pipelines/darkMatter/progenitorMassFunctionBaseSymphonyIDM1GeV_envelope.xml"/>
       <randomize              value="false"/>
       <evolveForestsVerbosity value="silent"/>
+      <reportFileName value="true" />
+      <reportState    value="true" />
     </posteriorSampleLikelihood>
 
   <!-- Symphony fdm_490e-22eV -->
@@ -142,6 +168,8 @@
       <baseParametersFileName value="%EXECPATH%/constraints/pipelines/darkMatter/progenitorMassFunctionBaseSymphonyfdm_490e-22eV.xml"/>
       <randomize              value="false"/>
       <evolveForestsVerbosity value="silent"/>
+      <reportFileName value="true" />
+      <reportState    value="true" />
     </posteriorSampleLikelihood>
 
   <!-- Symphony fdm_25.9e-22eV -->
@@ -151,6 +179,8 @@
       <baseParametersFileName value="%EXECPATH%/constraints/pipelines/darkMatter/progenitorMassFunctionBaseSymphonyfdm_25.9e-22eV.xml"/>
       <randomize              value="false"/>
       <evolveForestsVerbosity value="silent"/>
+      <reportFileName value="true" />
+      <reportState    value="true" />
     </posteriorSampleLikelihood>
 
   <!-- Symphony fdm_185e-22eV -->
@@ -160,6 +190,8 @@
       <baseParametersFileName value="%EXECPATH%/constraints/pipelines/darkMatter/progenitorMassFunctionBaseSymphonyfdm_185e-22eV.xml"/>
       <randomize              value="false"/>
       <evolveForestsVerbosity value="silent"/>
+      <reportFileName value="true" />
+      <reportState    value="true" />
     </posteriorSampleLikelihood>
 
   <!-- Symphony fdm_69.4e-22eV -->
@@ -169,6 +201,8 @@
       <baseParametersFileName value="%EXECPATH%/constraints/pipelines/darkMatter/progenitorMassFunctionBaseSymphonyfdm_69.4e-22eV.xml"/>
       <randomize              value="false"/>
       <evolveForestsVerbosity value="silent"/>
+      <reportFileName value="true" />
+      <reportState    value="true" />
     </posteriorSampleLikelihood>
 
   <!-- Symphony fdm_151e-22eV -->
@@ -178,6 +212,8 @@
       <baseParametersFileName value="%EXECPATH%/constraints/pipelines/darkMatter/progenitorMassFunctionBaseSymphonyfdm_151e-22eV.xml"/>
       <randomize              value="false"/>
       <evolveForestsVerbosity value="silent"/>
+      <reportFileName value="true" />
+      <reportState    value="true" />
     </posteriorSampleLikelihood>
 
   <!-- Symphony fdm_113e-22eV -->
@@ -187,6 +223,8 @@
       <baseParametersFileName value="%EXECPATH%/constraints/pipelines/darkMatter/progenitorMassFunctionBaseSymphonyfdm_113e-22eV.xml"/>
       <randomize              value="false"/>
       <evolveForestsVerbosity value="silent"/>
+      <reportFileName value="true" />
+      <reportState    value="true" />
     </posteriorSampleLikelihood>
 
   <!-- Symphony WDM10 -->
@@ -196,6 +234,8 @@
       <baseParametersFileName value="%EXECPATH%/constraints/pipelines/darkMatter/progenitorMassFunctionBaseSymphonyWDM10.xml"/>
       <randomize              value="false"/>
       <evolveForestsVerbosity value="silent"/>
+      <reportFileName value="true" />
+      <reportState    value="true" />
     </posteriorSampleLikelihood>
 
   <!-- Symphony WDM6.5 -->
@@ -205,6 +245,8 @@
       <baseParametersFileName value="%EXECPATH%/constraints/pipelines/darkMatter/progenitorMassFunctionBaseSymphonyWDM6.5.xml"/>
       <randomize              value="false"/>
       <evolveForestsVerbosity value="silent"/>
+      <reportFileName value="true" />
+      <reportState    value="true" />
     </posteriorSampleLikelihood>
 
   <!-- Symphony WDM6 -->
@@ -214,6 +256,8 @@
       <baseParametersFileName value="%EXECPATH%/constraints/pipelines/darkMatter/progenitorMassFunctionBaseSymphonyWDM6.xml"/>
       <randomize              value="false"/>
       <evolveForestsVerbosity value="silent"/>
+      <reportFileName value="true" />
+      <reportState    value="true" />
     </posteriorSampleLikelihood>
 
   <!-- Symphony WDM5 -->
@@ -223,6 +267,8 @@
       <baseParametersFileName value="%EXECPATH%/constraints/pipelines/darkMatter/progenitorMassFunctionBaseSymphonyWDM5.xml"/>
       <randomize              value="false"/>
       <evolveForestsVerbosity value="silent"/>
+      <reportFileName value="true" />
+      <reportState    value="true" />
     </posteriorSampleLikelihood>
 
   <!-- Symphony WDM4-->
@@ -232,6 +278,8 @@
       <baseParametersFileName value="%EXECPATH%/constraints/pipelines/darkMatter/progenitorMassFunctionBaseSymphonyWDM4.xml"/>
       <randomize              value="false"/>
       <evolveForestsVerbosity value="silent"/>
+      <reportFileName value="true" />
+      <reportState    value="true" />
     </posteriorSampleLikelihood>
 
   </posteriorSampleLikelihood>

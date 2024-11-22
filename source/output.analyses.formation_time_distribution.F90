@@ -581,7 +581,7 @@ contains
 
     !![
     <referenceConstruct                             object="galacticFilterHaloIsolated_"      constructor="galacticFilterHaloIsolated  (                                                                                           )"/>
-    <referenceConstruct                             object="galacticFilterHaloMassRange_"     constructor="galacticFilterHaloMassRange (massParentMinimum,massParentMaximum,cosmologyFunctions_,cosmologyParameters_,darkMatterProfileDMO_,virialDensityContrast_,virialDensityContrastDefinition_)"/>
+    <referenceConstruct                             object="galacticFilterHaloMassRange_"     constructor="galacticFilterHaloMassRange (massParentMinimum,massParentMaximum,cosmologyFunctions_,cosmologyParameters_,virialDensityContrast_,virialDensityContrastDefinition_)"/>
     <referenceConstruct isResult="yes" owner="self" object="galacticFilterParentMass_"        constructor="galacticFilterAll           (filtersParent_                                                                                                 )"/>
     <referenceConstruct                             object="galacticFilterParentNode_"        constructor="galacticFilterDescendantNode(timeParent                                        ,allowSelf,cosmologyFunctions_,self%galacticFilterParentMass_)"/>
     !!]
@@ -765,7 +765,7 @@ contains
     return
   end subroutine formationTimeDistributionFinalizeAnalysis
 
-  subroutine formationTimeDistributionFinalize(self)
+  subroutine formationTimeDistributionFinalize(self, groupName)
     !!{
     Implement analysis finalization for formation time distribution. We simply normalize the accumulated weight of parent nodes.
     !!}
@@ -775,9 +775,11 @@ contains
     implicit none
     class(outputAnalysisFormationTimeDistribution), intent(inout) :: self
     type (hdf5Object                          )                :: analysesGroup, analysisGroup
-
+    ! Lines added below
+    type (varying_string                      ), intent(in   ), optional :: groupName
+    ! Lines added above
     call self                               %finalizeAnalysis()
-    call self%outputAnalysisVolumeFunction1D%finalize        ()
+    call self%outputAnalysisVolumeFunction1D%finalize        (groupName)
     ! Add attributes giving the range of mass ratios considered. Also re-write the log-likelihood attribute here as it will have
     ! been written as part of the "outputAnalysisVolumeFunction1D" parent class, but we need to do our own calculation.    
     !$ call hdf5Access%set()
