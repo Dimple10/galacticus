@@ -2,7 +2,7 @@
 #PBS -N mcmc_all
 #PBS -l nodes=4:ppn=16
 #PBS -j oe
-#PBS -o mcmc_topHat_sharpK.log
+#PBS -o mcmc_debug.log
 #PBS -m ea
 #PBS -M dsarnaaik@carnegiescience.edu
 #PBS -V

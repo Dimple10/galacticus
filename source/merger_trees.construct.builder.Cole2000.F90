@@ -215,7 +215,7 @@ contains
     <inputParameter>
       <name>toleranceTimeEarliest</name>
       <source>parameters</source>
-      <defaultValue>2.0d-6</defaultValue>
+      <defaultValue>2.0d-5</defaultValue>
       <description>The fractional tolerance used to judge if a branch is at the earliest allowed time in the tree.</description>
     </inputParameter>
     <inputParameter>

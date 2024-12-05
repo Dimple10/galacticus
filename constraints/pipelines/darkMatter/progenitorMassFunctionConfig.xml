@@ -16,27 +16,27 @@
   
   <posteriorSampleLikelihood value="independentLikelihoods">
 
- 
+
     <!-- HugeMDPL -->
     <parameterMap         value="mergerTreeBranchingProbability::G0 mergerTreeBranchingProbability::gamma1 mergerTreeBranchingProbability::gamma2 mergerTreeBranchingProbability::gamma3 progenitorMassFunctionParameters::rootVarianceTargetFractional"/>
     <parameterInactiveMap value=""                                                                                                                                                       />
     <posteriorSampleLikelihood value="galaxyPopulation">
       <baseParametersFileName value="%EXECPATH%/constraints/pipelines/darkMatter/progenitorMassFunctionBaseHugeMDPL.xml"/>
-      <randomize              value="false"                                                                            />
-      <evolveForestsVerbosity value="silent"                                                                           />
-      <reportFileName value="true"/>
-      <reportState    value="true"/>
-    </posteriorSampleLikelihood> 
+      <randomize              value="false"                                                                             />
+      <evolveForestsVerbosity value="silent"                                                                            />
+      <reportFileName value="true"                                                                                      />
+      <reportState    value="true"                                                                                      />
+    </posteriorSampleLikelihood>
 
     <!-- BigMDPL -->
     <parameterMap         value="mergerTreeBranchingProbability::G0 mergerTreeBranchingProbability::gamma1 mergerTreeBranchingProbability::gamma2 mergerTreeBranchingProbability::gamma3 progenitorMassFunctionParameters::rootVarianceTargetFractional"/>
     <parameterInactiveMap value=""                                                                                                                                                       />
     <posteriorSampleLikelihood value="galaxyPopulation">
       <baseParametersFileName value="%EXECPATH%/constraints/pipelines/darkMatter/progenitorMassFunctionBaseBigMDPL.xml"/>
-      <randomize              value="false"                                                                           />
-      <evolveForestsVerbosity value="silent"                                                                          />
-      <reportFileName value="true" />
-      <reportState    value="true"/>
+      <randomize              value="false"                                                                             />
+      <evolveForestsVerbosity value="silent"                                                                            />
+      <reportFileName value="true"                                                                                      />
+      <reportState    value="true"                                                                                      />
     </posteriorSampleLikelihood>
 
     <!-- MDPL2 -->
@@ -44,8 +44,8 @@
     <parameterInactiveMap value=""                                                                                                                                                       /> 
     <posteriorSampleLikelihood value="galaxyPopulation">
       <baseParametersFileName value="%EXECPATH%/constraints/pipelines/darkMatter/progenitorMassFunctionBaseMDPL2.xml"/>
-      <randomize              value="false"                                                                         /> 
-      <evolveForestsVerbosity value="silent"                                                                          /> 
+      <randomize              value="false"                                                                          />
+      <evolveForestsVerbosity value="silent"                                                                         />
       <reportFileName value="true" />
       <reportState    value="true" />
     </posteriorSampleLikelihood> 
