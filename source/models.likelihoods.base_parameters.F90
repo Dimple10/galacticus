@@ -222,8 +222,8 @@ contains
     ! Update parameter values.
     if (report_ .and. self%reportState) call displayIndent("State:")
     do i=1,size(modelParametersActive_)
-       if (report_ .and. self%reportState) &
-            & call displayMessage(char(modelParametersActive_(i)%modelParameter_%name())//" = "//char(self%modelParametersActive_(i)%parameter_%get()))
+       !if (report_ .and. self%reportState) &
+       !     & call displayMessage(char(modelParametersActive_(i)%modelParameter_%name())//" = "//char(self%modelParametersActive_(i)%parameter_%get()))
        if (self%modelParametersActive_(i)%indexElement == 0) then
           ! Simply overwrite the parameter.
           call self%modelParametersActive_(i)%parameter_%set(modelParametersActive_(i)%modelParameter_%unmap(stateVector(i)))
@@ -247,6 +247,8 @@ contains
           call self%modelParametersActive_(i)%parameter_%set(String_Join(parameterNames," "))
           deallocate(parameterNames)
        end if
+       if (report_ .and. self%reportState) &
+            & call displayMessage(char(modelParametersActive_(i)%modelParameter_%name())//" = "//char(self%modelParametersActive_(i)%parameter_%get()))
     end do
     ! Resolve dependencies in derived parameters.
     if (size(modelParametersInactive_) > 0) then

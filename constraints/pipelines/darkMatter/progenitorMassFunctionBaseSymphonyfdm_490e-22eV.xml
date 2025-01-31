@@ -12,7 +12,7 @@
   <xi:include href="transferFunction_Symphony_fdm_490e-22eV.xml"     xpointer="xpointer(parameters/*)" xmlns:xi="http://www.w3.org/2001/XInclude"/>
   <xi:include href="progenitorMassFunctionParameters.xml" xpointer="xpointer(parameters/*)" xmlns:xi="http://www.w3.org/2001/XInclude"/>
   <xi:include href="progenitorMassFunctionResolution.xml" xpointer="xpointer(parameters/*)" xmlns:xi="http://www.w3.org/2001/XInclude"/>
-  <xi:include href="mergerTreeEvolution.xml"        xpointer="xpointer(parameters/*)" xmlns:xi="http://www.w3.org/2001/XInclude"/>
+  <xi:include href="mergerTreeEvolution_NonCDM.xml"        xpointer="xpointer(parameters/*)" xmlns:xi="http://www.w3.org/2001/XInclude"/>
 
   <!-- Task control -->
   <evolveForestsWorkShare value="cyclic"/>
@@ -21,7 +21,7 @@
   <mergerTreeBuildMasses value="replicate">
     <replicationCount value="100"/>
     <mergerTreeBuildMasses value="readHDF5">
-      <fileName value="%DATASTATICPATH%/darkMatter/haloMasses_Symphony_MilkyWay_fdm_490e-22eV.hdf5"/>
+      <fileName value="%DATASTATICPATH%/darkMatter/haloMasses_Symphony_MilkyWay_FDM:490e-22eV.hdf5"/>
     </mergerTreeBuildMasses>
   </mergerTreeBuildMasses>
   <mergerTreeMassResolution value="fixed">
@@ -48,7 +48,7 @@
          mass in the sample. -->
     <virialDensityContrastDefinition value="sphericalCollapseClsnlssMttrCsmlgclCnstnt"/>
     <outputAnalysis value="progenitorMassFunction">
-      <fileName                     value="%DATASTATICPATH%/darkMatter/progenitorMassFunctions_Symphony_MilkyWay_fdm_490e-22eV.hdf5"/>
+      <fileName                     value="%DATASTATICPATH%/darkMatter/progenitorMassFunctions_Symphony_MilkyWay_FDM:490e-22eV.hdf5"/>
       <indexParent                  value="2"                                                                                        />
       <indexRedshift                value="0"                                                                                        />
       <massRatioLikelihoodMinimum value="=([simulation::massParticle]*[resolution::progenitorHaloParticleCountMinimum]*step([simulation::massParticle]*[resolution::progenitorHaloParticleCountMinimum]-1e-5*1e12)+1e-5*1e12*step(-[simulation::massParticle]*[resolution::progenitorHaloParticleCountMinimum]+1e-5*1e12))/10.0^12.0"/>
@@ -64,7 +64,7 @@
       <targetLabel                  value="Nadler et al. (2022)"                                                                     />
     </outputAnalysis>    
     <outputAnalysis value="progenitorMassFunction">
-      <fileName                     value="%DATASTATICPATH%/darkMatter/progenitorMassFunctions_Symphony_MilkyWay_fdm_490e-22eV.hdf5"/>
+      <fileName                     value="%DATASTATICPATH%/darkMatter/progenitorMassFunctions_Symphony_MilkyWay_FDM:490e-22eV.hdf5"/>
       <indexParent                  value="2"                                                                                        />
       <indexRedshift                value="1"                                                                                        />
       <massRatioLikelihoodMinimum value="=([simulation::massParticle]*[resolution::progenitorHaloParticleCountMinimum]*step([simulation::massParticle]*[resolution::progenitorHaloParticleCountMinimum]-1e-5*1e12)+1e-5*1e12*step(-[simulation::massParticle]*[resolution::progenitorHaloParticleCountMinimum]+1e-5*1e12))/10.0^12.0"/>
@@ -80,7 +80,7 @@
       <targetLabel                  value="Nadler et al. (2022)"                                                                     />
     </outputAnalysis>    
     <outputAnalysis value="progenitorMassFunction">
-      <fileName                     value="%DATASTATICPATH%/darkMatter/progenitorMassFunctions_Symphony_MilkyWay_fdm_490e-22eV.hdf5"/>
+      <fileName                     value="%DATASTATICPATH%/darkMatter/progenitorMassFunctions_Symphony_MilkyWay_FDM:490e-22eV.hdf5"/>
       <indexParent                  value="2"                                                                                        />
       <indexRedshift                value="2"                                                                                        />
       <massRatioLikelihoodMinimum value="=([simulation::massParticle]*[resolution::progenitorHaloParticleCountMinimum]*step([simulation::massParticle]*[resolution::progenitorHaloParticleCountMinimum]-1e-5*1e12)+1e-5*1e12*step(-[simulation::massParticle]*[resolution::progenitorHaloParticleCountMinimum]+1e-5*1e12))/10.0^12.0"/>
@@ -96,7 +96,7 @@
       <targetLabel                  value="Nadler et al. (2022)"                                                                     />
     </outputAnalysis>    
     <outputAnalysis value="progenitorMassFunction">
-      <fileName                     value="%DATASTATICPATH%/darkMatter/progenitorMassFunctions_Symphony_MilkyWay_fdm_490e-22eV.hdf5"/>
+      <fileName                     value="%DATASTATICPATH%/darkMatter/progenitorMassFunctions_Symphony_MilkyWay_FDM:490e-22eV.hdf5"/>
       <indexParent                  value="2"                                                                                        />
       <indexRedshift                value="3"                                                                                        />
       <massRatioLikelihoodMinimum value="=([simulation::massParticle]*[resolution::progenitorHaloParticleCountMinimum]*step([simulation::massParticle]*[resolution::progenitorHaloParticleCountMinimum]-1e-5*1e12)+1e-5*1e12*step(-[simulation::massParticle]*[resolution::progenitorHaloParticleCountMinimum]+1e-5*1e12))/10.0^12.0"/>
