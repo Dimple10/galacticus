@@ -178,11 +178,15 @@ contains
     type            (lockDescriptor                                  )                             :: fileLock
 
     if (tableStore) then
-       call Directory_Make(char(File_Path(char(self%fileNameCriticalOverdensity)))                             )
-       call File_Lock     (               char(self%fileNameCriticalOverdensity)  ,fileLock,lockIsShared=.false.)
+       call Directory_Make(char(File_Path(char(self%fileNameCriticalOverdensity)))                              )
+       call File_Lock     (               char(self%fileNameCriticalOverdensity)  ,fileLock,lockIsShared=.true. )
     end if
     call    self%restoreTable(time,criticalOverdensity_,self%fileNameCriticalOverdensity                 ,tableStore,status)
     if (status /= errorStatusSuccess) then
+       if (tableStore) then
+          call File_Unlock(                                                        fileLock,sync        =.false.)
+          call File_Lock  (               char(self%fileNameCriticalOverdensity)  ,fileLock,lockIsShared=.false.)
+       end if
        call self%tabulate    (time,criticalOverdensity_,cllsnlssMttCsmlgclCnstntClcltnCriticalOverdensity                  )
        call self%storeTable  (     criticalOverdensity_,self%fileNameCriticalOverdensity                 ,tableStore       )
     end if
@@ -207,11 +211,15 @@ contains
     type            (lockDescriptor                                  )                             :: fileLock
 
     if (tableStore) then
-       call Directory_Make(char(File_Path(char(self%fileNameVirialDensityContrast)))                             )
-       call File_Lock     (               char(self%fileNameVirialDensityContrast)  ,fileLock,lockIsShared=.false.)
+       call Directory_Make(char(File_Path(char(self%fileNameVirialDensityContrast)))                              )
+       call File_Lock     (               char(self%fileNameVirialDensityContrast)  ,fileLock,lockIsShared=.true. )
     end if
     call    self%restoreTable(time,virialDensityContrast_,self%fileNameVirialDensityContrast                 ,tableStore,status)
     if (status /= errorStatusSuccess) then
+       if (tableStore) then
+          call File_Unlock(                                                          fileLock,sync        =.false.)
+          call File_Lock  (               char(self%fileNameVirialDensityContrast)  ,fileLock,lockIsShared=.false.)
+       end if
        call self%tabulate    (time,virialDensityContrast_,cllsnlssMttCsmlgclCnstntClcltnVirialDensityContrast                  )
        call self%storeTable  (     virialDensityContrast_,self%fileNameVirialDensityContrast                 ,tableStore       )
     end if
@@ -236,11 +244,15 @@ contains
     type            (lockDescriptor                                  )                             :: fileLock
 
     if (tableStore) then
-       call Directory_Make(char(File_Path(char(self%fileNameRadiusTurnaround)))                             )
-       call File_Lock     (               char(self%fileNameRadiusTurnaround)  ,fileLock,lockIsShared=.false.)
+       call Directory_Make(char(File_Path(char(self%fileNameRadiusTurnaround)))                              )
+       call File_Lock     (               char(self%fileNameRadiusTurnaround)  ,fileLock,lockIsShared=.true. )
     end if
     call    self%restoreTable(time,radiusTurnaround_,self%fileNameRadiusTurnaround                 ,tableStore,status)
     if (status /= errorStatusSuccess) then
+       if (tableStore) then
+          call File_Unlock(                                                     fileLock,sync        =.false.)
+          call File_Lock  (               char(self%fileNameRadiusTurnaround)  ,fileLock,lockIsShared=.false.)
+       end if
        call self%tabulate    (time,radiusTurnaround_,cllsnlssMttCsmlgclCnstntClcltnRadiusTurnaround                  )
        call self%storeTable  (     radiusTurnaround_,self%fileNameRadiusTurnaround                 ,tableStore       )
     end if
