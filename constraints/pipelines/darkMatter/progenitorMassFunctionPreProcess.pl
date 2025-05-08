@@ -60,16 +60,16 @@ my @simulations =
  #     snapshots           => "116 70 48 38 26 12",
  #     builder             => \&cosmoSimBuilder
  # },
- # {
- #     label               => "MDPL2",
- #     description         => "Progenitor halo mass function for non-backsplash z=0 parent halos from the MDPL2 simulation.",
- #     simulationReference => "Klypin, Yepes, Gottlober, Hess; 2016; MNRAS; 457; 4340",
- #     simulationURL       => "https://www.cosmosim.org/cms/simulations/mdpl2/",
- #     hubbleConstant      => 0.6777,
- #     massParticle        => 1.51e9,
- #     snapshots           => "125 124 120 107 94 75 52 26",
- #     builder             => \&cosmoSimBuilder
- # }
+ {
+    label               => "MDPL2",
+    description         => "Progenitor halo mass function for non-backsplash z=0 parent halos from the MDPL2 simulation.",
+    simulationReference => "Klypin, Yepes, Gottlober, Hess; 2016; MNRAS; 457; 4340",
+    simulationURL       => "https://www.cosmosim.org/cms/simulations/mdpl2/",
+    hubbleConstant      => 0.6777,
+    massParticle        => 1.51e9,
+    snapshots           => "125 124 120 107 94 75 52 26",
+    builder             => \&cosmoSimBuilder
+ },
  # {
  #     label               => "BigMDPL",
  #     description         => "Progenitor halo mass function for non-backsplash z=0 parent halos from the BigMDPL simulation.",

@@ -2,8 +2,9 @@
 #PBS -N mcmc_all
 #PBS -l nodes=4:ppn=16
 #PBS -j oe
-#PBS -o mcmc_errortest6.log
+#PBS -o restart_errortest6_2.log
 #SBATCH --mem-per-cpu=8G
+#SBATCH --mail-type=ALL
 #PBS -m ea
 #PBS -M dsarnaaik@carnegiescience.edu
 #PBS -V
@@ -21,5 +22,5 @@ export GALACTICUS_CPPFLAGS="-I/home/abenson/Galacticus/Tools/include"
 ulimit -t unlimited
 ulimit -c unlimited
 export OMP_NUM_THREADS=1
-/usr/bin/time -v mpirun --n 16 --map-by node --bind-to none -mca btl ^openib ./Galacticus.exe constraints/pipelines/darkMatter/progenitorMassFunctionConfig.xml
+/usr/bin/time -v mpirun --n 16 --map-by node --bind-to none -mca btl ^openib ./Galacticus.exe constraints/pipelines/darkMatter/progenitorMassFunctionConfig_restart.xml
 exit

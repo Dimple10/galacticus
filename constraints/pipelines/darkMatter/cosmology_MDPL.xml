@@ -43,6 +43,7 @@
 	<running             value="0.000"/>
       </powerSpectrumPrimordial>
       <powerSpectrumPrimordialTransferred value="simple" />
+      <!-- Just used when normalizing power spectrum-->
       <powerSpectrumWindowFunction value="ETHOS">
 	<cW   value="=[haloMassFunctionParameters::cW]"  />
 	<beta value="=[haloMassFunctionParameters::beta]"/>

@@ -309,10 +309,13 @@
       <acceptedStateCount value="100"/>
     </posteriorSampleState>
 
-    <posteriorSampleStateInitialize value="latinHypercube">
-      <maximinTrialCount value="100"/>
+    <posteriorSampleStateInitialize value="resume">
+      <logFileRoot  value="chains/chains_errortest6"/>
+      <restoreState value="true"                    />
     </posteriorSampleStateInitialize>
-    
+
+    <appendLogs             value="true"  />
+
     <posteriorSampleConvergence value="gelmanRubin">
       <thresholdHatR              value=" 1.20"/>
       <burnCount                  value="10"   />
@@ -331,7 +334,7 @@
     <posteriorSampleDffrntlEvltnRandomJump   value="adaptive"/>
 
     <posteriorSampleDffrntlEvltnProposalSize value="adaptive" >
-      <gammaInitial          value="0.10e+0"/>
+      <gammaInitial          value="0.01e+0"/>
       <gammaAdjustFactor     value="1.10e+0"/>
       <gammaMinimum          value="1.00e-2"/>
       <gammaMaximum          value="3.00e+0"/>
