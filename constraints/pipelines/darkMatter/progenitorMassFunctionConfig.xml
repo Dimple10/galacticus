@@ -388,7 +388,7 @@
     
     <posteriorSampleStoppingCriterion value="stepCount">
       <stopAfterCount value="10000"/>
-     </posteriorSampleStoppingCriterion>
+    </posteriorSampleStoppingCriterion>
 
     <posteriorSampleDffrntlEvltnRandomJump   value="adaptive"/>
 
