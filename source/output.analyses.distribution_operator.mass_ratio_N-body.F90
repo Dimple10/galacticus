@@ -144,7 +144,7 @@ contains
     type            (treeNode                                        ), intent(inout)                                        :: node
     double precision                                                                 , dimension(size(propertyValueMinimum)) :: massRatioNBodyOperateScalar
     double precision                                                  , parameter                                            :: timeTolerance              =1.0d-4
-    double precision                                                  , parameter                                            :: integrationExtent          =3.0d+1
+    double precision                                                  , parameter                                            :: integrationExtent          =1.0d+2
     type            (treeNode                                        ), pointer                                              :: nodeParent
     class           (nodeComponentBasic                              ), pointer                                              :: basic
     double precision                                                                                                         :: massUncertaintyRatio              , massUncertaintyParent      , &
