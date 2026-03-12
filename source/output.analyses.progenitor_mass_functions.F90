@@ -876,8 +876,8 @@ contains
     use :: Error        , only : Error_Report
     implicit none
     class           (outputAnalysisProgenitorMassFunction), intent(inout) :: self
-    integer         (c_size_t                            )                :: i
-    double precision                                      , parameter     :: factorDecline=2.0d0, valueSmall=1.0d-6
+    double precision                                      , parameter     :: factorDecline=2.0d0, valueSmall  =1.0d-6
+    integer         (c_size_t                            )                :: i                  , iLastNonZero
 
     call self%outputAnalysisVolumeFunction1D%finalizeAnalysis()
     ! If already finalized, no need to do anything.
@@ -896,20 +896,39 @@ contains
     ! If requested, fill in any zero bins with small values. This is useful to avoid improbable likelihoods, which can be
     ! problematic for optimization/MCMC as they provide no gradient information. The approach here is to extrapolate to zero value
     ! bins by simply reducing the value from the prior bin by a fixed factor. The assumption is that such bins value extremely low
-    ! value, such that the actual count in those bins will be tiny anyway, adn should not affect any viable model likelihood.
+    ! value, such that the actual count in those bins will be tiny anyway, and should not affect any viable model likelihood. Emit
+    ! an error if the extrapolation would lead to a non-negligble number of halos in the bin, but only if the bin is within the
+    ! range considered in likelihood calculations.
     if (self%fillInZeroBins) then
+       iLastNonZero=1_c_size_t
        do i=2_c_size_t,self%binCount
-          if (self%functionValue(i) <= 0.0d0) then
-             if     (                                  &
-                  &   +self%functionValue        (i-1) &
-                  &   *self%countConversionFactor      &
-                  &   /self%massRatios           (i-1) &
-                  &  >                                 &
-                  &   +valueSmall                      &
-                  &) call Error_Report('refusing to extrapolate to empty bin with potential non-neglible content'//{introspection:location})
-             self%functionValue(i)=+self%functionValue(i-1) &
-                  &                /     factorDecline
+          ! Update the last known non-zero value.
+          if (self%functionValue(i) > 0.0d0) then
+             iLastNonZero=i
+             cycle
           end if
+          ! If the target dataset is zero in this bin, it is acceptable that the model be zero also - so simply skip checking such
+          ! cases.
+          if (self%functionValueTarget(i) <= 0.0d0) cycle
+          ! Check for problematic cases
+          if     (                                                 &
+               &    +self%functionValue             (iLastNonZero) &
+               &    *self%countConversionFactor                    &
+               &    /self%massRatios                (iLastNonZero) &
+               &   >                                               &
+               &    +valueSmall                                    &
+               &  .and.                                            &
+               &     self%massRatios                (i           ) &
+               &   >=                                              &
+               &     self%massRatioLikelihoodMinimum               &
+               &  .and.                                            &
+               &     self%massRatios                (i           ) &
+               &   <=                                              &
+               &    self%massRatioLikelihoodMaximum                &
+               & ) call Error_Report('refusing to extrapolate to empty bin with potential non-neglible content'//{introspection:location})
+          ! Extrapolate a value to this bin from the last known non-zero bin.
+          self%functionValue(i)=+self%functionValue  (  iLastNonZero) &
+               &                /     factorDecline**(i-iLastNonZero)
        end do
     end if
     return
