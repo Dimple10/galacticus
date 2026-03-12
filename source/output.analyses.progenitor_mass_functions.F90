@@ -873,11 +873,12 @@ contains
 #ifdef USEMPI
     use :: MPI_Utilities, only : mpiSelf
 #endif
-    use :: Error        , only : Error_Report
+    use :: Display      , only : displayMessage, displayMagenta, displayReset 
     implicit none
     class           (outputAnalysisProgenitorMassFunction), intent(inout) :: self
     double precision                                      , parameter     :: factorDecline=2.0d0, valueSmall  =1.0d-6
     integer         (c_size_t                            )                :: i                  , iLastNonZero
+    logical                                                               :: warnFillIn
 
     call self%outputAnalysisVolumeFunction1D%finalizeAnalysis()
     ! If already finalized, no need to do anything.
@@ -901,6 +902,7 @@ contains
     ! range considered in likelihood calculations.
     if (self%fillInZeroBins) then
        iLastNonZero=1_c_size_t
+       warnFillIn  =.false.
        do i=2_c_size_t,self%binCount
           ! Update the last known non-zero value.
           if (self%functionValue(i) > 0.0d0) then
@@ -925,11 +927,12 @@ contains
                &     self%massRatios                (i           ) &
                &   <=                                              &
                &    self%massRatioLikelihoodMaximum                &
-               & ) call Error_Report('refusing to extrapolate to empty bin with potential non-neglible content'//{introspection:location})
+               & ) warnFillIn=.true.
           ! Extrapolate a value to this bin from the last known non-zero bin.
           self%functionValue(i)=+self%functionValue  (  iLastNonZero) &
                &                /     factorDecline**(i-iLastNonZero)
        end do
+       if (warnFillIn) call displayMessage(displayMagenta()//'WARNING:'//displayReset()//' had to extrapolate to empty bin with potential non-neglible content')
     end if
     return
   end subroutine progenitorMassFunctionFinalizeAnalysis
