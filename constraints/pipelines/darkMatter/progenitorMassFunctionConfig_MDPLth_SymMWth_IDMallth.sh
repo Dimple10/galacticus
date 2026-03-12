@@ -2,7 +2,7 @@
 #PBS -N binomial_MDPLth_SymMWth_IDMallth
 #PBS -l nodes=4:ppn=16
 #PBS -j oe
-#PBS -o binomialLikelihood_MDPLth_SymMWth_IDMallth.log
+#PBS -o binomialLikelihood_MDPLth_SymMWth_IDMallth_run2.log
 #SBATCH --mem-per-cpu=8G
 #PBS -m ea
 #PBS -M dsarnaaik@carnegiescience.edu

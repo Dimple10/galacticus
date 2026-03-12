@@ -17,7 +17,7 @@
   
   <posteriorSampleLikelihood value="independentLikelihoods">
 
-    <!-- HugeMDPL -->
+    <!-- HugeMDPL >
     <parameterMap         value="mergerTreeBranchingProbability/G0 mergerTreeBranchingProbability/gamma1 mergerTreeBranchingProbability/gamma2 mergerTreeBranchingProbability/gamma3 progenitorMassFunctionParameters/rootVarianceTargetFractional"/>
     <parameterInactiveMap value="randomNumberGenerator/seed" ignoreWarnings="true"                                                                                                                                                                 />
     <posteriorSampleLikelihood value="galaxyPopulation">
@@ -28,7 +28,7 @@
       <reportFileName            value="true"                                                                              />
       <reportState               value="true"                                                                              />
       <collaborativeMPI          value="false"                                                                             />
-    </posteriorSampleLikelihood>
+    </posteriorSampleLikelihood-->
 
     <!-- BigMDPL >
     <parameterMap         value="mergerTreeBranchingProbability/G0 mergerTreeBranchingProbability/gamma1 mergerTreeBranchingProbability/gamma2 mergerTreeBranchingProbability/gamma3 progenitorMassFunctionParameters/rootVarianceTargetFractional"/>

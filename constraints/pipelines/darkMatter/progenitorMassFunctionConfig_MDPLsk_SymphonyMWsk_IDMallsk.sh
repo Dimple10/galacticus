@@ -2,7 +2,7 @@
 #PBS -N binomial_MDPLsk_SymMWsk_IDMallsk
 #PBS -l nodes=4:ppn=16
 #PBS -j oe
-#PBS -o binomialLikelihood_MDPLsk_SymMWsk_IDMallsk.log
+#PBS -o binomialLikelihood_MDPLsk_SymMWsk_IDMallsk_run2.log
 #SBATCH --mem-per-cpu=8G
 #PBS -m ea
 #PBS -M dsarnaaik@carnegiescience.edu
