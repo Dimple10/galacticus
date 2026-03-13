@@ -62,6 +62,7 @@
       <covarianceTargetOnly         value="true"                                                                                    />
       <likelihoodInLog              value="false"                                                                                    />
       <likelihoodInCounts           value="true"                                                                                     />
+      <fillInZeroBins               value="true"                                                                                     />
       <rootVarianceTargetFractional value="=[progenitorMassFunctionParameters/rootVarianceTargetFractional]" 			     />
       <alwaysIsolatedOnly           value="true"                                                                                     />
       <redshiftParent               value="0.0"                                                                                      />
@@ -79,6 +80,7 @@
       <covarianceTargetOnly         value="true"                                                                                    />
       <likelihoodInLog              value="false"                                                                                    />
       <likelihoodInCounts           value="true"                                                                                     />
+      <fillInZeroBins               value="true"                                                                                     />
       <rootVarianceTargetFractional value="=[progenitorMassFunctionParameters/rootVarianceTargetFractional]" 			     />
       <alwaysIsolatedOnly           value="true"                                                                                     />
       <redshiftParent               value="0.0"                                                                                      />
@@ -96,6 +98,7 @@
       <covarianceTargetOnly         value="true"                                                                                    />
       <likelihoodInLog              value="false"                                                                                    />
       <likelihoodInCounts           value="true"                                                                                     />
+      <fillInZeroBins               value="true"                                                                                     />
       <rootVarianceTargetFractional value="=[progenitorMassFunctionParameters/rootVarianceTargetFractional]" 			     />
       <alwaysIsolatedOnly           value="true"                                                                                     />
       <redshiftParent               value="0.0"                                                                                      />
@@ -113,6 +116,7 @@
       <covarianceTargetOnly         value="true"                                                                                    />
       <likelihoodInLog              value="false"                                                                                    />
       <likelihoodInCounts           value="true"                                                                                     />
+      <fillInZeroBins               value="true"                                                                                     />
       <rootVarianceTargetFractional value="=[progenitorMassFunctionParameters/rootVarianceTargetFractional]" 			     />
       <alwaysIsolatedOnly           value="true"                                                                                     />
       <redshiftParent               value="0.0"                                                                                      />
