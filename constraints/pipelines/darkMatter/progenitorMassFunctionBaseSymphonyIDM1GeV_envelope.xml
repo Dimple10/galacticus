@@ -26,7 +26,7 @@
   <mergerTreeBuildMasses value="replicate">
     <replicationCount value="1000"/>
     <mergerTreeBuildMasses value="readHDF5">
-      <fileName value="%DATASTATICPATH%/darkMatter/hostHaloMasses_COZMIC_MilkyWay_resolutionX1_IDM:1eGeV:envelope_z0.000.hdf5"/>
+      <fileName value="%DATASTATICPATH%/darkMatter/hostHaloMasses_COZMIC_MilkyWay_resolutionX1_IDM:1GeV:envelope_z0.000.hdf5"/>
     </mergerTreeBuildMasses>
   </mergerTreeBuildMasses>
   <mergerTreeMassResolution value="fixed">
