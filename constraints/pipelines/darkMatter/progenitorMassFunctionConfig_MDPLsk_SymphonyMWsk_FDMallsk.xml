@@ -27,7 +27,7 @@
       <evolveForestsVerbosity    value="silent"                                                                            />
       <reportFileName            value="true"                                                                              />
       <reportState               value="true"                                                                              />
-      <collaborativeMPI          value="false"                                                                             />
+      <countCollaborativeGroups  value="-1"                                                                                       />
     </posteriorSampleLikelihood-->
 
     <!-- BigMDPL >
@@ -40,7 +40,7 @@
       <evolveForestsVerbosity    value="silent"                                                                            />
       <reportFileName            value="true"                                                                              />
       <reportState               value="true"                                                                              />
-      <collaborativeMPI          value="false"                                                                             />
+      <countCollaborativeGroups  value="-1"                                                                                       />
     </posteriorSampleLikelihood -->
 
     <!-- MDPL2 -->
@@ -53,7 +53,7 @@
       <evolveForestsVerbosity    value="silent"                                                                            />
       <reportFileName            value="true"                                                                              />
       <reportState               value="true"                                                                              />
-      <collaborativeMPI          value="false"                                                                             />
+      <countCollaborativeGroups  value="-1"                                                                                       />
     </posteriorSampleLikelihood>
 
     <!--SMDPL >
@@ -66,7 +66,7 @@
       <evolveForestsVerbosity    value="silent"                                                                            />
       <reportFileName            value="true"                                                                              />
       <reportState               value="true"                                                                              />
-      <collaborativeMPI          value="false"                                                                             />
+      <countCollaborativeGroups  value="-1"                                                                                       />
     </posteriorSampleLikelihood>
 
     < VSMDPL >
@@ -79,7 +79,7 @@
       <evolveForestsVerbosity    value="silent"                                                                            />
       <reportFileName            value="true"                                                                              />
       <reportState               value="true"                                                                              />
-      <collaborativeMPI          value="false"                                                                             />
+      <countCollaborativeGroups  value="-1"                                                                                       />
     </posteriorSampleLikelihood -->
 
     <!-- Symphony Milky Way -->
@@ -92,7 +92,7 @@
       <evolveForestsVerbosity    value="silent"                                                                                    />
       <reportFileName            value="true"                                                                                      />
       <reportState               value="true"                                                                                      />
-      <collaborativeMPI          value="false"                                                                                     />
+      <countCollaborativeGroups  value="-1"                                                                                       />
     </posteriorSampleLikelihood>
 
     <!-- Symphony LMC >
@@ -105,7 +105,7 @@
       <evolveForestsVerbosity    value="silent"                                                                               />
       <reportFileName            value="true"                                                                                 />
       <reportState               value="true"                                                                                 />
-      <collaborativeMPI          value="false"                                                                                />
+      <countCollaborativeGroups  value="-1"                                                                                       />
     </posteriorSampleLikelihood>
 
     < Symphony WDM3 >
@@ -119,7 +119,7 @@
       <evolveForestsVerbosity    value="silent"                                                                                         />
       <reportFileName            value="true"                                                                                           />
       <reportState               value="true"                                                                                           />
-      <collaborativeMPI          value="false"                                                                                          />
+      <countCollaborativeGroups  value="-1"                                                                                       />
     </posteriorSampleLikelihood>
 
 
@@ -134,7 +134,7 @@
       <evolveForestsVerbosity    value="silent"                                                                                               />
       <reportFileName            value="true"                                                                                                 />
       <reportState               value="true"                                                                                                 />
-      <collaborativeMPI          value="false"                                                                                                />
+      <countCollaborativeGroups  value="-1"                                                                                       />
     </posteriorSampleLikelihood>
 
     < Symphony IDM1e-2GeV_halfmode >
@@ -148,7 +148,7 @@
       <evolveForestsVerbosity    value="silent"                                                                                               />
       <reportFileName            value="true"                                                                                                 />
       <reportState               value="true"                                                                                                 />
-      <collaborativeMPI          value="false"                                                                                                />
+      <countCollaborativeGroups  value="-1"                                                                                       />
     </posteriorSampleLikelihood>
 
     < Symphony IDM1GeV_halfmode >
@@ -162,7 +162,7 @@
       <evolveForestsVerbosity    value="silent"                                                                                            />
       <reportFileName            value="true"                                                                                              />
       <reportState               value="true"                                                                                              />
-      <collaborativeMPI          value="false"                                                                                             />
+      <countCollaborativeGroups  value="-1"                                                                                       />
     </posteriorSampleLikelihood>
 
     < Symphony IDM1e-4GeV_envelope >
@@ -176,7 +176,7 @@
       <evolveForestsVerbosity    value="silent"                                                                                               />
       <reportFileName            value="true"                                                                                                 />
       <reportState               value="true"                                                                                                 />
-      <collaborativeMPI          value="false"                                                                                                />
+      <countCollaborativeGroups  value="-1"                                                                                       />
     </posteriorSampleLikelihood>
 
     < Symphony IDM1e-2GeV_envelope >
@@ -190,7 +190,7 @@
       <evolveForestsVerbosity    value="silent"                                                                                               />
       <reportFileName            value="true"                                                                                                 />
       <reportState               value="true"                                                                                                 />
-      <collaborativeMPI          value="false"                                                                                                />
+      <countCollaborativeGroups  value="-1"                                                                                       />
     </posteriorSampleLikelihood>
 
     < Symphony IDM1GeV_envelope >
@@ -204,7 +204,7 @@
       <evolveForestsVerbosity    value="silent"                                                                                            />
       <reportFileName            value="true"                                                                                              />
       <reportState               value="true"                                                                                              />
-      <collaborativeMPI          value="false"                                                                                             />
+      <countCollaborativeGroups  value="-1"                                                                                       />
     </posteriorSampleLikelihood-->
 
     <!-- Symphony fdm_490e-22eV -->
@@ -218,7 +218,7 @@
       <evolveForestsVerbosity    value="silent"                                                                                         />
       <reportFileName            value="true"                                                                                           />
       <reportState               value="true"                                                                                           />
-      <collaborativeMPI          value="false"                                                                                          />
+      <countCollaborativeGroups  value="-1"                                                                                       />
     </posteriorSampleLikelihood>
 
   <!-- Symphony fdm_25.9e-22eV-->
@@ -232,7 +232,7 @@
       <evolveForestsVerbosity    value="silent"                                                                                          />
       <reportFileName            value="true"                                                                                            />
       <reportState               value="true"                                                                                            />
-      <collaborativeMPI          value="false"                                                                                           />
+      <countCollaborativeGroups  value="-1"                                                                                       />
     </posteriorSampleLikelihood>
 
     <!-- Symphony fdm_185e-22eV -->
@@ -246,7 +246,7 @@
       <evolveForestsVerbosity    value="silent"                                                                                         />
       <reportFileName            value="true"                                                                                           />
       <reportState               value="true"                                                                                           />
-      <collaborativeMPI          value="false"                                                                                          />
+      <countCollaborativeGroups  value="-1"                                                                                       />
     </posteriorSampleLikelihood>
 
     <!-- Symphony fdm_69.4e-22eV -->
@@ -260,7 +260,7 @@
       <evolveForestsVerbosity    value="silent"                                                                                          />
       <reportFileName            value="true"                                                                                            />
       <reportState               value="true"                                                                                            />
-      <collaborativeMPI          value="false"                                                                                           />
+      <countCollaborativeGroups  value="-1"                                                                                       />
     </posteriorSampleLikelihood>
 
     <!-- Symphony fdm_151e-22eV -->
@@ -274,7 +274,7 @@
       <evolveForestsVerbosity    value="silent"                                                                                         />
       <reportFileName            value="true"                                                                                           />
       <reportState               value="true"                                                                                           />
-      <collaborativeMPI          value="false"                                                                                          />
+      <countCollaborativeGroups  value="-1"                                                                                       />
     </posteriorSampleLikelihood>
 
     <!--Symphony fdm_113e-22eV -->
@@ -288,7 +288,7 @@
       <evolveForestsVerbosity    value="silent"                                                                                         />
       <reportFileName            value="true"                                                                                           />
       <reportState               value="true"                                                                                           />
-      <collaborativeMPI          value="false"                                                                                          />
+      <countCollaborativeGroups  value="-1"                                                                                       />
     </posteriorSampleLikelihood>
 
     <!-- Symphony WDM10 >
@@ -302,7 +302,7 @@
       <evolveForestsVerbosity    value="silent"                                                                                         />
       <reportFileName            value="true"                                                                                           />
       <reportState               value="true"                                                                                           />
-      <collaborativeMPI          value="false"                                                                                          />
+      <countCollaborativeGroups  value="-1"                                                                                       />
     </posteriorSampleLikelihood>
 
     < Symphony WDM6.5 >
@@ -316,7 +316,7 @@
       <evolveForestsVerbosity    value="silent"                                                                                         />
       <reportFileName            value="true"                                                                                           />
       <reportState               value="true"                                                                                           />
-      <collaborativeMPI          value="false"                                                                                          />
+      <countCollaborativeGroups  value="-1"                                                                                       />
     </posteriorSampleLikelihood>
 
     < Symphony WDM6 >
@@ -330,7 +330,7 @@
       <evolveForestsVerbosity    value="silent"                                                                                         />
       <reportFileName            value="true"                                                                                           />
       <reportState               value="true"                                                                                           />
-      <collaborativeMPI          value="false"                                                                                          />
+      <countCollaborativeGroups  value="-1"                                                                                       />
     </posteriorSampleLikelihood>
 
     < Symphony WDM5 >
@@ -344,7 +344,7 @@
       <evolveForestsVerbosity    value="silent"                                                                                         />
       <reportFileName            value="true"                                                                                           />
       <reportState               value="true"                                                                                           />
-      <collaborativeMPI          value="false"                                                                                          />
+      <countCollaborativeGroups  value="-1"                                                                                       />
     </posteriorSampleLikelihood>
 
     < Symphony WDM4 >
@@ -358,7 +358,7 @@
       <evolveForestsVerbosity    value="silent"                                                                                         />
       <reportFileName            value="true"                                                                                           />
       <reportState               value="true"                                                                                           />
-      <collaborativeMPI          value="false"                                                                                          />
+      <countCollaborativeGroups  value="-1"                                                                                       />
     </posteriorSampleLikelihood-->
 
   </posteriorSampleLikelihood>

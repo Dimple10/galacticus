@@ -13,7 +13,7 @@
     <initializeNodeClassHierarchy value="false"/>
   </task>
 
-  <outputFileName value="chains/galacticus_binomialLikelihood_MDPLth_SymMWth_FDMallth.hdf5"/>
+  <outputFileName value="chains/galacticus_IDMenvelope_test_new.hdf5"/>
   
   <posteriorSampleLikelihood value="independentLikelihoods">
 
@@ -22,51 +22,51 @@
     <parameterInactiveMap value="randomNumberGenerator/seed" ignoreWarnings="true"                                                                                                                                                                 />
     <posteriorSampleLikelihood value="galaxyPopulation">
       <baseParametersFileName    value="%EXECPATH%/constraints/pipelines/darkMatter/progenitorMassFunctionBaseHugeMDPL.xml" />
-      <changeParametersFileNames value="%EXECPATH%/constraints/pipelines/darkMatter/powerSpectrumWindowFunction_topHat.xml"/>
+      <changeParametersFileNames value="%EXECPATH%/constraints/pipelines/darkMatter/powerSpectrumWindowFunction_sharpK.xml"/>
       <randomize                 value="false"                                                                             />
       <evolveForestsVerbosity    value="silent"                                                                            />
       <reportFileName            value="true"                                                                              />
       <reportState               value="true"                                                                              />
-      <countCollaborativeGroups  value="-1"                                                                                       />
-    </posteriorSampleLikelihood-->
+      <collaborativeMPI          value="false"                                                                             />
+    </posteriorSampleLikelihood>
 
-    <!-- BigMDPL >
+    < BigMDPL >
     <parameterMap         value="mergerTreeBranchingProbability/G0 mergerTreeBranchingProbability/gamma1 mergerTreeBranchingProbability/gamma2 mergerTreeBranchingProbability/gamma3 progenitorMassFunctionParameters/rootVarianceTargetFractional"/>
     <parameterInactiveMap value="randomNumberGenerator/seed" ignoreWarnings="true"                                                                                                                                                                 />
     <posteriorSampleLikelihood value="galaxyPopulation">
       <baseParametersFileName    value="%EXECPATH%/constraints/pipelines/darkMatter/progenitorMassFunctionBaseBigMDPL.xml"  />
-      <changeParametersFileNames value="%EXECPATH%/constraints/pipelines/darkMatter/powerSpectrumWindowFunction_topHat.xml"/>
+      <changeParametersFileNames value="%EXECPATH%/constraints/pipelines/darkMatter/powerSpectrumWindowFunction_sharpK.xml"/>
       <randomize                 value="false"                                                                             />
       <evolveForestsVerbosity    value="silent"                                                                            />
       <reportFileName            value="true"                                                                              />
       <reportState               value="true"                                                                              />
-      <countCollaborativeGroups  value="-1"                                                                                       />
+      <collaborativeMPI          value="false"                                                                             />
     </posteriorSampleLikelihood -->
 
-    <!-- MDPL2 -->
+    <!-- MDPL2 >
     <parameterMap         value="mergerTreeBranchingProbability/G0 mergerTreeBranchingProbability/gamma1 mergerTreeBranchingProbability/gamma2 mergerTreeBranchingProbability/gamma3 progenitorMassFunctionParameters/rootVarianceTargetFractional"/>
     <parameterInactiveMap value="randomNumberGenerator/seed" ignoreWarnings="true"                                                                                                                                                                 />
     <posteriorSampleLikelihood value="galaxyPopulation">
       <baseParametersFileName    value="%EXECPATH%/constraints/pipelines/darkMatter/progenitorMassFunctionBaseMDPL2.xml"    />
-      <changeParametersFileNames value="%EXECPATH%/constraints/pipelines/darkMatter/powerSpectrumWindowFunction_topHat.xml"/>
+      <changeParametersFileNames value="%EXECPATH%/constraints/pipelines/darkMatter/powerSpectrumWindowFunction_sharpK.xml"/>
       <randomize                 value="false"                                                                             />
       <evolveForestsVerbosity    value="silent"                                                                            />
       <reportFileName            value="true"                                                                              />
       <reportState               value="true"                                                                              />
-      <countCollaborativeGroups  value="-1"                                                                                       />
-    </posteriorSampleLikelihood>
+      <collaborativeMPI          value="false"                                                                             />
+    </posteriorSampleLikelihood-->
 
     <!--SMDPL >
     <parameterMap         value="mergerTreeBranchingProbability/G0 mergerTreeBranchingProbability/gamma1 mergerTreeBranchingProbability/gamma2 mergerTreeBranchingProbability/gamma3 progenitorMassFunctionParameters/rootVarianceTargetFractional"/>
     <parameterInactiveMap value="randomNumberGenerator/seed" ignoreWarnings="true"                                                                                                                                                                 />
     <posteriorSampleLikelihood value="galaxyPopulation">
       <baseParametersFileName    value="%EXECPATH%/constraints/pipelines/darkMatter/progenitorMassFunctionBaseSMDPL.xml"    />
-      <changeParametersFileNames value="%EXECPATH%/constraints/pipelines/darkMatter/powerSpectrumWindowFunction_topHat.xml"/>
+      <changeParametersFileNames value="%EXECPATH%/constraints/pipelines/darkMatter/powerSpectrumWindowFunction_sharpK.xml"/>
       <randomize                 value="false"                                                                             />
       <evolveForestsVerbosity    value="silent"                                                                            />
       <reportFileName            value="true"                                                                              />
       <reportState               value="true"                                                                              />
-      <countCollaborativeGroups  value="-1"                                                                                       />
+      <collaborativeMPI          value="false"                                                                             />
     </posteriorSampleLikelihood>
 
     < VSMDPL >
@@ -74,26 +74,26 @@
     <parameterInactiveMap value="randomNumberGenerator/seed" ignoreWarnings="true"                                                                                                                                                                 />
     <posteriorSampleLikelihood value="galaxyPopulation">
       <baseParametersFileName    value="%EXECPATH%/constraints/pipelines/darkMatter/progenitorMassFunctionBaseVSMDPL.xml"   />
-      <changeParametersFileNames value="%EXECPATH%/constraints/pipelines/darkMatter/powerSpectrumWindowFunction_topHat.xml"/>
+      <changeParametersFileNames value="%EXECPATH%/constraints/pipelines/darkMatter/powerSpectrumWindowFunction_sharpK.xml"/>
       <randomize                 value="false"                                                                             />
       <evolveForestsVerbosity    value="silent"                                                                            />
       <reportFileName            value="true"                                                                              />
       <reportState               value="true"                                                                              />
-      <countCollaborativeGroups  value="-1"                                                                                       />
-    </posteriorSampleLikelihood -->
+      <collaborativeMPI          value="false"                                                                             />
+    </posteriorSampleLikelihood-->
 
-    <!-- Symphony Milky Way -->
+    <!-- Symphony Milky Way >
     <parameterMap         value="mergerTreeBranchingProbability/G0 mergerTreeBranchingProbability/gamma1 mergerTreeBranchingProbability/gamma2 mergerTreeBranchingProbability/gamma3 progenitorMassFunctionParameters/rootVarianceTargetFractional"/>
     <parameterInactiveMap value="randomNumberGenerator/seed" ignoreWarnings="true"                                                                                                                                                                 />
     <posteriorSampleLikelihood value="galaxyPopulation">
       <baseParametersFileName    value="%EXECPATH%/constraints/pipelines/darkMatter/progenitorMassFunctionBaseSymphonyMilkyWay.xml"/>
-      <changeParametersFileNames value="%EXECPATH%/constraints/pipelines/darkMatter/powerSpectrumWindowFunction_topHat.xml"        />
+      <changeParametersFileNames value="%EXECPATH%/constraints/pipelines/darkMatter/powerSpectrumWindowFunction_sharpK.xml"        />
       <randomize                 value="false"                                                                                     />
       <evolveForestsVerbosity    value="silent"                                                                                    />
       <reportFileName            value="true"                                                                                      />
       <reportState               value="true"                                                                                      />
-      <countCollaborativeGroups  value="-1"                                                                                       />
-    </posteriorSampleLikelihood>
+      <collaborativeMPI          value="false"                                                                                     />
+    </posteriorSampleLikelihood-->
 
     <!-- Symphony LMC >
     <parameterMap         value="mergerTreeBranchingProbability/G0 mergerTreeBranchingProbability/gamma1 mergerTreeBranchingProbability/gamma2 mergerTreeBranchingProbability/gamma3 progenitorMassFunctionParameters/rootVarianceTargetFractional"/>
@@ -105,7 +105,7 @@
       <evolveForestsVerbosity    value="silent"                                                                               />
       <reportFileName            value="true"                                                                                 />
       <reportState               value="true"                                                                                 />
-      <countCollaborativeGroups  value="-1"                                                                                       />
+      <collaborativeMPI          value="false"                                                                                />
     </posteriorSampleLikelihood>
 
     < Symphony WDM3 >
@@ -113,56 +113,56 @@
     <parameterInactiveMap value="randomNumberGenerator/seed" ignoreWarnings="true"                                                                                                                                                                 />
     <posteriorSampleLikelihood value="galaxyPopulation">
       <baseParametersFileName    value="%EXECPATH%/constraints/pipelines/darkMatter/progenitorMassFunctionBaseSymphonyWDM3.xml"         />
-      <changeParametersFileNames value="%EXECPATH%/constraints/pipelines/darkMatter/powerSpectrumWindowFunction_topHat.xml
+      <changeParametersFileNames value="%EXECPATH%/constraints/pipelines/darkMatter/powerSpectrumWindowFunction_sharpK.xml
 					%EXECPATH%/constraints/pipelines/darkMatter/mergerTreeBranchingProbability_noCDMAssumptions.xml"/>
       <randomize                 value="false"                                                                                          />
       <evolveForestsVerbosity    value="silent"                                                                                         />
       <reportFileName            value="true"                                                                                           />
       <reportState               value="true"                                                                                           />
-      <countCollaborativeGroups  value="-1"                                                                                       />
-    </posteriorSampleLikelihood>
+      <collaborativeMPI          value="false"                                                                                          />
+    </posteriorSampleLikelihood-->
 
 
-    < Symphony IDM1e-4GeV_halfmode >
+    <!-- Symphony IDM1e-4GeV_halfmode >
     <parameterMap         value="mergerTreeBranchingProbability/G0 mergerTreeBranchingProbability/gamma1 mergerTreeBranchingProbability/gamma2 mergerTreeBranchingProbability/gamma3 progenitorMassFunctionParameters/rootVarianceTargetFractional"/>
     <parameterInactiveMap value="randomNumberGenerator/seed" ignoreWarnings="true"                                                                                                                                                                 />
     <posteriorSampleLikelihood value="galaxyPopulation">
       <baseParametersFileName    value="%EXECPATH%/constraints/pipelines/darkMatter/progenitorMassFunctionBaseSymphonyIDM1e-4GeV_halfmode.xml"/>
-      <changeParametersFileNames value="%EXECPATH%/constraints/pipelines/darkMatter/powerSpectrumWindowFunction_topHat.xml
+      <changeParametersFileNames value="%EXECPATH%/constraints/pipelines/darkMatter/powerSpectrumWindowFunction_sharpK.xml
 					%EXECPATH%/constraints/pipelines/darkMatter/mergerTreeBranchingProbability_noCDMAssumptions.xml"      />
       <randomize                 value="false"                                                                                                />
       <evolveForestsVerbosity    value="silent"                                                                                               />
       <reportFileName            value="true"                                                                                                 />
       <reportState               value="true"                                                                                                 />
-      <countCollaborativeGroups  value="-1"                                                                                       />
+      <collaborativeMPI          value="false"                                                                                                />
     </posteriorSampleLikelihood>
 
-    < Symphony IDM1e-2GeV_halfmode >
+    <! Symphony IDM1e-2GeV_halfmode >
     <parameterMap         value="mergerTreeBranchingProbability/G0 mergerTreeBranchingProbability/gamma1 mergerTreeBranchingProbability/gamma2 mergerTreeBranchingProbability/gamma3 progenitorMassFunctionParameters/rootVarianceTargetFractional"/>
     <parameterInactiveMap value="randomNumberGenerator/seed" ignoreWarnings="true"                                                                                                                                                                 />
     <posteriorSampleLikelihood value="galaxyPopulation">
       <baseParametersFileName    value="%EXECPATH%/constraints/pipelines/darkMatter/progenitorMassFunctionBaseSymphonyIDM1e-2GeV_halfmode.xml"/>
-      <changeParametersFileNames value="%EXECPATH%/constraints/pipelines/darkMatter/powerSpectrumWindowFunction_topHat.xml
+      <changeParametersFileNames value="%EXECPATH%/constraints/pipelines/darkMatter/powerSpectrumWindowFunction_sharpK.xml
 					%EXECPATH%/constraints/pipelines/darkMatter/mergerTreeBranchingProbability_noCDMAssumptions.xml"      />
       <randomize                 value="false"                                                                                                />
       <evolveForestsVerbosity    value="silent"                                                                                               />
       <reportFileName            value="true"                                                                                                 />
       <reportState               value="true"                                                                                                 />
-      <countCollaborativeGroups  value="-1"                                                                                       />
+      <collaborativeMPI          value="false"                                                                                                />
     </posteriorSampleLikelihood>
 
-    < Symphony IDM1GeV_halfmode >
+    <! Symphony IDM1GeV_halfmode >
     <parameterMap         value="mergerTreeBranchingProbability/G0 mergerTreeBranchingProbability/gamma1 mergerTreeBranchingProbability/gamma2 mergerTreeBranchingProbability/gamma3 progenitorMassFunctionParameters/rootVarianceTargetFractional"/>
     <parameterInactiveMap value="randomNumberGenerator/seed" ignoreWarnings="true"                                                                                                                                                                 />
     <posteriorSampleLikelihood value="galaxyPopulation">
       <baseParametersFileName    value="%EXECPATH%/constraints/pipelines/darkMatter/progenitorMassFunctionBaseSymphonyIDM1GeV_halfmode.xml"/>
-      <changeParametersFileNames value="%EXECPATH%/constraints/pipelines/darkMatter/powerSpectrumWindowFunction_topHat.xml
+      <changeParametersFileNames value="%EXECPATH%/constraints/pipelines/darkMatter/powerSpectrumWindowFunction_sharpK.xml
 					%EXECPATH%/constraints/pipelines/darkMatter/mergerTreeBranchingProbability_noCDMAssumptions.xml"   />
       <randomize                 value="false"                                                                                             />
       <evolveForestsVerbosity    value="silent"                                                                                            />
       <reportFileName            value="true"                                                                                              />
       <reportState               value="true"                                                                                              />
-      <countCollaborativeGroups  value="-1"                                                                                       />
+      <collaborativeMPI          value="false"                                                                                             />
     </posteriorSampleLikelihood>
 
     < Symphony IDM1e-4GeV_envelope >
@@ -170,13 +170,13 @@
     <parameterInactiveMap value="randomNumberGenerator/seed" ignoreWarnings="true"                                                                                                                                                                 />
     <posteriorSampleLikelihood value="galaxyPopulation">
       <baseParametersFileName    value="%EXECPATH%/constraints/pipelines/darkMatter/progenitorMassFunctionBaseSymphonyIDM1e-4GeV_envelope.xml"/>
-      <changeParametersFileNames value="%EXECPATH%/constraints/pipelines/darkMatter/powerSpectrumWindowFunction_topHat.xml
+      <changeParametersFileNames value="%EXECPATH%/constraints/pipelines/darkMatter/powerSpectrumWindowFunction_sharpK.xml
 					%EXECPATH%/constraints/pipelines/darkMatter/mergerTreeBranchingProbability_noCDMAssumptions.xml"      />
       <randomize                 value="false"                                                                                                />
       <evolveForestsVerbosity    value="silent"                                                                                               />
       <reportFileName            value="true"                                                                                                 />
       <reportState               value="true"                                                                                                 />
-      <countCollaborativeGroups  value="-1"                                                                                       />
+      <collaborativeMPI          value="false"                                                                                                />
     </posteriorSampleLikelihood>
 
     < Symphony IDM1e-2GeV_envelope >
@@ -184,139 +184,139 @@
     <parameterInactiveMap value="randomNumberGenerator/seed" ignoreWarnings="true"                                                                                                                                                                 />
     <posteriorSampleLikelihood value="galaxyPopulation">
       <baseParametersFileName    value="%EXECPATH%/constraints/pipelines/darkMatter/progenitorMassFunctionBaseSymphonyIDM1e-2GeV_envelope.xml"/>
-      <changeParametersFileNames value="%EXECPATH%/constraints/pipelines/darkMatter/powerSpectrumWindowFunction_topHat.xml
+      <changeParametersFileNames value="%EXECPATH%/constraints/pipelines/darkMatter/powerSpectrumWindowFunction_sharpK.xml
 					%EXECPATH%/constraints/pipelines/darkMatter/mergerTreeBranchingProbability_noCDMAssumptions.xml"      />
       <randomize                 value="false"                                                                                                />
       <evolveForestsVerbosity    value="silent"                                                                                               />
       <reportFileName            value="true"                                                                                                 />
       <reportState               value="true"                                                                                                 />
-      <countCollaborativeGroups  value="-1"                                                                                       />
-    </posteriorSampleLikelihood>
+      <collaborativeMPI          value="false"                                                                                                />
+    </posteriorSampleLikelihood-->
 
-    < Symphony IDM1GeV_envelope >
+    <!-- Symphony IDM1GeV_envelope -->
     <parameterMap         value="mergerTreeBranchingProbability/G0 mergerTreeBranchingProbability/gamma1 mergerTreeBranchingProbability/gamma2 mergerTreeBranchingProbability/gamma3 progenitorMassFunctionParameters/rootVarianceTargetFractional"/>
     <parameterInactiveMap value="randomNumberGenerator/seed" ignoreWarnings="true"                                                                                                                                                                 />
     <posteriorSampleLikelihood value="galaxyPopulation">
       <baseParametersFileName    value="%EXECPATH%/constraints/pipelines/darkMatter/progenitorMassFunctionBaseSymphonyIDM1GeV_envelope.xml"/>
-      <changeParametersFileNames value="%EXECPATH%/constraints/pipelines/darkMatter/powerSpectrumWindowFunction_topHat.xml
+      <changeParametersFileNames value="%EXECPATH%/constraints/pipelines/darkMatter/powerSpectrumWindowFunction_sharpK.xml
 					%EXECPATH%/constraints/pipelines/darkMatter/mergerTreeBranchingProbability_noCDMAssumptions.xml"   />
       <randomize                 value="false"                                                                                             />
       <evolveForestsVerbosity    value="silent"                                                                                            />
       <reportFileName            value="true"                                                                                              />
       <reportState               value="true"                                                                                              />
-      <countCollaborativeGroups  value="-1"                                                                                       />
-    </posteriorSampleLikelihood-->
+      <collaborativeMPI          value="false"                                                                                             />
+    </posteriorSampleLikelihood>
 
-    <!-- Symphony fdm_490e-22eV -->
+    <!-- Symphony fdm_490e-22eV >
     <parameterMap         value="mergerTreeBranchingProbability/G0 mergerTreeBranchingProbability/gamma1 mergerTreeBranchingProbability/gamma2 mergerTreeBranchingProbability/gamma3 progenitorMassFunctionParameters/rootVarianceTargetFractional"/>
     <parameterInactiveMap value="randomNumberGenerator/seed" ignoreWarnings="true"                                                                                                                                                                 />
     <posteriorSampleLikelihood value="galaxyPopulation">
       <baseParametersFileName    value="%EXECPATH%/constraints/pipelines/darkMatter/progenitorMassFunctionBaseSymphonyfdm_490e-22eV.xml"/>
-      <changeParametersFileNames value="%EXECPATH%/constraints/pipelines/darkMatter/powerSpectrumWindowFunction_topHat.xml
+      <changeParametersFileNames value="%EXECPATH%/constraints/pipelines/darkMatter/powerSpectrumWindowFunction_sharpK.xml
 					%EXECPATH%/constraints/pipelines/darkMatter/mergerTreeBranchingProbability_noCDMAssumptions.xml"/>
       <randomize                 value="false"                                                                                          />
       <evolveForestsVerbosity    value="silent"                                                                                         />
       <reportFileName            value="true"                                                                                           />
       <reportState               value="true"                                                                                           />
-      <countCollaborativeGroups  value="-1"                                                                                       />
+      <collaborativeMPI          value="false"                                                                                          />
     </posteriorSampleLikelihood>
 
-  <!-- Symphony fdm_25.9e-22eV-->
+  < Symphony fdm_25.9e-22eV>
     <parameterMap         value="mergerTreeBranchingProbability/G0 mergerTreeBranchingProbability/gamma1 mergerTreeBranchingProbability/gamma2 mergerTreeBranchingProbability/gamma3 progenitorMassFunctionParameters/rootVarianceTargetFractional"/>
     <parameterInactiveMap value="randomNumberGenerator/seed" ignoreWarnings="true"                                                                                                                                                                 />
     <posteriorSampleLikelihood value="galaxyPopulation">
       <baseParametersFileName    value="%EXECPATH%/constraints/pipelines/darkMatter/progenitorMassFunctionBaseSymphonyfdm_25.9e-22eV.xml"/>
-      <changeParametersFileNames value="%EXECPATH%/constraints/pipelines/darkMatter/powerSpectrumWindowFunction_topHat.xml
+      <changeParametersFileNames value="%EXECPATH%/constraints/pipelines/darkMatter/powerSpectrumWindowFunction_sharpK.xml
 					%EXECPATH%/constraints/pipelines/darkMatter/mergerTreeBranchingProbability_noCDMAssumptions.xml" />
       <randomize                 value="false"                                                                                           />
       <evolveForestsVerbosity    value="silent"                                                                                          />
       <reportFileName            value="true"                                                                                            />
       <reportState               value="true"                                                                                            />
-      <countCollaborativeGroups  value="-1"                                                                                       />
+      <collaborativeMPI          value="false"                                                                                           />
     </posteriorSampleLikelihood>
 
-    <!-- Symphony fdm_185e-22eV -->
+    < Symphony fdm_185e-22eV >
     <parameterMap         value="mergerTreeBranchingProbability/G0 mergerTreeBranchingProbability/gamma1 mergerTreeBranchingProbability/gamma2 mergerTreeBranchingProbability/gamma3 progenitorMassFunctionParameters/rootVarianceTargetFractional"/>
     <parameterInactiveMap value="randomNumberGenerator/seed" ignoreWarnings="true"                                                                                                                                                                 />
     <posteriorSampleLikelihood value="galaxyPopulation">
       <baseParametersFileName    value="%EXECPATH%/constraints/pipelines/darkMatter/progenitorMassFunctionBaseSymphonyfdm_185e-22eV.xml"/>
-      <changeParametersFileNames value="%EXECPATH%/constraints/pipelines/darkMatter/powerSpectrumWindowFunction_topHat.xml
+      <changeParametersFileNames value="%EXECPATH%/constraints/pipelines/darkMatter/powerSpectrumWindowFunction_sharpK.xml
 					%EXECPATH%/constraints/pipelines/darkMatter/mergerTreeBranchingProbability_noCDMAssumptions.xml"/>
       <randomize                 value="false"                                                                                          />
       <evolveForestsVerbosity    value="silent"                                                                                         />
       <reportFileName            value="true"                                                                                           />
       <reportState               value="true"                                                                                           />
-      <countCollaborativeGroups  value="-1"                                                                                       />
+      <collaborativeMPI          value="false"                                                                                          />
     </posteriorSampleLikelihood>
 
-    <!-- Symphony fdm_69.4e-22eV -->
+    < Symphony fdm_69.4e-22eV >
     <parameterMap         value="mergerTreeBranchingProbability/G0 mergerTreeBranchingProbability/gamma1 mergerTreeBranchingProbability/gamma2 mergerTreeBranchingProbability/gamma3 progenitorMassFunctionParameters/rootVarianceTargetFractional"/>
     <parameterInactiveMap value="randomNumberGenerator/seed" ignoreWarnings="true"                                                                                                                                                                 />
     <posteriorSampleLikelihood value="galaxyPopulation">
       <baseParametersFileName    value="%EXECPATH%/constraints/pipelines/darkMatter/progenitorMassFunctionBaseSymphonyfdm_69.4e-22eV.xml"/>
-      <changeParametersFileNames value="%EXECPATH%/constraints/pipelines/darkMatter/powerSpectrumWindowFunction_topHat.xml
+      <changeParametersFileNames value="%EXECPATH%/constraints/pipelines/darkMatter/powerSpectrumWindowFunction_sharpK.xml
 					%EXECPATH%/constraints/pipelines/darkMatter/mergerTreeBranchingProbability_noCDMAssumptions.xml" />
       <randomize                 value="false"                                                                                           />
       <evolveForestsVerbosity    value="silent"                                                                                          />
       <reportFileName            value="true"                                                                                            />
       <reportState               value="true"                                                                                            />
-      <countCollaborativeGroups  value="-1"                                                                                       />
+      <collaborativeMPI          value="false"                                                                                           />
     </posteriorSampleLikelihood>
 
-    <!-- Symphony fdm_151e-22eV -->
+    < Symphony fdm_151e-22eV >
     <parameterMap         value="mergerTreeBranchingProbability/G0 mergerTreeBranchingProbability/gamma1 mergerTreeBranchingProbability/gamma2 mergerTreeBranchingProbability/gamma3 progenitorMassFunctionParameters/rootVarianceTargetFractional"/>
     <parameterInactiveMap value="randomNumberGenerator/seed" ignoreWarnings="true"                                                                                                                                                                 />
     <posteriorSampleLikelihood value="galaxyPopulation">
       <baseParametersFileName    value="%EXECPATH%/constraints/pipelines/darkMatter/progenitorMassFunctionBaseSymphonyfdm_151e-22eV.xml"/>
-      <changeParametersFileNames value="%EXECPATH%/constraints/pipelines/darkMatter/powerSpectrumWindowFunction_topHat.xml
+      <changeParametersFileNames value="%EXECPATH%/constraints/pipelines/darkMatter/powerSpectrumWindowFunction_sharpK.xml
 					%EXECPATH%/constraints/pipelines/darkMatter/mergerTreeBranchingProbability_noCDMAssumptions.xml"/>
       <randomize                 value="false"                                                                                          />
       <evolveForestsVerbosity    value="silent"                                                                                         />
       <reportFileName            value="true"                                                                                           />
       <reportState               value="true"                                                                                           />
-      <countCollaborativeGroups  value="-1"                                                                                       />
+      <collaborativeMPI          value="false"                                                                                          />
     </posteriorSampleLikelihood>
 
-    <!--Symphony fdm_113e-22eV -->
+    <Symphony fdm_113e-22eV >
     <parameterMap         value="mergerTreeBranchingProbability/G0 mergerTreeBranchingProbability/gamma1 mergerTreeBranchingProbability/gamma2 mergerTreeBranchingProbability/gamma3 progenitorMassFunctionParameters/rootVarianceTargetFractional"/>
     <parameterInactiveMap value="randomNumberGenerator/seed" ignoreWarnings="true"                                                                                                                                                                 />
     <posteriorSampleLikelihood value="galaxyPopulation">
       <baseParametersFileName    value="%EXECPATH%/constraints/pipelines/darkMatter/progenitorMassFunctionBaseSymphonyfdm_113e-22eV.xml"/>
-      <changeParametersFileNames value="%EXECPATH%/constraints/pipelines/darkMatter/powerSpectrumWindowFunction_topHat.xml
+      <changeParametersFileNames value="%EXECPATH%/constraints/pipelines/darkMatter/powerSpectrumWindowFunction_sharpK.xml
 					%EXECPATH%/constraints/pipelines/darkMatter/mergerTreeBranchingProbability_noCDMAssumptions.xml"/>
       <randomize                 value="false"                                                                                          />
       <evolveForestsVerbosity    value="silent"                                                                                         />
       <reportFileName            value="true"                                                                                           />
       <reportState               value="true"                                                                                           />
-      <countCollaborativeGroups  value="-1"                                                                                       />
+      <collaborativeMPI          value="false"                                                                                          />
     </posteriorSampleLikelihood>
 
-    <!-- Symphony WDM10 >
+    < Symphony WDM10 >
     <parameterMap         value="mergerTreeBranchingProbability/G0 mergerTreeBranchingProbability/gamma1 mergerTreeBranchingProbability/gamma2 mergerTreeBranchingProbability/gamma3 progenitorMassFunctionParameters/rootVarianceTargetFractional"/>
     <parameterInactiveMap value="randomNumberGenerator/seed" ignoreWarnings="true"                                                                                                                                                                 />
     <posteriorSampleLikelihood value="galaxyPopulation">
       <baseParametersFileName    value="%EXECPATH%/constraints/pipelines/darkMatter/progenitorMassFunctionBaseSymphonyWDM10.xml"        />
-      <changeParametersFileNames value="%EXECPATH%/constraints/pipelines/darkMatter/powerSpectrumWindowFunction_topHat.xml
+      <changeParametersFileNames value="%EXECPATH%/constraints/pipelines/darkMatter/powerSpectrumWindowFunction_sharpK.xml
 					%EXECPATH%/constraints/pipelines/darkMatter/mergerTreeBranchingProbability_noCDMAssumptions.xml"/>
       <randomize                 value="false"                                                                                          />
       <evolveForestsVerbosity    value="silent"                                                                                         />
       <reportFileName            value="true"                                                                                           />
       <reportState               value="true"                                                                                           />
-      <countCollaborativeGroups  value="-1"                                                                                       />
+      <collaborativeMPI          value="false"                                                                                          />
     </posteriorSampleLikelihood>
 
-    < Symphony WDM6.5 >
+    <Symphony WDM6.5 >
     <parameterMap         value="mergerTreeBranchingProbability/G0 mergerTreeBranchingProbability/gamma1 mergerTreeBranchingProbability/gamma2 mergerTreeBranchingProbability/gamma3 progenitorMassFunctionParameters/rootVarianceTargetFractional"/>
     <parameterInactiveMap value="randomNumberGenerator/seed" ignoreWarnings="true"                                                                                                                                                                 />
     <posteriorSampleLikelihood value="galaxyPopulation">
       <baseParametersFileName    value="%EXECPATH%/constraints/pipelines/darkMatter/progenitorMassFunctionBaseSymphonyWDM6.5.xml"       />
-      <changeParametersFileNames value="%EXECPATH%/constraints/pipelines/darkMatter/powerSpectrumWindowFunction_topHat.xml
+      <changeParametersFileNames value="%EXECPATH%/constraints/pipelines/darkMatter/powerSpectrumWindowFunction_sharpK.xml
 					%EXECPATH%/constraints/pipelines/darkMatter/mergerTreeBranchingProbability_noCDMAssumptions.xml"/>
       <randomize                 value="false"                                                                                          />
       <evolveForestsVerbosity    value="silent"                                                                                         />
       <reportFileName            value="true"                                                                                           />
       <reportState               value="true"                                                                                           />
-      <countCollaborativeGroups  value="-1"                                                                                       />
+      <collaborativeMPI          value="false"                                                                                          />
     </posteriorSampleLikelihood>
 
     < Symphony WDM6 >
@@ -324,13 +324,13 @@
     <parameterInactiveMap value="randomNumberGenerator/seed" ignoreWarnings="true"                                                                                                                                                                 />
     <posteriorSampleLikelihood value="galaxyPopulation">
       <baseParametersFileName    value="%EXECPATH%/constraints/pipelines/darkMatter/progenitorMassFunctionBaseSymphonyWDM6.xml"         />
-      <changeParametersFileNames value="%EXECPATH%/constraints/pipelines/darkMatter/powerSpectrumWindowFunction_topHat.xml
+      <changeParametersFileNames value="%EXECPATH%/constraints/pipelines/darkMatter/powerSpectrumWindowFunction_sharpK.xml
 					%EXECPATH%/constraints/pipelines/darkMatter/mergerTreeBranchingProbability_noCDMAssumptions.xml"/>
       <randomize                 value="false"                                                                                          />
       <evolveForestsVerbosity    value="silent"                                                                                         />
       <reportFileName            value="true"                                                                                           />
       <reportState               value="true"                                                                                           />
-      <countCollaborativeGroups  value="-1"                                                                                       />
+      <collaborativeMPI          value="false"                                                                                          />
     </posteriorSampleLikelihood>
 
     < Symphony WDM5 >
@@ -338,13 +338,13 @@
     <parameterInactiveMap value="randomNumberGenerator/seed" ignoreWarnings="true"                                                                                                                                                                 />
     <posteriorSampleLikelihood value="galaxyPopulation">
       <baseParametersFileName    value="%EXECPATH%/constraints/pipelines/darkMatter/progenitorMassFunctionBaseSymphonyWDM5.xml"         />
-      <changeParametersFileNames value="%EXECPATH%/constraints/pipelines/darkMatter/powerSpectrumWindowFunction_topHat.xml
+      <changeParametersFileNames value="%EXECPATH%/constraints/pipelines/darkMatter/powerSpectrumWindowFunction_sharpK.xml
 					%EXECPATH%/constraints/pipelines/darkMatter/mergerTreeBranchingProbability_noCDMAssumptions.xml"/>
       <randomize                 value="false"                                                                                          />
       <evolveForestsVerbosity    value="silent"                                                                                         />
       <reportFileName            value="true"                                                                                           />
       <reportState               value="true"                                                                                           />
-      <countCollaborativeGroups  value="-1"                                                                                       />
+      <collaborativeMPI          value="false"                                                                                          />
     </posteriorSampleLikelihood>
 
     < Symphony WDM4 >
@@ -352,13 +352,13 @@
     <parameterInactiveMap value="randomNumberGenerator/seed" ignoreWarnings="true"                                                                                                                                                                 />
     <posteriorSampleLikelihood value="galaxyPopulation">
       <baseParametersFileName    value="%EXECPATH%/constraints/pipelines/darkMatter/progenitorMassFunctionBaseSymphonyWDM4.xml"         />
-      <changeParametersFileNames value="%EXECPATH%/constraints/pipelines/darkMatter/powerSpectrumWindowFunction_topHat.xml
+      <changeParametersFileNames value="%EXECPATH%/constraints/pipelines/darkMatter/powerSpectrumWindowFunction_sharpK.xml
 					%EXECPATH%/constraints/pipelines/darkMatter/mergerTreeBranchingProbability_noCDMAssumptions.xml"/>
       <randomize                 value="false"                                                                                          />
       <evolveForestsVerbosity    value="silent"                                                                                         />
       <reportFileName            value="true"                                                                                           />
       <reportState               value="true"                                                                                           />
-      <countCollaborativeGroups  value="-1"                                                                                       />
+      <collaborativeMPI          value="false"                                                                                          />
     </posteriorSampleLikelihood-->
 
   </posteriorSampleLikelihood>
@@ -369,7 +369,7 @@
     <acceptanceAverageCount value="           10"/>
     <stateSwapCount         value="           10"/>
     <recomputeCount         value="           11"/>
-    <logFileRoot            value="chains/chains_binomialLikelihood_MDPLth_SymMWth_FDMallth"/>
+    <logFileRoot            value="chains/chains_IDMenvelope_test_new"/>
     <reportCount            value="           10"/>
     <sampleOutliers         value="false"        />
     <logFlushCount          value="            1"/>
@@ -399,7 +399,7 @@
       <acceptanceRateMinimum value="0.10e+0"/>
       <acceptanceRateMaximum value="0.90e+0"/>
       <updateCount           value="10"     />
-      <logFileName           value="chains/binomialLikelihood_MDPLth_SymMWth_FDMallth.log"/>
+      <logFileName           value="chains/IDMenvelope_test_new.log"/>
     </posteriorSampleDffrntlEvltnProposalSize>
     
     <!-- PCH parameters -->
