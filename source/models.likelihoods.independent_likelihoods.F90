@@ -30,8 +30,20 @@
      type   (varying_string                ), dimension(:), allocatable :: parameterMapNames                , parameterMapNamesInactive
      type   (posteriorSampleLikelihoodList ), pointer                   :: next                    => null()
      type   (posteriorSampleStateSimple    )                            :: simulationState
-     logical                                                            :: parameterMapInitialized
+     logical                                                            :: parameterMapInitialized          , report
   end type posteriorSampleLikelihoodList
+
+  !![
+  <enumeration>
+   <name>orderRotation</name>
+   <description>Specifies how to rotate the order of likelihood evaluation by process number.</description>
+   <validator>yes</validator>
+   <encodeFunction>yes</encodeFunction>
+   <entry label="none"        />
+   <entry label="byRank"      />
+   <entry label="byRankOnNode"/>
+  </enumeration>
+  !!]
 
   !![
   <posteriorSampleLikelihood name="posteriorSampleLikelihoodIndependentLikelihoods">
@@ -65,9 +77,10 @@
      Implementation of a posterior sampling likelihood class which combines other likelihoods assumed to be independent.
      !!}
      private
+     type            (enumerationOrderRotationType )          :: orderRotation
      type            (posteriorSampleLikelihoodList), pointer :: modelLikelihoods    => null()
      double precision                                         :: logLikelihoodAccept
-     logical                                                  :: parameterMapIdentity
+     logical                                                  :: report                       , parameterMapIdentity
    contains
      final     ::                    independentLikelihoodsDestructor
      procedure :: evaluate        => independentLikelihoodsEvaluate
@@ -96,17 +109,31 @@ contains
     implicit none
     type   (posteriorSampleLikelihoodIndependentLikelihoods)                :: self
     type   (inputParameters                                ), intent(inout) :: parameters
-    type   (posteriorSampleLikelihoodList                  ), pointer       :: modelLikelihood_
-    integer                                                                 :: i                 , parameterMapCount
+    type   (posteriorSampleLikelihoodList                  ), pointer       :: modelLikelihood_  , modelLikelihoodLast
+    integer                                                                 :: i                 , parameterMapCount  , &
+         &                                                                     countRotation     , countLikelihoods
     type   (enumerationInputParameterErrorStatusType       )                :: errorStatus
-    type   (varying_string                                 )                :: parameterMapJoined
-    
+    type   (varying_string                                 )                :: parameterMapJoined, orderRotation
+
     !![
+    <inputParameter>
+      <name>orderRotation</name>
+      <source>parameters</source>
+      <defaultValue>var_str('none')</defaultValue>
+      <description>The order in which evaluation of likelihoods should be rotated as a function of process number.</description>
+    </inputParameter>
     <inputParameter>
       <name>logLikelihoodAccept</name>
       <variable>self%logLikelihoodAccept</variable>
       <defaultValue>huge(0.0d0)</defaultValue>
       <description>The log-likelihood which should be ``accepted''---once the log-likelihood reaches this value (or larger) no further updates to the chain will be made.</description>
+      <source>parameters</source>
+    </inputParameter>
+    <inputParameter>
+      <name>report</name>
+      <variable>self%report</variable>
+      <defaultValue>.false.</defaultValue>
+      <description>If true, report on the log-likelihood obtained.</description>
       <source>parameters</source>
     </inputParameter>
     !!]
@@ -124,7 +151,8 @@ contains
     end if
     self            %modelLikelihoods => null()
     modelLikelihood_                  => null()
-    do i=1,parameters%copiesCount('posteriorSampleLikelihood',zeroIfNotPresent=.true.)
+    countLikelihoods                  =  parameters%copiesCount('posteriorSampleLikelihood',zeroIfNotPresent=.true.)
+    do i=1,countLikelihoods
        if (associated(modelLikelihood_)) then
           allocate(modelLikelihood_%next)
           modelLikelihood_ => modelLikelihood_%next
@@ -165,13 +193,36 @@ contains
           end if
        end if
     end do
+    !! Perform rotation of likelihoods.
+    self%orderRotation=enumerationOrderRotationEncode(char(orderRotation),includesPrefix=.false.)
+    countRotation     =0
+    select case (self%orderRotation%ID)
+    case (orderRotationNone        %ID)
+       countRotation=0
+    case (orderRotationByRank      %ID)
+       countRotation=mpiSelf%rank      ()
+    case (orderRotationByRankOnNode%ID)
+       countRotation=mpiSelf%rankOnNode()
+    end select
+    if (countRotation > 0 .and. countLikelihoods > 1) then
+       do i=1,countRotation
+          modelLikelihood_    => self%modelLikelihoods
+          modelLikelihoodLast => self%modelLikelihoods
+          do while (associated(modelLikelihoodLast%next))
+             modelLikelihoodLast => modelLikelihoodLast%next
+          end do
+          self               %modelLikelihoods => modelLikelihood_%next
+          modelLikelihoodLast%next             => modelLikelihood_
+          modelLikelihood_   %next             => null()
+       end do
+    end if
     !![
     <inputParametersValidate source="parameters" multiParameters="posteriorSampleLikelihood, parameterMap, parameterInactiveMap" extraAllowedNames="parameterMap parameterInactiveMap"/>
     !!]
     return
   end function independentLikelihoodsConstructorParameters
 
-  function independentLikelihoodsConstructorInternal(modelLikelihoods,logLikelihoodAccept) result(self)
+  function independentLikelihoodsConstructorInternal(modelLikelihoods,logLikelihoodAccept,report,orderRotation) result(self)
     !!{
     Constructor for the \refClass{posteriorSampleLikelihoodIndependentLikelihoods} posterior sampling likelihood class.
     !!}
@@ -179,8 +230,10 @@ contains
     type            (posteriorSampleLikelihoodIndependentLikelihoods)                        :: self
     type            (posteriorSampleLikelihoodList                  ), target, intent(in   ) :: modelLikelihoods
     double precision                                                         , intent(in   ) :: logLikelihoodAccept
+    logical                                                                  , intent(in   ) :: report
+    type            (enumerationOrderRotationType                   )        , intent(in   ) :: orderRotation
     !![
-    <constructorAssign variables="*modelLikelihoods, logLikelihoodAccept"/>
+    <constructorAssign variables="*modelLikelihoods, logLikelihoodAccept, report, orderRotation"/>
     !!]
 
     return
@@ -223,6 +276,7 @@ contains
     !!{
     Return the log-likelihood for the halo mass function likelihood function.
     !!}
+    use :: Display                     , only : displayMessage
     use :: Error                       , only : Error_Report
     use :: Models_Likelihoods_Constants, only : logImpossible
     implicit none
@@ -240,6 +294,7 @@ contains
     real                                                                                           :: timeEvaluate_
     double precision                                                                               :: logLikelihoodVariance_, logPriorProposed_
     integer                                                                                        :: i                     , j
+    character       (len=16                                         )                              :: label
     !$GLC attributes unused :: forceAcceptance
 
     allocate(stateVector      (simulationState%dimension()))
@@ -315,7 +370,7 @@ contains
           logPriorProposed_=logPriorProposed
        end if
        ! Evaluate this likelihood
-       timeEvaluate_=-1.0
+       timeEvaluate_                                              =  -1.0
        independentLikelihoodsEvaluate                             =  +independentLikelihoodsEvaluate                                                        &
             &                                                        +modelLikelihood_%modelLikelihood_%evaluate(                                           &
             &                                                                                                    modelLikelihood_%simulationState         , &
@@ -335,6 +390,10 @@ contains
             &                                                        +timeEvaluate
        modelLikelihood_                                           =>  modelLikelihood_%next
     end do
+    if (self%report) then
+       write (label,'(e16.10)') independentLikelihoodsEvaluate
+       call displayMessage("logℒ (total) = "//trim(label))
+    end if
     return
   end function independentLikelihoodsEvaluate
 

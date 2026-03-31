@@ -45,7 +45,9 @@
     <lastModified revision="975fffd5aadf697707003f16bf9b4caee8ebe97d" time="2025-10-22T21:59:41"/>
     <task value="multi">
       <task value="evolveForests"/>
-      <task value="powerSpectra"/>
+      <task value="powerSpectra">
+	<pointsPerDecade value="10"/>
+      </task>
     </task>
     <mergerTreeOutputter value="multi">
       <mergerTreeOutputter value="standard"/>

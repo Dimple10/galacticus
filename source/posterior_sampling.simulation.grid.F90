@@ -85,7 +85,7 @@ contains
     class  (posteriorSamplesClass         ), pointer                     :: posteriorSamples_
     type   (varying_string                )                              :: logFileRoot               , message
     integer                                                              :: inactiveParameterCount    , activeParameterCount  , &
-         &                                                                  iInactive                 , iActive, &
+         &                                                                  iInactive                 , iActive               , &
          &                                                                  logFlushCount             , i
     logical                                                              :: appendLogs                , outputLikelihoods
 

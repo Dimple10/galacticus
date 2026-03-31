@@ -114,11 +114,13 @@ endif
 ifeq '$(GALACTICUS_BUILD_OPTION)' 'gprof'
 FCFLAGS       += -pg
 FCFLAGS_NOOPT += -pg
+F77FLAGS      += -pg
 CFLAGS        += -pg
 CPPFLAGS      += -pg
 else
 FCFLAGS       += -g
 FCFLAGS_NOOPT += -g
+F77FLAGS      += -g
 CFLAGS        += -g
 CPPFLAGS      += -g
 endif
@@ -390,9 +392,13 @@ $(BUILDPATH)/FFTlog/%.o: ./source/FFTlog/%.f Makefile
 	@mkdir -p $(BUILDPATH)/moduleBuild
 	$(FCCOMPILER) -c $< -o $(BUILDPATH)/FFTlog/$*.o $(F77FLAGS) -Wno-argument-mismatch -std=legacy
 
-# Object (*.o) files are built by compiling Fortran (*.f) source files.
+# Object (*.o) files are built by compiling Fortran (*.[fF]) source files.
 vpath %.f source
 $(BUILDPATH)/%.o : %.f $(BUILDPATH)/%.d $(BUILDPATH)/%.fl Makefile
+	@mkdir -p $(BUILDPATH)/moduleBuild
+	$(FCCOMPILER) -c $< -o $(BUILDPATH)/$*.o $(F77FLAGS)
+vpath %.F source
+$(BUILDPATH)/%.o : %.F $(BUILDPATH)/%.d $(BUILDPATH)/%.fl Makefile
 	@mkdir -p $(BUILDPATH)/moduleBuild
 	$(FCCOMPILER) -c $< -o $(BUILDPATH)/$*.o $(F77FLAGS)
 
@@ -441,6 +447,13 @@ $(BUILDPATH)/%.d : ./source/%.f
 	else \
 	 mv $(BUILDPATH)/$*.d~ $(BUILDPATH)/$*.d ; \
 	fi
+$(BUILDPATH)/%.d : ./source/%.F
+	@echo $(BUILDPATH)/$*.o > $(BUILDPATH)/$*.d~
+	@if cmp -s $(BUILDPATH)/$*.d $(BUILDPATH)/$*.d~ ; then \
+	 rm $(BUILDPATH)/$*.d~ ; \
+	else \
+	 mv $(BUILDPATH)/$*.d~ $(BUILDPATH)/$*.d ; \
+	fi
 $(BUILDPATH)/%.d : ./source/%.c
 	@echo $(BUILDPATH)/$*.o > $(BUILDPATH)/$*.d~
 	@if cmp -s $(BUILDPATH)/$*.d $(BUILDPATH)/$*.d~ ; then \
@@ -456,6 +469,13 @@ $(BUILDPATH)/%.d : ./source/%.cpp
 	 mv $(BUILDPATH)/$*.d~ $(BUILDPATH)/$*.d ; \
 	fi
 %.d : %.f
+	@echo $*.o > $*.d~
+	@if cmp -s $*.d $*.d~ ; then \
+	 rm $*.d~ ; \
+	else \
+	 mv $*.d~ $*.d ; \
+	fi
+%.d : %.F
 	@echo $*.o > $*.d~
 	@if cmp -s $*.d $*.d~ ; then \
 	 rm $*.d~ ; \
@@ -485,6 +505,8 @@ $(BUILDPATH)/%.d : ./source/%.cpp
 $(BUILDPATH)/%.fl : ./source/%.F90
 	@touch $(BUILDPATH)/$*.fl
 $(BUILDPATH)/%.fl : ./source/%.f
+	@touch $(BUILDPATH)/$*.fl
+$(BUILDPATH)/%.fl : ./source/%.F
 	@touch $(BUILDPATH)/$*.fl
 $(BUILDPATH)/%.fl : ./source/%.c
 	@touch $(BUILDPATH)/$*.fl

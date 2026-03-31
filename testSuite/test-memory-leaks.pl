@@ -31,8 +31,17 @@ my @models =
 	 parameters => "testSuite/parameters/memoryLeakFormationHalos.xml"
      },
      {
-	 label      => "MCMC",
-	 parameters => "testSuite/parameters/mcmcConfig.xml",
+     	 label      => "MCMC",
+     	 parameters => "testSuite/parameters/mcmcConfig.xml",
+     	 mpi        =>
+     	 {
+     	     processes => 4,
+     	     threads   => 1
+     	 }
+     },
+     {
+	 label      => "MCMCHMF",
+	 parameters => "testSuite/parameters/memoryLeakMCMCHMFConfig.xml",
 	 mpi        =>
 	 {
 	     processes => 4,
