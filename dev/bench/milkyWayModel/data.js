@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1794576282917,
+  "lastUpdate": 1794576376013,
   "repoUrl": "https://github.com/Dimple10/galacticus",
   "entries": {
     "Milky Way model benchmarks": [
@@ -10098,6 +10098,63 @@ window.BENCHMARK_DATA = {
             "value": 52.428999999999995,
             "range": "0.08623746285692772",
             "unit": "seconds"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "dimple@login4.cm.cluster",
+            "name": "Dimple Sarnaaik"
+          },
+          "committer": {
+            "email": "dimple@login4.cm.cluster",
+            "name": "Dimple Sarnaaik"
+          },
+          "distinct": true,
+          "id": "e5cec8dbad1de5b0d5cc5415e394c11925fe85d3",
+          "message": "Merge remote-tracking branch 'upstream/master'\n\n# Conflicts:\n#\tconstraints/pipelines/darkMatter/progenitorMassFunctionPreProcess.pl\n#\tsource/structure_formation/cosmological_mass_variance/peak_background_split.F90",
+          "timestamp": "2026-11-12T23:00:45-08:00",
+          "tree_id": "ae1cbe3f292dc9cfe3e80a1af9b2f7bc03f27225",
+          "url": "https://github.com/Dimple10/galacticus/commit/e5cec8dbad1de5b0d5cc5415e394c11925fe85d3"
+        },
+        "date": 1794576375058,
+        "tool": "customSmallerIsBetter",
+        "benches": [
+          {
+            "name": "Milky Way model - Likelihood - localGroupLuminosityFunction",
+            "value": 60.90780608594096,
+            "unit": "-logℒ"
+          },
+          {
+            "name": "Milky Way model - Likelihood - localGroupMassMetallicityRelation",
+            "value": 5.596569547432988,
+            "unit": "-logℒ"
+          },
+          {
+            "name": "Milky Way model - Likelihood - localGroupMassSizeRelation",
+            "value": 77.98068266923144,
+            "unit": "-logℒ"
+          },
+          {
+            "name": "Milky Way model - Likelihood - localGroupMassVelocityDispersionRelation",
+            "value": 23.856784656821056,
+            "unit": "-logℒ"
+          },
+          {
+            "name": "Milky Way model - Likelihood - localGroupOccupationFraction",
+            "value": 15.44917709920252,
+            "unit": "-logℒ"
+          },
+          {
+            "name": "Milky Way model - Likelihood - localGroupStellarMassFunction",
+            "value": 46.01458858138302,
+            "unit": "-logℒ"
+          },
+          {
+            "name": "Milky Way model - Likelihood - localGroupStellarMassHaloMassRelation",
+            "value": 8.586523829569957,
+            "unit": "-logℒ"
           }
         ]
       }
