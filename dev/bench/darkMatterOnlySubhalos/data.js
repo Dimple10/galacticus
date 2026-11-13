@@ -1,45 +1,8 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1794576277686,
+  "lastUpdate": 1794576288218,
   "repoUrl": "https://github.com/Dimple10/galacticus",
   "entries": {
     "Dark matter-only subhalos benchmarks": [
-      {
-        "commit": {
-          "author": {
-            "name": "Andrew Benson",
-            "username": "abensonca",
-            "email": "abenson@carnegiescience.edu"
-          },
-          "committer": {
-            "name": "Andrew Benson",
-            "username": "abensonca",
-            "email": "abenson@carnegiescience.edu"
-          },
-          "id": "510ac538753a5dd4c54d62e1a2c6237d7400213c",
-          "message": "fix: Correct git add/commit steps",
-          "timestamp": "2022-08-31T22:35:26Z",
-          "url": "https://github.com/galacticusorg/galacticus/commit/510ac538753a5dd4c54d62e1a2c6237d7400213c"
-        },
-        "date": 1661993749800,
-        "tool": "customSmallerIsBetter",
-        "benches": [
-          {
-            "name": "Dark Matter Only Subhalos - Likelihood - subhaloMassFunction",
-            "value": 56.5636704361171,
-            "unit": "-logℒ"
-          },
-          {
-            "name": "Dark Matter Only Subhalos - Likelihood - subhaloRadialDistribution",
-            "value": 25.6097232447882,
-            "unit": "-logℒ"
-          },
-          {
-            "name": "Dark Matter Only Subhalos - Likelihood - subhaloVelocityMaximumMean",
-            "value": 14937.6267911268,
-            "unit": "-logℒ"
-          }
-        ]
-      },
       {
         "commit": {
           "author": {
@@ -8707,6 +8670,43 @@ window.BENCHMARK_DATA = {
             "value": 27.654000000000003,
             "range": "0.12716288766774664",
             "unit": "seconds"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "dimple@login4.cm.cluster",
+            "name": "Dimple Sarnaaik"
+          },
+          "committer": {
+            "email": "dimple@login4.cm.cluster",
+            "name": "Dimple Sarnaaik"
+          },
+          "distinct": true,
+          "id": "e5cec8dbad1de5b0d5cc5415e394c11925fe85d3",
+          "message": "Merge remote-tracking branch 'upstream/master'\n\n# Conflicts:\n#\tconstraints/pipelines/darkMatter/progenitorMassFunctionPreProcess.pl\n#\tsource/structure_formation/cosmological_mass_variance/peak_background_split.F90",
+          "timestamp": "2026-11-12T23:00:45-08:00",
+          "tree_id": "ae1cbe3f292dc9cfe3e80a1af9b2f7bc03f27225",
+          "url": "https://github.com/Dimple10/galacticus/commit/e5cec8dbad1de5b0d5cc5415e394c11925fe85d3"
+        },
+        "date": 1794576287565,
+        "tool": "customSmallerIsBetter",
+        "benches": [
+          {
+            "name": "Dark Matter Only Subhalos - Likelihood - subhaloMassFunction",
+            "value": 2.582214415354354,
+            "unit": "-logℒ"
+          },
+          {
+            "name": "Dark Matter Only Subhalos - Likelihood - subhaloRadialDistribution",
+            "value": -5.121953059169675,
+            "unit": "-logℒ"
+          },
+          {
+            "name": "Dark Matter Only Subhalos - Likelihood - subhaloVelocityMaximumMean",
+            "value": 17129.052142243065,
+            "unit": "-logℒ"
           }
         ]
       }
