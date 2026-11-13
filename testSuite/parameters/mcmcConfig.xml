@@ -1,8 +1,9 @@
-<?xml version="1.0" encoding="UTF-8"?>
+<?xml version='1.0' encoding='UTF-8'?>
 <parameters>
-  <!-- Parameters for tutorial on constraining Galacticus parameters - https://github.com/galacticusorg/galacticus/wiki/Tutorial%3A-Constraining-Galacticus-Parameters -->
+  <!-- Parameters for tutorial on constraining Galacticus parameters - https://galacticus.readthedocs.io/en/latest/manuals/user-guide/tutorials/constraining-parameters.html -->
   <formatVersion>2</formatVersion>
-  <lastModified revision="165490f4968c699f7e5bb73ef60bcb7e626f51e6"/>
+  <lastModified revision="f88a96423e21da1fe340565b2036399633246e13" time="2026-10-22T05:48:31"/>
+
 
   <verbosityLevel value="standard"/>
 
@@ -13,10 +14,10 @@
   <outputFileName value="testSuite/outputs/mcmc.hdf5"/>
 
   <posteriorSampleLikelihood value="galaxyPopulation">
-    <baseParametersFileName   value="testSuite/parameters/mcmcBase.xml"/>
-    <failedParametersFileName value="./failedParameters.xml"           />
-    <randomize                value="false"                            />
-    <evolveForestsVerbosity   value="silent"                           />
+    <baseParametersFileName    value="testSuite/parameters/mcmcBase.xml"   />
+    <changeParametersFileNames value="testSuite/parameters/mcmcChanges.xml"/>
+    <failedParametersFileName  value="./failedParameters.xml"              />
+    <evolveForestsVerbosity    value="silent"                              />
   </posteriorSampleLikelihood>
 
   <!-- MCMC -->
@@ -55,6 +56,7 @@
     <posteriorSampleDffrntlEvltnRandomJump   value="adaptive"/>
 
     <posteriorSampleDffrntlEvltnProposalSize value="adaptive" >
+      <logFileName           value="mcmcProposalSize.log"/>
       <gammaInitial          value="0.500e+0"/>
       <gammaAdjustFactor     value="1.100e+0"/>
       <gammaMinimum          value="1.000e-4"/>
@@ -66,7 +68,7 @@
 
      <!-- Feedback -->
      <modelParameter value="active">
-       <name value="nodeOperator::nodeOperator[8]::stellarFeedbackOutflows::stellarFeedbackOutflows::velocityCharacteristic"/>
+       <name value="nodeOperator/nodeOperator[@value='stellarFeedbackDisks']/stellarFeedbackOutflows/stellarFeedbackOutflows/velocityCharacteristic"/>
        <distributionFunction1DPrior value="uniform">
 	 <limitLower value="25.0"/>
 	 <limitUpper value="500.0"/>

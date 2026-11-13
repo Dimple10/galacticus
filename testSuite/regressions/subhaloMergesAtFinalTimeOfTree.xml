@@ -1,7 +1,8 @@
-<?xml version="1.0"?>
+<?xml version='1.0' encoding='UTF-8'?>
 <parameters>
   <formatVersion>2</formatVersion>
-  <lastModified revision="165490f4968c699f7e5bb73ef60bcb7e626f51e6"/>
+  <lastModified revision="f88a96423e21da1fe340565b2036399633246e13" time="2026-10-22T05:48:31"/>
+
   <verbosityLevel value="standard"/>
   <componentDarkMatterProfile value="scaleFree"/>
 
@@ -48,14 +49,29 @@
     </nodeOperator>
     <!-- Halo positions -->
     <nodeOperator value="positionDiscrete"/>
+    <!-- Satellite physics -->
+    <nodeOperator value="satelliteOrphanize"/>
+    <!-- CGM physics -->
+    <nodeOperator value="CGMOuterRadiusVirialRadius"/>
+    <nodeOperator value="CGMCoolingHeating">
+      <component value="disk"/>
+    </nodeOperator>
+    <nodeOperator value="CGMAccretion">
+      <allowNegativeCGMMass value="false"/>
+    </nodeOperator>
+    <nodeOperator value="CGMStarvation">
+      <starveOutflowsOnly value="false"/>
+      <fractionBaryonLimitInNodeMerger value="false"/>
+    </nodeOperator>
   </nodeOperator>
-
+  
   <coolingTime value="simple">
     <degreesOfFreedom value="3.0"/>
   </coolingTime>
-  <cosmologicalMassVariance value="filteredPower">
+  <cosmologicalMassVariance value="filteredPower"/>
+  <powerSpectrumNormalizer value="sigma8">
     <sigma_8 value="0.9"/>
-  </cosmologicalMassVariance>
+  </powerSpectrumNormalizer>
   <darkMatterProfileDMO value="isothermal"/>
   <darkMatterProfileScaleRadius value="zero"/>
   <cosmologyParameters value="simple">
@@ -122,6 +138,7 @@
   </mergerTreeMassResolution>
   <hotHaloMassDistribution value="betaProfile"/>
   <mergerTreeEvolver value="standard">
+    <fractionTimestepSatelliteMinimum value="0.75"/>
     <allTreesExistAtFinalTime value="false"/>
     <timestepHostRelative value="0.1"/>
     <timestepHostAbsolute value="1.0"/>

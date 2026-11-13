@@ -1,8 +1,8 @@
-<?xml version="1.0"?>
+<?xml version='1.0' encoding='UTF-8'?>
 <parameters>
   <formatVersion>2</formatVersion>
-  <lastModified revision="165490f4968c699f7e5bb73ef60bcb7e626f51e6"/>
-  
+  <lastModified revision="f88a96423e21da1fe340565b2036399633246e13" time="2026-10-22T05:48:31"/>
+
   <cosmologyParameters value="simple">
     <HubbleConstant value="73.0"/>
     <OmegaMatter value="0.25"/>
@@ -11,9 +11,11 @@
     <temperatureCMB value="2.72548"/>
   </cosmologyParameters>
   
-  <cosmologicalMassVariance value="filteredPower">
+  <cosmologicalMassVariance value="filteredPower"/>
+  
+  <powerSpectrumNormalizer value="sigma8">
     <sigma_8 value="0.9"/>
-  </cosmologicalMassVariance>
+  </powerSpectrumNormalizer>
 
   <mergerTreeConstructor value="read">
     <fileNames value="testSuite/outputs/millenniumTestTreesGLCSingle.hdf5"/>
@@ -28,6 +30,7 @@
   </mergerTreeConstructor>
 
   <mergerTreeEvolver value="standard">
+    <fractionTimestepSatelliteMinimum value="0.75"/>
     <allTreesExistAtFinalTime value="false"/>
   </mergerTreeEvolver>
 
@@ -83,5 +86,21 @@
 	<stabilityThresholdStellar value="1.1"/>
       </galacticDynamicsBarInstability>
     </nodeOperator>
+    <!-- CGM physics -->
+    <nodeOperator value="CGMAccretion">
+      <allowNegativeCGMMass value="true"/>
+      <angularMomentumAlwaysGrows value="false"/>
+    </nodeOperator>
+    <nodeOperator value="CGMOutflowReincorporation">
+      <includeSatellites value="true"/>
+    </nodeOperator>
+    <nodeOperator value="CGMCoolingHeating">
+      <component value="disk"/>
+      <coolingFrom value="currentNode"/>
+      <excessHeatDrivesOutflow value="true"/>
+      <rateMaximumExpulsion value="1.0"/>
+    </nodeOperator>
+    <nodeOperator value="CGMOuterRadiusRamPressureStripping"/>
   </nodeOperator>
-</parameters>
+
+<componentHotHalo value="standard"/></parameters>

@@ -1,8 +1,10 @@
-<?xml version="1.0" encoding="UTF-8"?>
+<?xml version='1.0' encoding='UTF-8'?>
 <!-- Orbiting subhalo model using an NFW profile matched to a simulation from Errani and Navarro (2020) -->
+
 <parameters>
   <formatVersion>2</formatVersion>
-  <lastModified revision="165490f4968c699f7e5bb73ef60bcb7e626f51e6"/>
+  <lastModified revision="f88a96423e21da1fe340565b2036399633246e13" time="2026-10-22T05:48:31"/>
+
 
   <!-- Random number generation -->
   <randomNumberGenerator value="GSL">
@@ -107,7 +109,6 @@
   </virialOrbit>
 
   <!-- Galaxy mergers -->
-  <mergerMassMovements            value="null"/>
   <mergerRemnantSize              value="null"/>
 
   <!-- Values are taken from Yang et al. (2021; https://ui.adsabs.harvard.edu/abs/2020MNRAS.498.3902Y) using results for gamma=2.5

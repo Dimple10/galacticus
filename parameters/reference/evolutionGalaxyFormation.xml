@@ -1,21 +1,14 @@
-<?xml version="1.0" encoding="UTF-8"?>
+<?xml version='1.0' encoding='UTF-8'?>
 <!-- Reference subhalo orbits model -->
+
 <parameters>
-  <lastModified revision="165490f4968c699f7e5bb73ef60bcb7e626f51e6"/>
+  <lastModified revision="f88a96423e21da1fe340565b2036399633246e13" time="2026-10-22T05:48:31"/>
+
   <formatVersion>2</formatVersion>
   
   <!-- Component selection -->
   <componentBasic             value="standard"/>
-  <componentBlackHole         value="standard" >
-    <massSeed                                    value="100.0000"/>
-    <heatsHotHalo                                value="true"    />
-    <efficiencyWind                              value="  0.0024"/>
-    <efficiencyWindScalesWithEfficiencyRadiative value="true"    />
-    <bondiHoyleAccretionEnhancementHotHalo       value="  6.0000"/>
-    <bondiHoyleAccretionEnhancementSpheroid      value="  5.0000"/>
-    <bondiHoyleAccretionTemperatureSpheroid      value="100.0000"/>
-    <bondiHoyleAccretionHotModeOnly              value="true"    />
-  </componentBlackHole>
+  <componentBlackHole         value="standard"/>
   <componentDarkMatterProfile value="scale"   />
   <componentDisk              value="standard" >
     <massDistributionDisk value="exponentialDisk">
@@ -23,10 +16,7 @@
     </massDistributionDisk>
   </componentDisk>
   <componentHotHalo           value="standard" >
-    <fractionLossAngularMomentum value="0.3"  />
     <starveSatellites            value="false"/>
-    <efficiencyStrippingOutflow  value="0.1"  />
-    <trackStrippedGas            value="true" />
   </componentHotHalo>
   <componentPosition          value="null"    />
   <componentSatellite         value="orbiting"/>
@@ -73,7 +63,12 @@
   <hotHaloOutflowReincorporation      value="haloDynamicalTime" >
     <multiplier value="5.0"/>
   </hotHaloOutflowReincorporation>
-
+  <hotHaloOutflowStripping value="standard">
+     <efficiency value="0.1"/>
+  </hotHaloOutflowStripping>
+  <coolingInfallTorque value="fixed">
+     <fractionLossAngularMomentum value="0.3"/>
+  </coolingInfallTorque>
   <coolingFunction value="summation">
     <coolingFunction value="atomicCIECloudy"            />
     <coolingFunction value="CMBCompton"                 />
@@ -99,7 +94,8 @@
   <coolingTimeAvailable value="whiteFrenk1991">
     <ageFactor value="0.0"/>
   </coolingTimeAvailable>
-  
+  <circumgalacticMediumHeating value="AGNFeedback"/>
+
   <!-- Hot halo ram pressure stripping options -->
   <hotHaloRamPressureStripping value="font2008">
     <solverFailureIsFatal value="false"/>
@@ -117,7 +113,6 @@
   <!-- Star formation rate options -->
   <starFormationRateDisks               value="intgrtdSurfaceDensity"/>
   <starFormationRateSurfaceDensityDisks value="blitz2006"             >
-    <useTabulation value="true"/>
   </starFormationRateSurfaceDensityDisks>
   <starFormationRateSpheroids value="timescale">
     <starFormationTimescale value="dynamicalTime">
@@ -139,8 +134,14 @@
   </stellarPopulation>
 
   <!-- AGN feedback options -->
-  <hotHaloExcessHeatDrivesOutflow value="true"/>
-  
+  <blackHoleWind value="ciotti2009">
+    <efficiencyWind                              value="0.0024"/>
+    <efficiencyWindScalesWithEfficiencyRadiative value="true"  />
+  </blackHoleWind>
+  <blackHoleCGMHeating value="jetPower">
+    <efficiencyRadioMode value="1.0"/>
+  </blackHoleCGMHeating>
+
   <!-- Accretion disk properties -->
   <accretionDisks value="switched">
     <accretionRateThinDiskMaximum value="0.30"          />
@@ -157,6 +158,12 @@
   </accretionDisks>
 
   <!-- Black hole options -->
+  <blackHoleAccretionRate value="standard">
+    <bondiHoyleAccretionEnhancementSpheroid value="  5.0"/>
+    <bondiHoyleAccretionEnhancementHotHalo  value="  6.0"/>
+    <bondiHoyleAccretionTemperatureSpheroid value="100.0"/>
+    <bondiHoyleAccretionHotModeOnly         value="true"/>
+  </blackHoleAccretionRate>
   <blackHoleBinaryMerger value="rezzolla2008"/>
 
   <!-- Galaxy merger options -->
@@ -185,6 +192,7 @@
     <nodeOperator value="haloAngularMomentumVitvitska2002">
       <exponentMass                    value="1.92527794238468"/>
       <angularMomentumVarianceSpecific value="0.00100000000000"/>
+      <subresolutionAngularMomentumMethod  value="massScaled"           />
     </nodeOperator>
     <nodeOperator value="haloAngularMomentumInterpolate"/>
     <!-- Subhalo hierarchy -->
@@ -195,16 +203,19 @@
     <nodeOperator value="satelliteOrbit"               />
     <nodeOperator value="satelliteDynamicalFriction"   />
     <nodeOperator value="satelliteTidalMassLoss"       />
-    <nodeOperator value="satelliteTidalHeating"        />
+    <!-- Heating decay efficiency from Du et al. (2024; https://arxiv.org/abs/2403.09597) best fit for NFW subhalos. -->
+    <nodeOperator value="satelliteTidalHeating"         >
+      <efficiencyDecay value="0.274859"/>
+    </nodeOperator>
     <nodeOperator value="satelliteMergingRadiusTrigger" >
       <!-- Subhalos will be removed if they reach 1% of the virial radius of their host halo. -->
       <radiusVirialFraction value="0.01"/>
     </nodeOperator>
     <nodeOperator value="satelliteDestructionMassThreshold">
       <!-- Subhalos will be removed if they fall below the merger tree mass resolution limit. -->
-      <massDestructionAbsolute           value="=[mergerTreeMassResolution::massResolution]"/>
-      <massDestructionMassTreeFraction   value="0.0"                                        />
-      <massDestructionMassInfallFraction value="0.0"                                        />
+      <massDestructionAbsolute           value="=[mergerTreeMassResolution/massResolution]"/>
+      <massDestructionMassTreeFraction   value="0.0"                                       />
+      <massDestructionMassInfallFraction value="0.0"                                       />
     </nodeOperator>
     <!-- CGM -->
     <nodeOperator value="CGMChemistry">
@@ -242,6 +253,30 @@
     <nodeOperator value="nodeFormationTimeMassFraction">
       <fractionMassFormation value="0.5"/>
     </nodeOperator>
+    <!-- Black hole physics -->
+    <nodeOperator value="blackHolesSeed">
+      <blackHoleSeeds value="fixed">
+        <mass value="100"/>
+        <spin value="0"/>
+      </blackHoleSeeds>
+    </nodeOperator>
+    <nodeOperator value="blackHolesAccretion"/>
+    <nodeOperator value="blackHolesWinds"/>
+    <!-- CGM physics -->
+    <nodeOperator value="CGMAccretion">
+      <allowNegativeCGMMass value="true"/>
+      <angularMomentumAlwaysGrows value="false"/>
+    </nodeOperator>
+    <nodeOperator value="CGMOutflowReincorporation">
+      <includeSatellites value="true"/>
+    </nodeOperator>
+    <nodeOperator value="CGMCoolingHeating">
+      <component value="disk"/>
+      <coolingFrom value="currentNode"/>
+      <excessHeatDrivesOutflow value="true"/>
+      <rateMaximumExpulsion value="1.0"/>
+    </nodeOperator>
+    <nodeOperator value="CGMOuterRadiusRamPressureStripping"/>
   </nodeOperator>
 
   <!-- Merger tree evolution -->

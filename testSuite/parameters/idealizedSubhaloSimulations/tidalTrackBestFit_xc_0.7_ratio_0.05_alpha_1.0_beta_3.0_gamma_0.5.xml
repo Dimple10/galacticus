@@ -1,8 +1,10 @@
-<?xml version="1.0" encoding="UTF-8"?>
+<?xml version='1.0' encoding='UTF-8'?>
 <!-- Orbiting subhalo model described in Du et al. (2024) -->
+
 <parameters>
   <formatVersion>2</formatVersion>
-  <lastModified revision="165490f4968c699f7e5bb73ef60bcb7e626f51e6"/>
+  <lastModified revision="f88a96423e21da1fe340565b2036399633246e13" time="2026-10-22T05:48:31"/>
+
 
   <!-- Random number generation -->
   <randomNumberGenerator value="GSL">
@@ -101,7 +103,6 @@
   </virialOrbit>
 
   <!-- Galaxy mergers -->
-  <mergerMassMovements value="null"/>
   <mergerRemnantSize   value="null"/>
 
   <!-- Orbiting model of satellites -->
@@ -177,16 +178,14 @@
     <mergerTreeOutputter value="standard"/>
   </mergerTreeOutputter>
   <outputTimes value="list">
-    <times>
-      <value>
+    <times value="
          1.0
          4.129548998537654
          7.259097997075307
          10.288864273920456
          13.41841327245811
          16.44817954930326
-      </value>
-    </times>
+	 "/>
   </outputTimes>
 
   <relativeModelUncertainty value="0.138774"/>

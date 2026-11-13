@@ -1,5 +1,9 @@
-<?xml version="1.0"?>
+<?xml version='1.0' encoding='UTF-8'?>
 <parameters formatVersion="2" version="0.9.4">
+  <formatVersion>2</formatVersion>
+  <lastModified revision="f88a96423e21da1fe340565b2036399633246e13" time="2026-10-22T05:48:31"/>
+
+  <lastModified/>
 
   <!-- Logging -->
   <verbosityLevel value="standard"/>
@@ -35,9 +39,10 @@
     <neutrinoNumberEffective value="3.046"/>
   </transferFunction>
   <powerSpectrumPrimordialTransferred value="simple"/>
-  <cosmologicalMassVariance value="filteredPower">
+  <powerSpectrumNormalizer value="sigma8">
     <sigma_8 value="0.9"/>
-  </cosmologicalMassVariance>
+  </powerSpectrumNormalizer>
+  <cosmologicalMassVariance value="filteredPower"/>
 
   <!-- Structure formation -->
   <haloEnvironment value="normal">
@@ -53,9 +58,7 @@
       <normalization value="0.31033528914211"/>
       <p value="0.125711028294346"/>
       <cosmologicalMassVariance value="peakBackgroundSplit">
-        <cosmologicalMassVariance value="filteredPower">
-          <sigma_8 value="0.9"/>
-        </cosmologicalMassVariance>
+        <cosmologicalMassVariance value="filteredPower"/>
       </cosmologicalMassVariance>
       <criticalOverdensity value="peakBackgroundSplit">
         <criticalOverdensity value="sphericalCollapseClsnlssMttrCsmlgclCnstnt"/>
@@ -70,7 +73,6 @@
 
   <!-- Dark matter halo structure -->
   <darkMatterProfileDMO value="NFW"/>
-  <darkMatterProfileMaximumConcentration value="100.0"/>
   <darkMatterProfileScaleRadius value="concentrationLimiter">
     <concentrationMinimum value="  4.0"/>
     <concentrationMaximum value="100.0"/>
@@ -217,7 +219,6 @@
     <correlationRedshiftExponent value="0.000e0"/>
     <massParticle value="1.178e9"/>
   </nbodyHaloMassError>
-  <nodeMajorMergerFraction value="0.206728116479416"/>
 
   <nodeOperator value="multi">
     <!-- Cosmological epoch -->
@@ -232,6 +233,7 @@
     <nodeOperator value="satelliteMassLoss"   />
     <!-- Halo angular momentum -->
     <nodeOperator value="haloAngularMomentumVitvitska2002"  >
+      <subresolutionAngularMomentumMethod value="original"/>
       <exponentMass value="1.274460218346487"/>
     </nodeOperator>
     <nodeOperator value="haloAngularMomentumInterpolate"/>
@@ -239,6 +241,8 @@
     <nodeOperator value="starFormationDisks"/>
     <nodeOperator value="starFormationSpheroids"/>
     <!-- Analyses -->
-    <nodeOperator value="nodeMajorMergerTime"/>
+    <nodeOperator value="nodeMajorMergerTime">
+      <fractionMassMajorMerger value="0.206728116479416"/>
+    </nodeOperator>
   </nodeOperator>
 </parameters>

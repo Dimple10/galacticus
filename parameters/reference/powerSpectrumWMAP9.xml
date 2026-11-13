@@ -1,0 +1,37 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<!-- Power spectrum parameters from the WMAP 9-year data                                         -->
+
+<!-- Hinshaw et al. (2013; ApJS; 208; 19; https://ui.adsabs.harvard.edu/abs/2013ApJS..208...19H) -->
+
+<parameters>
+  <formatVersion>2</formatVersion>
+  <lastModified revision="f88a96423e21da1fe340565b2036399633246e13" time="2026-10-22T05:48:31"/>
+
+  
+  <!-- Power spectrum options -->
+  <cosmologicalMassVariance value="filteredPower"> <!-- Hinshaw et al. (2013; ApJS; 208; 19; https://ui.adsabs.harvard.edu/abs/2013ApJS..208...19H) -->
+    <tolerance                         value="3.0e-4"/>
+    <toleranceTopHat                   value="3.0e-4"/>
+    <nonMonotonicIsFatal               value="false" />
+    <monotonicInterpolation            value="true"  />
+    <powerSpectrumWindowFunction value="topHat"/>
+  </cosmologicalMassVariance>
+  <transferFunction                   value="CAMB"     >
+    <redshift value="100.0"/>
+    <!-- Specify a CDM particle explicitly here to allow this power spectrum to be used for models with non-CDM late-time physics. -->
+    <xi:include xmlns:xi="http://www.w3.org/2001/XInclude" href="darkMatterParticleCDM.xml" xpointer="xpointer(parameters/*)" />
+    <!-- Include cosmological model explicitly here so that baryons are included in the transfer function even for dark matter-only models. -->
+    <xi:include xmlns:xi="http://www.w3.org/2001/XInclude" href="cosmologyWMAP9.xml" xpointer="xpointer(parameters/*)" />
+  </transferFunction>
+  <powerSpectrumPrimordial            value="powerLaw" >
+    <index               value="0.9608"/> <!-- Hinshaw et al. (2013; ApJS; 208; 19; https://ui.adsabs.harvard.edu/abs/2013ApJS..208...19H) -->
+    <wavenumberReference value="1.0000"/>
+    <running             value="0.0000"/>
+  </powerSpectrumPrimordial>
+  <powerSpectrumPrimordialTransferred value="simple"  />
+  <powerSpectrumNormalizer value="sigma8">
+    <sigma_8 value="0.82"/>
+    <tolerance value="3.0e-4"/>
+  </powerSpectrumNormalizer>
+
+</parameters>

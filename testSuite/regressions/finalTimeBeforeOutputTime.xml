@@ -1,9 +1,12 @@
-<?xml version="1.0"?>
+<?xml version='1.0' encoding='UTF-8'?>
 <!-- Test case for tree with the final node existing prior to the requested output time -->
+
 <!-- Should not result in a deadlock.                                                   -->
+
 <parameters>
   <formatVersion>2</formatVersion>
-  <lastModified revision="165490f4968c699f7e5bb73ef60bcb7e626f51e6"/>
+  <lastModified revision="f88a96423e21da1fe340565b2036399633246e13" time="2026-10-22T05:48:31"/>
+
   <componentDarkMatterProfile value="scaleFree"/>
   <satelliteMergingTimescales value="jiang2008">
     <timescaleMultiplier value="1.0"/>
@@ -45,15 +48,28 @@
         <exponent value="3.5"/>
       </stellarFeedbackOutflows>
     </nodeOperator>
+    <!-- CGM physics -->
+    <nodeOperator value="CGMOuterRadiusVirialRadius"/>
+    <nodeOperator value="CGMCoolingHeating">
+      <component value="disk"/>
+    </nodeOperator>
+    <nodeOperator value="CGMAccretion">
+      <allowNegativeCGMMass value="false"/>
+    </nodeOperator>
+    <nodeOperator value="CGMStarvation">
+      <starveOutflowsOnly value="false"/>
+      <fractionBaryonLimitInNodeMerger value="false"/>
+    </nodeOperator>
   </nodeOperator>
 
   <coolingTime value="simple">
     <degreesOfFreedom value="3.0"/>
   </coolingTime>
   <componentSatellite value="mergeTime"/>
-  <cosmologicalMassVariance value="filteredPower">
+  <cosmologicalMassVariance value="filteredPower"/>
+  <powerSpectrumNormalizer value="sigma8">
     <sigma_8 value="0.9"/>
-  </cosmologicalMassVariance>
+  </powerSpectrumNormalizer>
   <mergerTreeBuildMassDistribution value="uniform"/>
   <darkMatterProfileDMO value="isothermal"/>
   <darkMatterProfileScaleRadius value="zero"/>
@@ -128,6 +144,7 @@
     <starveSatellites value="true"/>
   </componentHotHalo>
   <mergerTreeEvolver value="standard">
+    <fractionTimestepSatelliteMinimum value="0.75"/>
     <timestepHostRelative value="0.1"/>
     <allTreesExistAtFinalTime value="false"/>
     <timestepHostAbsolute value="1.0"/>

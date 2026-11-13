@@ -1,15 +1,17 @@
-<?xml version="1.0" encoding="UTF-8"?>
+<?xml version='1.0' encoding='UTF-8'?>
 <!-- Galacticus model constrained to match baryonic physics data                        -->
+
 <!-- See https://github.com/galacticusorg/galacticus/wiki/Constraints:-Baryonic-Physics -->
+
 <!-- 30-November-2020                                                                   -->
+
 <parameters>
   <formatVersion>2</formatVersion>
-  <lastModified revision="165490f4968c699f7e5bb73ef60bcb7e626f51e6"/>
+  <lastModified revision="f88a96423e21da1fe340565b2036399633246e13" time="2026-10-22T05:48:31"/>
+
 
   <!-- Task and work control -->
-  <task value="evolveForests">
-    <walltimeMaximum value="7200"/>
-  </task>
+  <task value="evolveForests"/>
   <evolveForestsWorkShare value="cyclic"/>
 
   <!-- Output file -->
@@ -18,13 +20,8 @@
   <!-- Component selection -->
   <componentBasic value="standard"/>
   <componentBlackHole value="simple">
-    <massSeed value="100.0"/>
-    <growthRatioToStellarSpheroid value="1.36151389582815"/>
-    <heatsHotHalo value="true"/>
     <efficiency value="0.00361121531459326"/>
     <fractionJet value="0.0436415271218433"/>
-    <efficiencyHeating value="0.000157598951094638"/>
-    <efficiencyWind value="0.00345361636349862"/>
   </componentBlackHole>
   <componentDarkMatterProfile value="scale"/>
   <componentDisk value="standard">
@@ -35,10 +32,7 @@
     </massDistributionDisk>
   </componentDisk>
   <componentHotHalo value="standard">
-    <fractionLossAngularMomentum value="0.95"/>
     <starveSatellites value="true"/>
-    <efficiencyStrippingOutflow value="0.1"/>
-    <trackStrippedGas value="false"/>
   </componentHotHalo>
   <componentPosition value="cartesian"/>
   <componentSatellite value="standard"/>
@@ -64,8 +58,7 @@
   </cosmologyParameters>
 
   <!-- Power spectrum options -->
-  <cosmologicalMassVariance value="filteredPower">
-    <sigma_8 value="0.8111"/> 	                      <!-- Planck 2018; arXiv:1807.06211 -->
+  <cosmologicalMassVariance value="filteredPower"> 	                      <!-- Planck 2018; arXiv:1807.06211 -->
   </cosmologicalMassVariance>
   <transferFunction value="eisensteinHu1999">
     <neutrinoNumberEffective value="3.046"/>
@@ -77,6 +70,9 @@
     <running value="0.0000"/>  	                      <!-- Planck 2018; arXiv:1807.06211 -->
   </powerSpectrumPrimordial>
   <powerSpectrumPrimordialTransferred value="simple"/>
+  <powerSpectrumNormalizer value="sigma8">
+    <sigma_8 value="0.8111"/>
+  </powerSpectrumNormalizer>
 
   <!-- Structure formation options -->
   <linearGrowth value="collisionlessMatter"/>
@@ -148,6 +144,10 @@
   <hotHaloOutflowReincorporation value="haloDynamicalTime">
     <multiplier value="8.24493150309934"/>
   </hotHaloOutflowReincorporation>
+  <hotHaloOutflowStripping value="zero"/>
+  <coolingInfallTorque value="fixed">
+    <fractionLossAngularMomentum value="0.95"/>
+  </coolingInfallTorque>
   <coolingFunction value="atomicCIECloudy"/>
   <coolingRadius value="simple"/>
   <coolingRate value="multiplier">
@@ -196,9 +196,18 @@
   <recycledFraction value="0.111679665936988"/> <!-- Used to allow setting of recycled fraction and stellar mass systematics as derived parameters -->
 
   <!-- AGN feedback options -->
-  <hotHaloExcessHeatDrivesOutflow value="true"/>
+  <blackHoleWind value="simple">
+    <efficiencyWind value="0.00345361636349862"/>
+  </blackHoleWind>
+  <blackHoleCGMHeating value="quasistatic">
+    <efficiencyHeating value="0.000157598951094638"/>
+  </blackHoleCGMHeating>
+  
   <!-- Black hole options -->
   <blackHoleBinaryMerger value="rezzolla2008"/>
+  <blackHoleAccretionRate value="spheroidTracking">
+    <growthRatioToStellarSpheroid value="1.36151389582815"/>
+  </blackHoleAccretionRate>
 
   <!-- Galaxy merger options -->
   <virialOrbit value="li2020"/>
@@ -247,6 +256,10 @@
       </stellarFeedbackOutflows>
     </nodeOperator>
     <nodeOperator value="barInstability">
+      <!-- Stellar luminosities are solved as inactive properties (see the disk/spheroid components, and the star   -->
+      <!-- formation operators above), so bar instability must be told this too - otherwise it reads the (inactive, -->
+      <!-- and therefore stale during active property evolution) stellar luminosities. See issue #128.             -->
+      <luminositiesStellarInactive value="true"/>
       <galacticDynamicsBarInstability value="efstathiou1982">
 	<stabilityThresholdGaseous value="0.751314746070123"/>
 	<stabilityThresholdStellar value="0.757125972218825"/>
@@ -270,6 +283,31 @@
     <nodeOperator value="satelliteMassLoss"/>
     <!-- Positions for subhalos -->
     <nodeOperator value="positionTraceDarkMatter"/>
+    <nodeOperator value="blackHolesSeed">
+      <blackHoleSeeds value="fixed">
+        <mass value="100"/>
+        <spin value="0"/>
+      </blackHoleSeeds>
+    </nodeOperator>
+    <!-- CGM physics -->
+    <nodeOperator value="CGMAccretion">
+      <allowNegativeCGMMass value="true"/>
+      <angularMomentumAlwaysGrows value="false"/>
+    </nodeOperator>
+    <nodeOperator value="CGMStarvation">
+      <starveOutflowsOnly value="false"/>
+      <fractionBaryonLimitInNodeMerger value="false"/>
+    </nodeOperator>
+    <nodeOperator value="CGMOutflowReincorporation">
+      <includeSatellites value="false"/>
+    </nodeOperator>
+    <nodeOperator value="CGMCoolingHeating">
+      <component value="disk"/>
+      <coolingFrom value="currentNode"/>
+      <excessHeatDrivesOutflow value="true"/>
+      <rateMaximumExpulsion value="1.0"/>
+    </nodeOperator>
+    <nodeOperator value="CGMOuterRadiusRamPressureStripping"/>
   </nodeOperator>
   
   <!-- Numerical tolerances -->
@@ -310,7 +348,7 @@
   <outputAnalysis value="multi">
 
     <!-- Stellar mass functions -->
-    <outputAnalysis value="massFunctionStellarBaldry2012GAMA"> <!-- Analysis #0 -->
+    <outputAnalysis value="massFunctionStellarBaldry2012GAMA"> <!-- Analysis #1 -->
       <!-- z~0 GAMA -->
       <randomErrorMinimum value="0.20"/>
       <randomErrorMaximum value="0.20"/>
@@ -326,7 +364,7 @@
 	<scatter value="0.926814651398173"/>
       </massFunctionIncompleteness>
     </outputAnalysis>
-    <outputAnalysis value="massFunctionStellarULTRAVISTA"> <!-- Analysis #1 -->
+    <outputAnalysis value="massFunctionStellarULTRAVISTA"> <!-- Analysis #2 -->
     <!-- z=2.5-3.0 ULTRAVISTA -->
       <redshiftInterval value="5"/>
       <randomErrorMinimum value="0.20"/>
@@ -337,22 +375,22 @@
     </outputAnalysis>
 
     <!-- Stellar-halo mass relations -->
-    <outputAnalysis value="stellarVsHaloMassRelationLeauthaud2012"> <!-- Analysis #2 -->
+    <outputAnalysis value="stellarVsHaloMassRelationLeauthaud2012"> <!-- Analysis #3 -->
       <redshiftInterval value="1"/>
       <computeScatter value="false"/>
       <systematicErrorPolynomialCoefficient value="0.0582454381888318 -0.058115287792454"/>
     </outputAnalysis>
-    <outputAnalysis value="stellarVsHaloMassRelationLeauthaud2012"> <!-- Analysis #3 -->
+    <outputAnalysis value="stellarVsHaloMassRelationLeauthaud2012"> <!-- Analysis #4 -->
       <redshiftInterval value="1"/>
       <computeScatter value="true"/>
       <systematicErrorPolynomialCoefficient value="0.0582454381888318 -0.058115287792454"/>
     </outputAnalysis>
-    <outputAnalysis value="stellarVsHaloMassRelationLeauthaud2012"> <!-- Analysis #4 -->
+    <outputAnalysis value="stellarVsHaloMassRelationLeauthaud2012"> <!-- Analysis #5 -->
       <redshiftInterval value="3"/>
       <computeScatter value="false"/>
       <systematicErrorPolynomialCoefficient value="0.0582454381888318 -0.058115287792454"/>
     </outputAnalysis>
-    <outputAnalysis value="stellarVsHaloMassRelationLeauthaud2012"> <!-- Analysis #5 -->
+    <outputAnalysis value="stellarVsHaloMassRelationLeauthaud2012"> <!-- Analysis #6 -->
       <redshiftInterval value="3"/>
       <computeScatter value="true"/>
       <systematicErrorPolynomialCoefficient value="0.0582454381888318 -0.058115287792454"/>
@@ -362,39 +400,39 @@
     <!-- <outputAnalysis value="HIVsHaloMassRelationPadmanabhan2017"    > -->
     <!--   <systematicErrorPolynomialCoefficient            value="0.0 0.0"         /> -->
     <!-- </outputAnalysis> -->
-    <outputAnalysis value="massFunctionHIALFALFAMartin2010"> <!-- Analysis #6 -->
+    <outputAnalysis value="massFunctionHIALFALFAMartin2010"> <!-- Analysis #7 -->
       <systematicErrorPolynomialCoefficient value="-0.126745570595433 0.00149220388187935"/>
       <outputAnalysisDistributionOperator value="randomErrorALFLF"/>
       <outputAnalysisMolecularRatio value="obreschkow2009"/>
     </outputAnalysis>
 
     <!-- Morphology -->
-    <outputAnalysis value="morphologicalFractionGAMAMoffett2016"> <!-- Analysis #7 -->
+    <outputAnalysis value="morphologicalFractionGAMAMoffett2016"> <!-- Analysis #8 -->
       <ratioEarlyType value="0.719247501103713"/>
       <ratioEarlyTypeError value="0.236806923974236"/>
       <systematicErrorPolynomialCoefficient value="-0.155872721559837 0.0077688225143428"/>
     </outputAnalysis>
 
     <!-- Galaxy sizes -->
-    <outputAnalysis value="galaxySizesSDSS"> <!-- Analysis #8 -->
+    <outputAnalysis value="galaxySizesSDSS"> <!-- Analysis #9 -->
       <distributionNumber value="10"/>
       <massStellarRatio value="0.719247501103713"/>
     </outputAnalysis>
-    <outputAnalysis value="galaxySizesSDSS"> <!-- Analysis #9 -->
+    <outputAnalysis value="galaxySizesSDSS"> <!-- Analysis #10 -->
       <distributionNumber value="15"/>
       <massStellarRatio value="0.719247501103713"/>
     </outputAnalysis>
-    <outputAnalysis value="galaxySizesSDSS"> <!-- Analysis #10 -->
+    <outputAnalysis value="galaxySizesSDSS"> <!-- Analysis #11 -->
       <distributionNumber value="24"/>
       <massStellarRatio value="0.719247501103713"/>
     </outputAnalysis>
-    <outputAnalysis value="galaxySizesSDSS"> <!-- Analysis #11 -->
+    <outputAnalysis value="galaxySizesSDSS"> <!-- Analysis #12 -->
       <distributionNumber value="29"/>
       <massStellarRatio value="0.719247501103713"/>
     </outputAnalysis>
 
     <!-- Broad-band luminosity functions -->
-    <outputAnalysis value="luminosityFunctionMonteroDorta2009SDSS"> <!-- Analysis #12 -->
+    <outputAnalysis value="luminosityFunctionMonteroDorta2009SDSS"> <!-- Analysis #13 -->
       <band value="g"/>
       <randomErrorMinimum value="0.013"/>
       <randomErrorMaximum value="0.013"/>
@@ -402,7 +440,7 @@
       <systematicErrorPolynomialCoefficient value="0.0021761064660743 0.00711985285823365"/>
       <sizeSourceLensing value="2.0e-3"/>
     </outputAnalysis>
-    <outputAnalysis value="luminosityFunctionMonteroDorta2009SDSS"> <!-- Analysis #13 -->
+    <outputAnalysis value="luminosityFunctionMonteroDorta2009SDSS"> <!-- Analysis #14 -->
       <band value="r"/>
       <randomErrorMinimum value="0.010"/>
       <randomErrorMaximum value="0.010"/>
@@ -412,26 +450,24 @@
     </outputAnalysis>
 
     <!-- Emission line luminosity functions -->
-    <outputAnalysis value="luminosityFunctionGunawardhana2013SDSS"> <!-- Analysis #14 -->
+    <outputAnalysis value="luminosityFunctionGunawardhana2013SDSS"> <!-- Analysis #15 -->
       <randomErrorMinimum value="+0.1"/>
       <randomErrorMaximum value="+0.1"/>
       <randomErrorPolynomialCoefficient value="+0.1"/>
       <systematicErrorPolynomialCoefficient value="-0.00668698203006482 -0.00098878419875252"/>
       <sizeSourceLensing value="2.0e-3"/>
-      <depthOpticalISMCoefficient value="0.0"/>
     </outputAnalysis>
-    <outputAnalysis value="luminosityFunctionSobral2013HiZELS"> <!-- Analysis #15 -->
+    <outputAnalysis value="luminosityFunctionSobral2013HiZELS"> <!-- Analysis #16 -->
       <redshiftInterval value="4"/>
       <randomErrorMinimum value="+0.1"/>
       <randomErrorMaximum value="+0.1"/>
       <randomErrorPolynomialCoefficient value="+0.1"/>
       <systematicErrorPolynomialCoefficient value="-0.00668698203006482 -0.00098878419875252"/>
       <sizeSourceLensing value="2.0e-3"/>
-      <depthOpticalISMCoefficient value="0.0"/>
     </outputAnalysis>
 
     <!-- Mass-metallicity relations -->
-    <outputAnalysis value="massMetallicityBlanc2019"> <!-- Analysis #16 -->
+    <outputAnalysis value="massMetallicityBlanc2019"> <!-- Analysis #17 -->
       <fractionGasThreshold value="0.10"/>
       <systematicErrorPolynomialCoefficient value="0.0582454381888318 -0.058115287792454"/>
       <metallicitySystematicErrorPolynomialCoefficient value="-0.0432432683189376"/>
@@ -440,43 +476,75 @@
     </outputAnalysis>
 
     <!-- Black hole-bulge relation -->
-    <outputAnalysis value="blackHoleBulgeRelation"> <!-- Analysis #17 -->
+    <outputAnalysis value="blackHoleBulgeRelation"> <!-- Analysis #18 -->
       <randomErrorMinimum value="+0.090"/>
       <randomErrorMaximum value="+0.090"/>
       <randomErrorPolynomialCoefficient value="+0.000"/>
       <systematicErrorPolynomialCoefficient value="-0.000290999740052957 0.001719822220954"/>
     </outputAnalysis>
 
-    <!-- Local Group stellar mass function -->
-    <outputAnalysis value="localGroupStellarMassFunction"/> <!-- Analysis #18 -->
-
   </outputAnalysis>
 
-  <!-- Systematics nuisance parameters -->
-  <sdssStellarMassSystematics0 value="0.0582454381888318"/>
-  <sdssStellarMassSystematics1 value="-0.058115287792454"/>
-  <gamaStellarMassSystematics0 value="-0.155872721559837"/>
-  <gamaStellarMassSystematics1 value="0.0077688225143428"/>
-  <ultravistaStellarMassSystematics0 value="-0.251426271063426"/>
-  <ultravistaStellarMassSystematics1 value="-0.0124830824977516"/>
-  <alfalfaMassSystematics0 value="-0.126745570595433"/>
-  <alfalfaMassSystematics1 value="0.00149220388187935"/>
-  <sdssMagnitudeSystematics0 value="0.0021761064660743"/>
-  <sdssMagnitudeSystematics1 value="0.00711985285823365"/>
-  <emissionLineLuminositySystematics0 value="-0.00668698203006482"/>
-  <emissionLineLuminositySystematics1 value="-0.00098878419875252"/>
+  <!-- Systematics nuisance parameters. These are only a record of the fitted values: no class reads them. The values are
+       applied through the systematicErrorPolynomialCoefficient parameters of the analyses above (with a fixed offset in some
+       cases, such as the IMF shift applied to ULTRAVISTA). -->
+  <sdssStellarMassSystematics0 value="0.0582454381888318" ignoreWarnings="true"/>
+  <sdssStellarMassSystematics1 value="-0.058115287792454" ignoreWarnings="true"/>
+  <gamaStellarMassSystematics0 value="-0.155872721559837" ignoreWarnings="true"/>
+  <gamaStellarMassSystematics1 value="0.0077688225143428" ignoreWarnings="true"/>
+  <ultravistaStellarMassSystematics0 value="-0.251426271063426" ignoreWarnings="true"/>
+  <ultravistaStellarMassSystematics1 value="-0.0124830824977516" ignoreWarnings="true"/>
+  <alfalfaMassSystematics0 value="-0.126745570595433" ignoreWarnings="true"/>
+  <alfalfaMassSystematics1 value="0.00149220388187935" ignoreWarnings="true"/>
+  <sdssMagnitudeSystematics0 value="0.0021761064660743" ignoreWarnings="true"/>
+  <sdssMagnitudeSystematics1 value="0.00711985285823365" ignoreWarnings="true"/>
+  <emissionLineLuminositySystematics0 value="-0.00668698203006482" ignoreWarnings="true"/>
+  <emissionLineLuminositySystematics1 value="-0.00098878419875252" ignoreWarnings="true"/>
   <ratioEarlyType value="0.719247501103713"/>
 
+  <!-- Emission line calculations. The Halpha luminosity function analyses compute line luminosities by convolving
+       the star formation history with tabulated Cloudy models of HII regions, so a star formation history must be
+       stored, and must resolve the young, ionizing populations in time and in metallicity. These are the calibrated
+       choices of `parameters/reference/emissionLines.xml`; the metallicity boundaries match those of the tabulation
+       used. -->
+  <starFormationHistory value="adaptive">
+    <timeStepMinimum       value="1.25893e-4"/>
+    <countTimeStepsMaximum value="200"       />
+    <metallicityBoundaries value="
+				  0.00531914893617 0.010638297872340 0.021276595744680 0.067282503407837
+				  0.21276595744680 0.300896502632573 0.425531914893617 0.490000000000000
+				  0.58000000000000 0.672825034078379 0.750000000000000 0.900000000000000
+				  1.06382978723404 1.200000000000000 1.350000000000000 1.500000000000000
+				  1.68206258519595 1.950000000000000 2.200000000000000 2.450000000000000
+				  2.65957446808511
+				  "/>
+  </starFormationHistory>
+  <hiiRegionEscapeFraction value="fixed">
+    <escapeFraction value="0.10"/>
+    <ageLimit       value="0.01"/>
+  </hiiRegionEscapeFraction>
+  <hiiRegionMassFunction value="rosolowsky2021">
+    <exponent    value="-1.8e0"/>
+    <massMinimum value="+1.0e4"/>
+    <massMaximum value="+1.0e8"/>
+  </hiiRegionMassFunction>
+  <hiiRegionDensityDistribution value="logNormal">
+    <densityHydrogenReference value="3.0e2"/>
+    <densityHydrogenMinimum   value="1.0e1"/>
+    <densityHydrogenMaximum   value="4.0e2"/>
+    <sigma                    value="1.8e0"/>
+  </hiiRegionDensityDistribution>
+
   <!-- Luminosity calculations -->
-  <luminosityFilter value="         SDSS_g   SDSS_g   SDSS_g   SDSS_g   SDSS_g   SDSS_g   SDSS_g   SDSS_g   SDSS_g   SDSS_g   SDSS_g         SDSS_r   SDSS_r   SDSS_r   SDSS_r   SDSS_r   SDSS_r   SDSS_r   SDSS_r   SDSS_r   SDSS_r   SDSS_r         SDSS_g   SDSS_g   SDSS_g   SDSS_g   SDSS_g   SDSS_g   SDSS_g   SDSS_g   SDSS_g   SDSS_g   SDSS_g         SDSS_r   SDSS_r   SDSS_r   SDSS_r   SDSS_r   SDSS_r   SDSS_r   SDSS_r   SDSS_r   SDSS_r   SDSS_r         Lyc             Lyc             Lyc             Lyc             Lyc              Lyc             Lyc             Lyc         HeliumContinuum HeliumContinuum HeliumContinuum HeliumContinuum HeliumContinuum  HeliumContinuum HeliumContinuum HeliumContinuum         OxygenContinuum OxygenContinuum OxygenContinuum OxygenContinuum OxygenContinuum  OxygenContinuum OxygenContinuum OxygenContinuum         "/>
+  <luminosityFilter value="SDSS_g   SDSS_g   SDSS_g   SDSS_g   SDSS_g   SDSS_g   SDSS_g   SDSS_g   SDSS_g   SDSS_g   SDSS_g   SDSS_r   SDSS_r   SDSS_r   SDSS_r   SDSS_r   SDSS_r   SDSS_r   SDSS_r   SDSS_r   SDSS_r   SDSS_r   SDSS_g   SDSS_g   SDSS_g   SDSS_g   SDSS_g   SDSS_g   SDSS_g   SDSS_g   SDSS_g   SDSS_g   SDSS_g   SDSS_r   SDSS_r   SDSS_r   SDSS_r   SDSS_r   SDSS_r   SDSS_r   SDSS_r   SDSS_r   SDSS_r   SDSS_r   Buser_V"/>
   
-  <luminosityType value="         observed observed observed observed observed observed observed observed observed observed observed         observed observed observed observed observed observed observed observed observed observed observed         observed observed observed observed observed observed observed observed observed observed observed         observed observed observed observed observed observed observed observed observed observed observed         rest     rest     rest     rest     rest     rest     rest     rest         rest     rest     rest     rest     rest     rest     rest     rest         rest     rest     rest     rest     rest     rest     rest     rest         "/>
+  <luminosityType value="observed observed observed observed observed observed observed observed observed observed observed observed observed observed observed observed observed observed observed observed observed observed observed observed observed observed observed observed observed observed observed observed observed observed observed observed observed observed observed observed observed observed observed observed rest   "/>
   
-  <luminosityRedshift value="         0.02     0.04     0.06     0.08     0.10     0.12     0.14     0.16     0.18     0.20     0.24         0.02     0.04     0.06     0.08     0.10     0.12     0.14     0.16     0.18     0.20     0.24         0.02     0.04     0.06     0.08     0.10     0.12     0.14     0.16     0.18     0.20     0.24         0.02     0.04     0.06     0.08     0.10     0.12     0.14     0.16     0.18     0.20     0.24         0.02     0.04     0.06     0.08     0.10     0.40     0.86     2.20         0.02     0.04     0.06     0.08     0.10     0.40     0.86     2.20         0.02     0.04     0.06     0.08     0.10     0.40     0.86     2.20         "/>
+  <luminosityRedshift value="0.02     0.04     0.06     0.08     0.10     0.12     0.14     0.16     0.18     0.20     0.24     0.02     0.04     0.06     0.08     0.10     0.12     0.14     0.16     0.18     0.20     0.24     0.02     0.04     0.06     0.08     0.10     0.12     0.14     0.16     0.18     0.20     0.24     0.02     0.04     0.06     0.08     0.10     0.12     0.14     0.16     0.18     0.20     0.24     0.00   "/>
 
   
-  <luminosityBandRedshift value="         0.10     0.10     0.10     0.10     0.10     0.10     0.10     0.10     0.10     0.10     0.10         0.10     0.10     0.10     0.10     0.10     0.10     0.10     0.10     0.10     0.10     0.10         0.10     0.10     0.10     0.10     0.10     0.10     0.10     0.10     0.10     0.10     0.10         0.10     0.10     0.10     0.10     0.10     0.10     0.10     0.10     0.10     0.10     0.10         0.02     0.04     0.06     0.08     0.10     0.40     0.86     2.20         0.02     0.04     0.06     0.08     0.10     0.40     0.86     2.20         0.02     0.04     0.06     0.08     0.10     0.40     0.86     2.20         "/>
-  <luminosityPostprocessSet value="         default  default  default  default  default  default  default  default  default  default  default         default  default  default  default  default  default  default  default  default  default  default         recent   recent   recent   recent   recent   recent   recent   recent   recent   recent   recent         recent   recent   recent   recent   recent   recent   recent   recent   recent   recent   recent         default  default  default  default  default  default  default  default         default  default  default  default  default  default  default  default         default  default  default  default  default  default  default  default         "/>
+  <luminosityBandRedshift value="0.10     0.10     0.10     0.10     0.10     0.10     0.10     0.10     0.10     0.10     0.10     0.10     0.10     0.10     0.10     0.10     0.10     0.10     0.10     0.10     0.10     0.10     0.10     0.10     0.10     0.10     0.10     0.10     0.10     0.10     0.10     0.10     0.10     0.10     0.10     0.10     0.10     0.10     0.10     0.10     0.10     0.10     0.10     0.10     0.00   "/>
+  <luminosityPostprocessSet value="default  default  default  default  default  default  default  default  default  default  default  default  default  default  default  default  default  default  default  default  default  default  recent   recent   recent   recent   recent   recent   recent   recent   recent   recent   recent   recent   recent   recent   recent   recent   recent   recent   recent   recent   recent   recent   default"/>
   <stellarPopulationSpectraPostprocessorBuilder value="lookup">
     <names value="default recent"/>
     <stellarPopulationSpectraPostprocessor value="inoue2014"/>
@@ -488,6 +556,5 @@
       </stellarPopulationSpectraPostprocessor>
     </stellarPopulationSpectraPostprocessor>
   </stellarPopulationSpectraPostprocessorBuilder>
-  <stellarSpectraDustAttenuation value="charlotFall2000"/>
 
 </parameters>

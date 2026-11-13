@@ -1,15 +1,21 @@
-<?xml version="1.0" encoding="UTF-8"?>
+<?xml version='1.0' encoding='UTF-8'?>
 <!-- Reference subhalo orbits model -->
+
 <parameters>
   <formatVersion>2</formatVersion>
-  <lastModified revision="165490f4968c699f7e5bb73ef60bcb7e626f51e6"/>
+  <lastModified revision="f88a96423e21da1fe340565b2036399633246e13" time="2026-10-22T05:48:31"/>
+
 
   <!-- Merger tree building options --> 
+  <mergerTreeSeeds value="random">
+    <!-- Assign random number seeds to trees randomly. This ensures that any change in the global random number generator seed
+         will produce an completely independent set of trees. -->
+  </mergerTreeSeeds>
   <mergerTreeConstructor value="filter">
     <!-- Use a 'filter' constructor here. It will default to an 'always' filter (making it inactive), but this allows models to
          impose a filter if they wish to do so. -->
     <mergerTreeConstructor value="build">
-      <redshiftBase value="0.0"/>
+      <redshiftBase value="=[mergerTreeRedshiftBase|0.0]"/>
     </mergerTreeConstructor>
   </mergerTreeConstructor>
   <mergerTreeBuilder     value="cole2000">

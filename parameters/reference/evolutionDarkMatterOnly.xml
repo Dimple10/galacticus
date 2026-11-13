@@ -1,8 +1,10 @@
-<?xml version="1.0" encoding="UTF-8"?>
+<?xml version='1.0' encoding='UTF-8'?>
 <!-- Reference subhalo orbits model -->
+
 <parameters>
   <formatVersion>2</formatVersion>
-  <lastModified revision="165490f4968c699f7e5bb73ef60bcb7e626f51e6"/>
+  <lastModified revision="f88a96423e21da1fe340565b2036399633246e13" time="2026-10-22T05:48:31"/>
+
   
   <!-- Component selection -->
   <componentBasic             value="standard"/>
@@ -38,23 +40,31 @@
     <nodeOperator value="darkMatterProfileScaleInterpolate"/>
     <!-- Halo angular momentum -->
     <nodeOperator value="haloAngularMomentumVitvitska2002"  >
-      <exponentMass value="1.10475"/> <!-- Best fit value from Benson, Behrens, & Lu (2020) offset for fix to Keplerian orbit propagation -->
+      <!-- Best fit value from Benson, Behrens, & Lu (2020) offset for fix to Keplerian orbit propagation -->
+      <exponentMass                    value="1.10475"/>
+      <angularMomentumVarianceSpecific value="0.00100"/>
+      <subresolutionAngularMomentumMethod  value="massScaled"  />
     </nodeOperator>
     <nodeOperator value="haloAngularMomentumInterpolate"/>
     <!-- Subhalo hierarchy -->
     <nodeOperator value="subsubhaloPromotion"   />
     <!-- Subhalo orbits -->
-    <nodeOperator value="satelliteOrbit"                   />
+    <nodeOperator value="satelliteOrbit">
+      <acceptUnboundOrbits value="false"/>
+    </nodeOperator>
     <nodeOperator value="satelliteDynamicalFriction"       />
     <nodeOperator value="satelliteTidalMassLoss"           />
-    <nodeOperator value="satelliteTidalHeating"            />
+    <!-- Heating decay efficiency from Du et al. (2024; https://arxiv.org/abs/2403.09597) best fit for NFW subhalos. -->
+    <nodeOperator value="satelliteTidalHeating"             >
+      <efficiencyDecay value="0.274859"/>
+    </nodeOperator>
     <nodeOperator value="satelliteMergingRadiusTrigger"     >
       <radiusVirialFraction      value="0.01"/>
     </nodeOperator>
     <nodeOperator value="satelliteDestructionMassThreshold" >
-      <massDestructionAbsolute           value="=[mergerTreeMassResolution::massResolution]"/>
-      <massDestructionMassInfallFraction value="0.0e0"                                      />
-      <massDestructionMassTreeFraction   value="0.0e0"                                      />
+      <massDestructionAbsolute           value="=[mergerTreeMassResolution/massResolution]"/>
+      <massDestructionMassInfallFraction value="0.0e0"                                     />
+      <massDestructionMassTreeFraction   value="0.0e0"                                     />
     </nodeOperator>
   </nodeOperator>
   

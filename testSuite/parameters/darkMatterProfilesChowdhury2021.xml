@@ -1,0 +1,34 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<!-- Default parameters for Galacticus v0.9.4 -->
+
+<!-- 30-October-2011                          -->
+
+<parameters>
+  <formatVersion>2</formatVersion>
+  <lastModified revision="f88a96423e21da1fe340565b2036399633246e13" time="2026-10-22T05:48:31"/>
+
+  <!-- Component selection -->
+  <componentBasic value="standard"/>
+  <componentBlackHole value="standard"/>
+  <componentDarkMatterProfile value="scale"/>
+  <componentDisk value="null"/>
+  <componentHotHalo value="null"/>
+  <componentSatellite value="null"/>
+  <componentSpheroid value="null"/>
+  <componentSpin value="null"/>
+
+  <!-- Cosmological parameters and options -->
+  <cosmologyFunctions value="matterLambda"/>
+  <cosmologyParameters value="simple">
+    <HubbleConstant value="67.36000"/>
+    <!-- Planck 2018; arXiv:1807.06211 -->
+    <OmegaMatter value=" 0.31530"/>
+    <!-- Planck 2018; arXiv:1807.06211 -->
+    <OmegaDarkEnergy value=" 0.68470"/>
+    <!-- Planck 2018; arXiv:1807.06211 -->
+    <OmegaBaryon value=" 0.04930"/>
+    <!-- Planck 2018; arXiv:1807.06211 -->
+    <temperatureCMB value=" 2.72548"/>
+  </cosmologyParameters>
+
+</parameters>

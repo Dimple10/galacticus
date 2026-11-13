@@ -1,8 +1,10 @@
-<?xml version="1.0" encoding="UTF-8"?>
+<?xml version='1.0' encoding='UTF-8'?>
 <!-- Parameters for tutorial on computing dark matter-only merger trees - -->
+
 <parameters>
   <formatVersion>2</formatVersion>
-  <lastModified revision="165490f4968c699f7e5bb73ef60bcb7e626f51e6"/>
+  <lastModified revision="f88a96423e21da1fe340565b2036399633246e13" time="2026-10-22T05:48:31"/>
+
 
   <!-- Specify tasks to perform -->
   <task value="evolveForests"/>
@@ -45,9 +47,10 @@
     <running value="0.000"/>
   </powerSpectrumPrimordial>
   <powerSpectrumPrimordialTransferred value="simple"/>
-  <cosmologicalMassVariance value="filteredPower">
+  <powerSpectrumNormalizer value="sigma8">
     <sigma_8 value="0.807"/>
-  </cosmologicalMassVariance>
+  </powerSpectrumNormalizer>
+  <cosmologicalMassVariance value="filteredPower"/>
 
   <!-- Structure formation options -->
   <linearGrowth value="collisionlessMatter"/>
@@ -56,6 +59,7 @@
   <virialDensityContrast value="sphericalCollapseClsnlssMttrCsmlgclCnstnt"/>
 
   <!-- Merger tree building options -->
+  <mergerTreeSeeds value="random"/>
   <mergerTreeConstructor value="build"/>
   <mergerTreeBuilder value="cole2000">
     <accretionLimit value="0.1"/>
@@ -102,6 +106,7 @@
     <odeToleranceRelative value="0.01"/>
   </mergerTreeNodeEvolver>
   <mergerTreeEvolver value="standard">
+    <fractionTimestepSatelliteMinimum value="0.75"/>
     <timestepHostAbsolute value="1.0"/>
     <timestepHostRelative value="0.1"/>
   </mergerTreeEvolver>

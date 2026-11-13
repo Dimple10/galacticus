@@ -1,9 +1,12 @@
-<?xml version="1.0" encoding="UTF-8"?>
+<?xml version='1.0' encoding='UTF-8'?>
 <!-- Test of leaky-box chemical evolution -->
+
 <!-- 08-July-2015                         -->
+
 <parameters>
   <formatVersion>2</formatVersion>
-  <lastModified revision="165490f4968c699f7e5bb73ef60bcb7e626f51e6"/>
+  <lastModified revision="f88a96423e21da1fe340565b2036399633246e13" time="2026-10-22T05:48:31"/>
+
 
   <!-- Component selection -->
   <componentBasic value="standard"/>
@@ -11,7 +14,6 @@
   <componentBlackHole value="null"/>
   <componentDarkMatterProfile value="scaleFree"/>
   <componentDisk value="verySimpleSize">
-    <trackAbundances value="true"/>
     <massDistributionDisk value="exponentialDisk">
       <dimensionless value="true"/>
     </massDistributionDisk>
@@ -34,9 +36,10 @@
   </cosmologyParameters>
 
   <!-- Power spectrum options -->
-  <cosmologicalMassVariance value="filteredPower">
+  <cosmologicalMassVariance value="filteredPower"/>
+  <powerSpectrumNormalizer value="sigma8">
     <sigma_8 value="0.807"/>
-  </cosmologicalMassVariance>
+  </powerSpectrumNormalizer>
   <transferFunction value="eisensteinHu1999">
     <neutrinoNumberEffective value="3.046"/>
     <neutrinoMassSummed value="0.000"/>
@@ -49,7 +52,7 @@
 
   <!-- Structure formation options -->
   <linearGrowth value="collisionlessMatter"/>
-  <haloMassFunction value="Tinker2008"/>
+  <haloMassFunction value="tinker2008"/>
   <criticalOverdensity value="sphericalCollapseClsnlssMttrCsmlgclCnstnt"/>
   <virialDensityContrast value="sphericalCollapseClsnlssMttrCsmlgclCnstnt"/>
 
@@ -90,6 +93,7 @@
   </mergerTreeNodeEvolver>
 
   <mergerTreeEvolver value="standard">
+    <fractionTimestepSatelliteMinimum value="0.75"/>
     <timestepHostAbsolute value="1.000"/>
     <timestepHostRelative value="0.100"/>
   </mergerTreeEvolver>
@@ -117,8 +121,19 @@
 	</stellarFeedbackOutflows>
       </stellarFeedbackOutflows>
     </nodeOperator>
+    <!-- CGM physics -->
+    <nodeOperator value="CGMOuterRadiusVirialRadius"/>
+    <nodeOperator value="CGMCoolingHeating">
+      <component value="disk"/>
+    </nodeOperator>
+    <nodeOperator value="CGMAccretion">
+      <allowNegativeCGMMass value="false"/>
+    </nodeOperator>
+    <nodeOperator value="CGMStarvation">
+      <starveOutflowsOnly value="false"/>
+      <fractionBaryonLimitInNodeMerger value="false"/>
+    </nodeOperator>
   </nodeOperator>
-
 
   <nodePropertyExtractor value="multi">
     <nodePropertyExtractor value="spin"/>

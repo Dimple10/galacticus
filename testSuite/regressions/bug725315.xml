@@ -1,11 +1,16 @@
-<?xml version="1.0"?>
+<?xml version='1.0' encoding='UTF-8'?>
 <!-- Regression test case for Bug #725315 - "Segfault when using star -->
+
 <!-- formation histories (metallicity split)" -->
+
 <!-- Andrew Benson -->
+
 <!-- 25-February-2011 -->
+
 <parameters>
   <formatVersion>2</formatVersion>
-  <lastModified revision="165490f4968c699f7e5bb73ef60bcb7e626f51e6"/>
+  <lastModified revision="f88a96423e21da1fe340565b2036399633246e13" time="2026-10-22T05:48:31"/>
+
   <cosmologyParameters value="simple">
     <OmegaMatter value="0.2725"/>
     <OmegaBaryon value="0.0455"/>
@@ -77,11 +82,41 @@
 	<stabilityThresholdStellar value="1.1"/>
       </galacticDynamicsBarInstability>
     </nodeOperator>
+    <!-- Black hole physics -->
+    <nodeOperator value="blackHolesSeed">
+      <blackHoleSeeds value="fixed">
+        <mass value="100"/>
+        <spin value="0"/>
+      </blackHoleSeeds>
+    </nodeOperator>
+    <nodeOperator value="blackHolesAccretion"/>
+    <nodeOperator value="blackHolesWinds"/>
+    <!-- CGM physics -->
+    <nodeOperator value="CGMAccretion">
+      <allowNegativeCGMMass value="true"/>
+      <angularMomentumAlwaysGrows value="false"/>
+    </nodeOperator>
+    <nodeOperator value="CGMStarvation">
+      <starveOutflowsOnly value="false"/>
+      <fractionBaryonLimitInNodeMerger value="false"/>
+    </nodeOperator>
+    <nodeOperator value="CGMOutflowReincorporation">
+      <includeSatellites value="false"/>
+    </nodeOperator>
+    <nodeOperator value="CGMCoolingHeating">
+      <component value="disk"/>
+      <coolingFrom value="currentNode"/>
+      <excessHeatDrivesOutflow value="true"/>
+      <rateMaximumExpulsion value="1.0"/>
+    </nodeOperator>
+    <nodeOperator value="CGMOuterRadiusRamPressureStripping"/>
   </nodeOperator>
 
-  <cosmologicalMassVariance value="filteredPower">
+  <cosmologicalMassVariance value="filteredPower"/>
+
+  <powerSpectrumNormalizer value="sigma8">
     <sigma_8 value="0.807"/>
-  </cosmologicalMassVariance>
+  </powerSpectrumNormalizer>
 
   <darkMatterProfileDMO value="NFW"/>
   <coolingTimeAvailable value="whiteFrenk1991">
@@ -107,13 +142,7 @@
   </mergerTreeBuildMasses>
   <cosmologyFunctions value="matterLambda"/>
   <criticalOverdensity value="sphericalCollapseClsnlssMttrCsmlgclCnstnt"/>
-  <componentBlackHole value="standard">
-    <massSeed value="100"/>
-    <efficiencyWind value="0.001"/>
-    <bondiHoyleAccretionTemperatureSpheroid value="100"/>
-    <bondiHoyleAccretionEnhancementHotHalo value="1"/>
-    <bondiHoyleAccretionEnhancementSpheroid value="1"/>
-  </componentBlackHole>
+  <componentBlackHole value="standard"/>
   <componentSpheroid value="standard">
     <efficiencyEnergeticOutflow value="1"/>
     <toleranceAbsoluteMass value="1e-06"/>
@@ -202,20 +231,28 @@
   <stellarPopulationProperties value="noninstantaneous">
     <countHistoryTimes value="10"/>
   </stellarPopulationProperties>
-  <outputFileName value="testSuite/outputs/regressions/test.hdf5"/>
+  <outputFileName value="testSuite/outputs/regressions/test725315.hdf5"/>
   <componentSatellite value="standard"/>
   <stateFileRoot value="galacticusDebug"/>
 
   <initialMassFunction value="salpeter1955"/>
   <componentHotHalo value="standard">
-  <starveSatellites value="true"/>
+    <starveSatellites value="true"/>
   </componentHotHalo>
+
+  <hotHaloOutflowStripping value="standard">
+     <efficiency value="0.1"/>
+  </hotHaloOutflowStripping>
+  <coolingInfallTorque value="fixed">
+     <fractionLossAngularMomentum value="0.3"/>
+  </coolingInfallTorque>
   <accretionHalo value="simple">
     <redshiftReionization value="9"/>
     <velocitySuppressionReionization value="30.0"/>
   </accretionHalo>
 
   <mergerTreeEvolver value="standard">
+    <fractionTimestepSatelliteMinimum value="0.75"/>
     <timestepHostRelative value="0.1"/>
     <timestepHostAbsolute value="1"/>
   </mergerTreeEvolver>
@@ -228,6 +265,7 @@
   <coolingRate value="whiteFrenk1991">
     <velocityCutOff value="10000"/>
   </coolingRate>
+  <circumgalacticMediumHeating value="AGNFeedback"/>
   <componentSpin value="scalar"/>
   <mergerTreeBuilder value="cole2000">
     <mergeProbability value="0.1"/>
@@ -238,6 +276,19 @@
   </outputTimes>
 
   <coolingRadius value="simple"/>
+  <blackHoleAccretionRate value="standard">
+    <bondiHoyleAccretionEnhancementSpheroid value="  1.0"/>
+    <bondiHoyleAccretionEnhancementHotHalo  value="  1.0"/>
+    <bondiHoyleAccretionTemperatureSpheroid value="100.0"/>
+    <bondiHoyleAccretionHotModeOnly         value="true"/>
+  </blackHoleAccretionRate>
+  <blackHoleWind value="ciotti2009">
+    <efficiencyWind                              value="0.001"/>
+    <efficiencyWindScalesWithEfficiencyRadiative value="true" />
+  </blackHoleWind>
+  <blackHoleCGMHeating value="jetPower">
+    <efficiencyRadioMode value="1.0"/>
+  </blackHoleCGMHeating>
   <blackHoleBinaryMerger value="rezzolla2008"/>
   <galacticStructureSolver value="equilibrium"/>
   <mergerTreeConstructor value="build">

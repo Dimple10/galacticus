@@ -1,9 +1,11 @@
-<?xml version="1.0" encoding="UTF-8"?>
+<?xml version='1.0' encoding='UTF-8'?>
 <!-- Parameter file used to test option to always promote the most massive progenitor - even if it is a subhalo and non-subhalo progenitors are present. -->
+
 <!-- Andrew Benson - 28-January-2024 -->
+
 <parameters>
   <formatVersion>2</formatVersion>
-  <lastModified revision="165490f4968c699f7e5bb73ef60bcb7e626f51e6"/>
+  <lastModified revision="f88a96423e21da1fe340565b2036399633246e13" time="2026-10-22T05:48:31"/>
 
   <componentBasic value="standard"/>
   <componentBlackHole value="standard"/>
@@ -23,9 +25,11 @@
     <temperatureCMB value=" 2.72548"/>
   </cosmologyParameters>
 
-  <cosmologicalMassVariance value="filteredPower">
+  <cosmologicalMassVariance value="filteredPower"/>
+
+  <powerSpectrumNormalizer value="sigma8">
     <sigma_8 value="0.821"/>
-  </cosmologicalMassVariance>
+  </powerSpectrumNormalizer>
 
   <powerSpectrumPrimordial value="powerLaw">
     <index value="0.9649"/>
@@ -56,7 +60,23 @@
     <allowBranchJumps value="true"/>
     <presetSubhaloIndices value="false"/>
   </mergerTreeConstructor>
-  
+
+  <!-- Black hole physics -->
+  <blackHoleAccretionRate value="standard">
+    <bondiHoyleAccretionEnhancementSpheroid value="  5.0"/>
+    <bondiHoyleAccretionEnhancementHotHalo  value="  6.0"/>
+    <bondiHoyleAccretionTemperatureSpheroid value="100.0"/>
+    <bondiHoyleAccretionHotModeOnly         value="true"/>
+  </blackHoleAccretionRate>
+  <blackHoleWind value="ciotti2009">
+    <efficiencyWind                              value="0.0024"/>
+    <efficiencyWindScalesWithEfficiencyRadiative value="true"  />
+  </blackHoleWind>
+  <blackHoleCGMHeating value="jetPower">
+    <efficiencyRadioMode value="1.0"/>
+  </blackHoleCGMHeating>
+  <circumgalacticMediumHeating value="AGNFeedback"/>
+
   <nodePropertyExtractor value="multi">
     <nodePropertyExtractor value="massAccretionHistory"/>
     <nodePropertyExtractor value="nodeIndices"/>
@@ -68,7 +88,38 @@
     <nodeOperator value="DMOInterpolate"/>    
     <!-- Halo positions -->
     <nodeOperator value="positionDiscrete"/>
+    <!-- Black hole physics -->
+    <nodeOperator value="blackHolesSeed">
+      <blackHoleSeeds value="fixed">
+        <mass value="100"/>
+        <spin value="0"/>
+      </blackHoleSeeds>
+    </nodeOperator>
+    <nodeOperator value="blackHolesAccretion"/>
+    <nodeOperator value="blackHolesWinds"/>
+    <!-- Satellite physics -->
+    <nodeOperator value="satelliteOrphanize"/>
+    <!-- CGM physics -->
+    <nodeOperator value="CGMAccretion">
+      <allowNegativeCGMMass value="true"/>
+      <angularMomentumAlwaysGrows value="false"/>
+    </nodeOperator>
+    <nodeOperator value="CGMOutflowReincorporation">
+      <includeSatellites value="true"/>
+      <outflowToColdMode value="false"/>
+    </nodeOperator>
+    <nodeOperator value="CGMCoolingHeating">
+      <component value="disk"/>
+      <coolingFrom value="currentNode"/>
+      <excessHeatDrivesOutflow value="true"/>
+      <rateMaximumExpulsion value="1.0"/>
+    </nodeOperator>
+    <nodeOperator value="CGMColdModeInflow">
+      <component value="disk"/>
+      <coolingFrom value="currentNode"/>
+    </nodeOperator>
+    <nodeOperator value="CGMOuterRadiusRamPressureStripping"/>
   </nodeOperator>
-  
+
   <outputFileName value="testSuite/outputs/mostMassiveProgenitorIsSubhalo.hdf5"/>
 </parameters>
